@@ -15,12 +15,19 @@ export type AppSettings = {
   keywordPresets: string[];
 };
 
+// 블덱스 지수 체계: 최적 3~1, 준최 7~0
+export type BlogIndexLevel =
+  | 'optimal3' | 'optimal2' | 'optimal1'  // 최적화
+  | 'sub7' | 'sub6' | 'sub5' | 'sub4'     // 준최적화 상위
+  | 'sub3' | 'sub2' | 'sub1' | 'sub0'     // 준최적화 하위
+  | null;
+
 export type UserProfile = {
   locationCity: string;
   locationDistrict: string;
   locationNeighborhood: string;
   blogUrl: string;
-  blogIndexLevel: 'high' | 'medium' | 'low' | null;
+  blogIndexLevel: BlogIndexLevel;
   blogIndexCheckedAt: string | null;
 };
 

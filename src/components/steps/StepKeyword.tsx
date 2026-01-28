@@ -67,26 +67,40 @@ export default function StepKeyword({ value, onChange, businessCategory }: StepK
     }
   };
 
+  // 블덱스 지수를 전략 그룹으로 매핑
+  const getStrategyGroup = (level: string | null): 'optimal' | 'sub-high' | 'sub-low' | null => {
+    if (!level) return null;
+    if (['optimal1', 'optimal2', 'optimal3'].includes(level)) return 'optimal';
+    if (['sub4', 'sub5', 'sub6', 'sub7'].includes(level)) return 'sub-high';
+    return 'sub-low';
+  };
+
   const getBlogLevelBadge = () => {
-    switch (blogIndexLevel) {
-      case 'high':
-        return <span className="px-2 py-0.5 rounded-full bg-green-100 text-green-700 text-xs">상</span>;
-      case 'medium':
-        return <span className="px-2 py-0.5 rounded-full bg-yellow-100 text-yellow-700 text-xs">중</span>;
-      case 'low':
-        return <span className="px-2 py-0.5 rounded-full bg-orange-100 text-orange-700 text-xs">하</span>;
-      default:
-        return null;
-    }
+    if (!blogIndexLevel) return null;
+
+    // 블덱스 레벨 표시 (예: 최적3, 준최5)
+    const label = blogIndexLevel.startsWith('optimal')
+      ? `최적${blogIndexLevel.replace('optimal', '')}`
+      : `준최${blogIndexLevel.replace('sub', '')}`;
+
+    const group = getStrategyGroup(blogIndexLevel);
+    const colorClass = group === 'optimal'
+      ? 'bg-green-100 text-green-700'
+      : group === 'sub-high'
+      ? 'bg-blue-100 text-blue-700'
+      : 'bg-orange-100 text-orange-700';
+
+    return <span className={`px-2 py-0.5 rounded-full text-xs ${colorClass}`}>{label}</span>;
   };
 
   const getBlogLevelStrategy = () => {
-    switch (blogIndexLevel) {
-      case 'high':
+    const group = getStrategyGroup(blogIndexLevel);
+    switch (group) {
+      case 'optimal':
         return '구/시 단위 경쟁 키워드로 노출을 노려보세요';
-      case 'medium':
+      case 'sub-high':
         return '동 단위 키워드로 안정적인 노출을 목표로 합니다';
-      case 'low':
+      case 'sub-low':
         return '동 + 세부시술 조합으로 틈새 키워드를 공략하세요';
       default:
         return '';

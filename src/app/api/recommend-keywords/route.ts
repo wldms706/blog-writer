@@ -15,6 +15,28 @@ const BUSINESS_KEYWORDS: Record<string, string[]> = {
   'waxing': ['왁싱', '브라질리언왁싱', '페이스왁싱', '바디왁싱'],
 };
 
+// 블덱스 지수를 키워드 전략 그룹으로 매핑
+function getKeywordStrategy(blogIndexLevel: string): 'broad' | 'medium' | 'narrow' {
+  // 최적화 1~3: 넓은 지역 (구/시 단위)
+  if (['optimal1', 'optimal2', 'optimal3'].includes(blogIndexLevel)) {
+    return 'broad';
+  }
+  // 준최적화 상위 4~7: 동 단위
+  if (['sub4', 'sub5', 'sub6', 'sub7'].includes(blogIndexLevel)) {
+    return 'medium';
+  }
+  // 준최적화 하위 0~3: 동 + 세부시술
+  return 'narrow';
+}
+
+function getStrategyDescription(strategy: 'broad' | 'medium' | 'narrow'): string {
+  switch (strategy) {
+    case 'broad': return '시/구 단위의 넓은 지역 키워드로 경쟁 가능';
+    case 'medium': return '동 단위의 중간 지역 키워드 추천';
+    case 'narrow': return '동 + 세부시술 조합의 좁은 틈새 키워드';
+  }
+}
+
 export async function POST(request: NextRequest) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -61,6 +83,8 @@ export async function POST(request: NextRequest) {
     }
 
     const businessKeywords = BUSINESS_KEYWORDS[businessCategory] || [];
+    const strategy = getKeywordStrategy(blogIndexLevel);
+    const strategyDesc = getStrategyDescription(strategy);
 
     // Gemini에게 키워드 추천 요청
     const prompt = `당신은 네이버 블로그 SEO 전문가입니다.
@@ -69,14 +93,14 @@ export async function POST(request: NextRequest) {
 - 업종: ${businessCategory}
 - 업종 관련 키워드: ${businessKeywords.join(', ')}
 - 지역: ${locationCity} ${locationDistrict} ${locationNeighborhood}
-- 블로그 지수: ${blogIndexLevel}
+- 블로그 지수: ${blogIndexLevel} (블덱스 기준)
+
+현재 키워드 전략: ${strategyDesc}
 
 블로그 지수에 따른 키워드 전략:
-- high (상): 시/구 단위의 넓은 지역 키워드로 경쟁 가능 (예: "강남피부관리", "서울눈썹문신")
-- medium (중): 동 단위의 중간 지역 키워드 추천 (예: "신사동피부관리", "두정동눈썹문신")
-- low (하): 동 + 세부시술 조합의 좁은 틈새 키워드 (예: "신사동여드름관리", "두정동자연눈썹")
-
-현재 블로그 지수는 "${blogIndexLevel}"입니다.
+- 최적1~3 (높음): 시/구 단위의 넓은 지역 키워드로 경쟁 가능 (예: "${locationDistrict}피부관리", "${locationCity}눈썹문신")
+- 준최4~7 (중간): 동 단위의 중간 지역 키워드 추천 (예: "${locationNeighborhood}피부관리", "${locationNeighborhood}눈썹문신")
+- 준최0~3 (낮음): 동 + 세부시술 조합의 좁은 틈새 키워드 (예: "${locationNeighborhood}여드름관리", "${locationNeighborhood}자연눈썹")
 
 위 전략에 맞춰 최적의 검색 키워드 5개를 추천해주세요.
 각 키워드는 실제 네이버에서 검색될 수 있는 형태여야 합니다.
@@ -153,13 +177,16 @@ function generateFallbackKeywords(
   blogIndexLevel: string
 ) {
   const baseKeywords = BUSINESS_KEYWORDS[businessCategory] || ['관리'];
-  const location = blogIndexLevel === 'high' ? district : neighborhood;
+  const strategy = getKeywordStrategy(blogIndexLevel);
+
+  // 전략에 따라 지역 범위 결정
+  const location = strategy === 'broad' ? district : neighborhood;
 
   return baseKeywords.slice(0, 5).map((kw) => ({
     keyword: `${location}${kw}`,
-    reason: blogIndexLevel === 'high'
+    reason: strategy === 'broad'
       ? '구 단위 경쟁 키워드'
-      : blogIndexLevel === 'low'
+      : strategy === 'narrow'
       ? '동 + 세부시술 틈새 키워드'
       : '동 단위 안정 키워드',
   }));

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { getSettings, saveSettings, clearAllHistory, getProfile, saveProfile, type AppSettings, type UserProfile } from '@/lib/storage';
+import { getSettings, saveSettings, clearAllHistory, getProfile, saveProfile, type AppSettings, type UserProfile, type BlogIndexLevel } from '@/lib/storage';
 import { BUSINESS_CATEGORIES } from '@/data/constants';
 import { createClient } from '@/lib/supabase/client';
 
@@ -89,22 +89,50 @@ export default function SettingsPage() {
     showToast('히스토리가 삭제되었습니다');
   };
 
+  // 블덱스 지수 체계
+  const BLOG_INDEX_OPTIONS: { value: NonNullable<BlogIndexLevel>; label: string; group: string; color: string }[] = [
+    { value: 'optimal3', label: '최적 3', group: 'optimal', color: 'green' },
+    { value: 'optimal2', label: '최적 2', group: 'optimal', color: 'green' },
+    { value: 'optimal1', label: '최적 1', group: 'optimal', color: 'green' },
+    { value: 'sub7', label: '준최 7', group: 'sub-high', color: 'blue' },
+    { value: 'sub6', label: '준최 6', group: 'sub-high', color: 'blue' },
+    { value: 'sub5', label: '준최 5', group: 'sub-high', color: 'blue' },
+    { value: 'sub4', label: '준최 4', group: 'sub-high', color: 'blue' },
+    { value: 'sub3', label: '준최 3', group: 'sub-low', color: 'yellow' },
+    { value: 'sub2', label: '준최 2', group: 'sub-low', color: 'yellow' },
+    { value: 'sub1', label: '준최 1', group: 'sub-low', color: 'orange' },
+    { value: 'sub0', label: '준최 0', group: 'sub-low', color: 'orange' },
+  ];
+
   const getBlogLevelText = (level: string | null) => {
-    switch (level) {
-      case 'high': return '상 (경쟁 키워드 도전 가능)';
-      case 'medium': return '중 (동 단위 키워드 추천)';
-      case 'low': return '하 (세부 키워드 집중)';
-      default: return '미측정';
-    }
+    const option = BLOG_INDEX_OPTIONS.find(o => o.value === level);
+    if (!option) return '미측정';
+
+    if (option.group === 'optimal') return `${option.label} (경쟁 키워드 도전 가능)`;
+    if (option.group === 'sub-high') return `${option.label} (동 단위 키워드 추천)`;
+    return `${option.label} (세부 키워드 집중)`;
   };
 
   const getBlogLevelColor = (level: string | null) => {
-    switch (level) {
-      case 'high': return 'text-green-600 bg-green-50';
-      case 'medium': return 'text-yellow-600 bg-yellow-50';
-      case 'low': return 'text-orange-600 bg-orange-50';
+    const option = BLOG_INDEX_OPTIONS.find(o => o.value === level);
+    if (!option) return 'text-slate-500 bg-slate-50';
+
+    switch (option.color) {
+      case 'green': return 'text-green-600 bg-green-50';
+      case 'blue': return 'text-blue-600 bg-blue-50';
+      case 'yellow': return 'text-yellow-600 bg-yellow-50';
+      case 'orange': return 'text-orange-600 bg-orange-50';
       default: return 'text-slate-500 bg-slate-50';
     }
+  };
+
+  const getBlogLevelStrategy = (level: string | null) => {
+    const option = BLOG_INDEX_OPTIONS.find(o => o.value === level);
+    if (!option) return '';
+
+    if (option.group === 'optimal') return '넓은 지역 키워드(구/시 단위)로 경쟁해보세요!';
+    if (option.group === 'sub-high') return '동 단위 키워드로 안정적인 노출을 노려보세요.';
+    return '세부 시술 + 동 조합 키워드로 틈새를 공략하세요.';
   };
 
   if (loading) {
@@ -191,38 +219,68 @@ export default function SettingsPage() {
 
           {/* 블로그 지수 수동 선택 */}
           <div className="mb-3">
-            <label className="mb-2 block text-xs font-medium text-slate-700">블로그 지수 선택</label>
-            <div className="grid grid-cols-3 gap-2">
-              <button
-                onClick={() => handleSaveProfile({ blogIndexLevel: 'high', blogIndexCheckedAt: new Date().toISOString() })}
-                className={`rounded-lg border-2 px-3 py-2 text-xs font-medium transition-all ${
-                  profile.blogIndexLevel === 'high'
-                    ? 'border-green-500 bg-green-50 text-green-700'
-                    : 'border-slate-200 bg-white text-slate-600 hover:border-green-300'
-                }`}
-              >
-                상 (1000+)
-              </button>
-              <button
-                onClick={() => handleSaveProfile({ blogIndexLevel: 'medium', blogIndexCheckedAt: new Date().toISOString() })}
-                className={`rounded-lg border-2 px-3 py-2 text-xs font-medium transition-all ${
-                  profile.blogIndexLevel === 'medium'
-                    ? 'border-yellow-500 bg-yellow-50 text-yellow-700'
-                    : 'border-slate-200 bg-white text-slate-600 hover:border-yellow-300'
-                }`}
-              >
-                중 (100~999)
-              </button>
-              <button
-                onClick={() => handleSaveProfile({ blogIndexLevel: 'low', blogIndexCheckedAt: new Date().toISOString() })}
-                className={`rounded-lg border-2 px-3 py-2 text-xs font-medium transition-all ${
-                  profile.blogIndexLevel === 'low'
-                    ? 'border-orange-500 bg-orange-50 text-orange-700'
-                    : 'border-slate-200 bg-white text-slate-600 hover:border-orange-300'
-                }`}
-              >
-                하 (0~99)
-              </button>
+            <label className="mb-2 block text-xs font-medium text-slate-700">블로그 지수 선택 (블덱스 기준)</label>
+
+            {/* 최적 그룹 */}
+            <div className="mb-2">
+              <p className="mb-1 text-[10px] text-green-600 font-medium">최적화</p>
+              <div className="grid grid-cols-3 gap-1.5">
+                {BLOG_INDEX_OPTIONS.filter(o => o.group === 'optimal').map((option) => (
+                  <button
+                    key={option.value}
+                    onClick={() => handleSaveProfile({ blogIndexLevel: option.value, blogIndexCheckedAt: new Date().toISOString() })}
+                    className={`rounded-lg border-2 px-2 py-1.5 text-xs font-medium transition-all ${
+                      profile.blogIndexLevel === option.value
+                        ? 'border-green-500 bg-green-50 text-green-700'
+                        : 'border-slate-200 bg-white text-slate-600 hover:border-green-300'
+                    }`}
+                  >
+                    {option.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* 준최 상위 그룹 */}
+            <div className="mb-2">
+              <p className="mb-1 text-[10px] text-blue-600 font-medium">준최적화 (상위)</p>
+              <div className="grid grid-cols-4 gap-1.5">
+                {BLOG_INDEX_OPTIONS.filter(o => o.group === 'sub-high').map((option) => (
+                  <button
+                    key={option.value}
+                    onClick={() => handleSaveProfile({ blogIndexLevel: option.value, blogIndexCheckedAt: new Date().toISOString() })}
+                    className={`rounded-lg border-2 px-2 py-1.5 text-xs font-medium transition-all ${
+                      profile.blogIndexLevel === option.value
+                        ? 'border-blue-500 bg-blue-50 text-blue-700'
+                        : 'border-slate-200 bg-white text-slate-600 hover:border-blue-300'
+                    }`}
+                  >
+                    {option.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* 준최 하위 그룹 */}
+            <div>
+              <p className="mb-1 text-[10px] text-orange-600 font-medium">준최적화 (하위)</p>
+              <div className="grid grid-cols-4 gap-1.5">
+                {BLOG_INDEX_OPTIONS.filter(o => o.group === 'sub-low').map((option) => (
+                  <button
+                    key={option.value}
+                    onClick={() => handleSaveProfile({ blogIndexLevel: option.value, blogIndexCheckedAt: new Date().toISOString() })}
+                    className={`rounded-lg border-2 px-2 py-1.5 text-xs font-medium transition-all ${
+                      profile.blogIndexLevel === option.value
+                        ? option.color === 'yellow'
+                          ? 'border-yellow-500 bg-yellow-50 text-yellow-700'
+                          : 'border-orange-500 bg-orange-50 text-orange-700'
+                        : 'border-slate-200 bg-white text-slate-600 hover:border-orange-300'
+                    }`}
+                  >
+                    {option.label}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
 
@@ -241,9 +299,7 @@ export default function SettingsPage() {
                 )}
               </div>
               <p className="mt-1 text-[11px] opacity-80">
-                {profile.blogIndexLevel === 'high' && '넓은 지역 키워드(구/시 단위)로 경쟁해보세요!'}
-                {profile.blogIndexLevel === 'medium' && '동 단위 키워드로 안정적인 노출을 노려보세요.'}
-                {profile.blogIndexLevel === 'low' && '세부 시술 + 동 조합 키워드로 틈새를 공략하세요.'}
+                {getBlogLevelStrategy(profile.blogIndexLevel)}
               </p>
             </div>
           )}
