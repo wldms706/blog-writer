@@ -66,6 +66,7 @@ export default function StepGenerate({ onReset, formData }: StepGenerateProps) {
             topic: topic?.name || formData.topic,
             purpose: purpose?.name || formData.purpose,
             readerState: reader?.name || formData.readerState,
+            selectedTitle: formData.selectedTitle,
           }),
         });
 

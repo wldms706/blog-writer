@@ -8,6 +8,7 @@ import StepTopic from '@/components/steps/StepTopic';
 import StepPurpose from '@/components/steps/StepPurpose';
 import StepReader from '@/components/steps/StepReader';
 import StepRules from '@/components/steps/StepRules';
+import StepTitleSelect from '@/components/steps/StepTitleSelect';
 import StepGenerate from '@/components/steps/StepGenerate';
 import { FormData } from '@/types';
 
@@ -18,6 +19,7 @@ const initialFormData: FormData = {
   purpose: null,
   readerState: null,
   rulesConfirmed: false,
+  selectedTitle: '',
   additionalContext: '',
 };
 
@@ -39,13 +41,15 @@ export default function Home() {
         return formData.readerState !== null;
       case 6:
         return formData.rulesConfirmed;
+      case 7:
+        return formData.selectedTitle.trim().length > 0;
       default:
         return false;
     }
   };
 
   const handleNext = () => {
-    if (canProceed() && currentStep < 7) {
+    if (canProceed() && currentStep < 8) {
       setCurrentStep(currentStep + 1);
     }
   };
@@ -114,6 +118,18 @@ export default function Home() {
           />
         );
       case 7:
+        return (
+          <StepTitleSelect
+            value={formData.selectedTitle}
+            onChange={(value) => setFormData({ ...formData, selectedTitle: value })}
+            keyword={formData.keyword}
+            businessCategory={formData.businessCategory || ''}
+            topic={formData.topic || ''}
+            purpose={formData.purpose || ''}
+            readerState={formData.readerState || ''}
+          />
+        );
+      case 8:
         return <StepGenerate onReset={handleReset} formData={formData} />;
       default:
         return null;
@@ -131,7 +147,7 @@ export default function Home() {
       <div className="min-h-[400px]">{renderStep()}</div>
 
       {/* Bottom Navigation */}
-      {currentStep < 7 && (
+      {currentStep < 8 && (
         <div className="mt-6 flex items-center justify-between border-t border-slate-100 pt-4">
           <button
             onClick={handleBack}
@@ -161,7 +177,7 @@ export default function Home() {
           </button>
 
           <div className="text-xs text-slate-400">
-            {currentStep} / 7 단계
+            {currentStep} / 8 단계
           </div>
 
           <button
@@ -175,7 +191,7 @@ export default function Home() {
               }
             `}
           >
-            {currentStep === 6 ? '글 생성하기' : '다음'}
+            {currentStep === 7 ? '글 생성하기' : '다음'}
             <svg
               className="w-4 h-4"
               fill="none"

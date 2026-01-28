@@ -40,6 +40,7 @@ export type FormData = {
   purpose: string | null;
   readerState: string | null;
   rulesConfirmed: boolean;
+  selectedTitle: string;
   additionalContext: string;
 };
 

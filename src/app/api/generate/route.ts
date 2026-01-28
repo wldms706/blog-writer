@@ -75,7 +75,7 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const { keyword, businessCategory, topic, purpose, readerState } = await request.json();
+    const { keyword, businessCategory, topic, purpose, readerState, selectedTitle } = await request.json();
 
     // 규제 업종 여부 확인
     const isRegulatedBusiness = businessCategory === 'semi-permanent';
@@ -87,6 +87,7 @@ export async function POST(request: NextRequest) {
 글 주제: ${topic}
 글의 목적: ${purpose}
 독자 상태: ${readerState}
+${selectedTitle ? `제목: ${selectedTitle}` : ''}
 
 ${isRegulatedBusiness ? `
 ⚠️ 중요: 이 글은 "반영구" 업종입니다. 반드시 다음 규칙을 지켜주세요:
@@ -98,7 +99,7 @@ ${isRegulatedBusiness ? `
 ` : ''}
 
 위 조건을 반영하여, 시스템 규칙을 준수하는 블로그 글을 작성해주세요.
-제목을 첫 줄에 쓰고, 한 줄 띄운 후 본문을 작성해주세요.
+${selectedTitle ? `제목은 "${selectedTitle}"을 그대로 사용하세요.` : '제목을 첫 줄에 쓰고,'} 한 줄 띄운 후 본문을 작성해주세요.
 마크다운 문법(##, **, ---, 리스트 기호 등)을 절대 사용하지 마세요. 순수 텍스트로만 작성하세요.
 공백 제외 1,500자 이상 반드시 작성하세요.`;
 

@@ -68,27 +68,35 @@ export default function StepKeyword({ value, onChange, businessCategory }: StepK
   };
 
   // 블덱스 지수를 전략 그룹으로 매핑
-  const getStrategyGroup = (level: string | null): 'optimal' | 'sub-high' | 'sub-low' | null => {
+  const getStrategyGroup = (level: string | null): 'optimal' | 'sub-high' | 'sub-low' | 'general' | null => {
     if (!level) return null;
     if (['optimal1', 'optimal2', 'optimal3'].includes(level)) return 'optimal';
-    if (['sub4', 'sub5', 'sub6', 'sub7'].includes(level)) return 'sub-high';
-    return 'sub-low';
+    if (['sub5', 'sub6', 'sub7'].includes(level)) return 'sub-high';
+    if (['sub1', 'sub2', 'sub3', 'sub4'].includes(level)) return 'sub-low';
+    return 'general'; // sub0 = 일반
   };
 
   const getBlogLevelBadge = () => {
     if (!blogIndexLevel) return null;
 
-    // 블덱스 레벨 표시 (예: 최적3, 준최5)
-    const label = blogIndexLevel.startsWith('optimal')
-      ? `최적${blogIndexLevel.replace('optimal', '')}`
-      : `준최${blogIndexLevel.replace('sub', '')}`;
+    // 블덱스 레벨 표시 (예: 최적3, 준최5, 일반)
+    let label: string;
+    if (blogIndexLevel === 'sub0') {
+      label = '일반';
+    } else if (blogIndexLevel.startsWith('optimal')) {
+      label = `최적${blogIndexLevel.replace('optimal', '')}`;
+    } else {
+      label = `준최${blogIndexLevel.replace('sub', '')}`;
+    }
 
     const group = getStrategyGroup(blogIndexLevel);
     const colorClass = group === 'optimal'
       ? 'bg-green-100 text-green-700'
       : group === 'sub-high'
       ? 'bg-blue-100 text-blue-700'
-      : 'bg-orange-100 text-orange-700';
+      : group === 'sub-low'
+      ? 'bg-yellow-100 text-yellow-700'
+      : 'bg-slate-100 text-slate-700';
 
     return <span className={`px-2 py-0.5 rounded-full text-xs ${colorClass}`}>{label}</span>;
   };
@@ -101,7 +109,9 @@ export default function StepKeyword({ value, onChange, businessCategory }: StepK
       case 'sub-high':
         return '동 단위 키워드로 안정적인 노출을 목표로 합니다';
       case 'sub-low':
-        return '동 + 세부시술 조합으로 틈새 키워드를 공략하세요';
+        return '동 + 세부 키워드 조합 (예: 역삼동여자눈썹문신)';
+      case 'general':
+        return '초세부 틈새 키워드로 집중 공략하세요 (예: 망한눈썹문신)';
       default:
         return '';
     }

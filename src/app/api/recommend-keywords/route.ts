@@ -16,24 +16,29 @@ const BUSINESS_KEYWORDS: Record<string, string[]> = {
 };
 
 // 블덱스 지수를 키워드 전략 그룹으로 매핑
-function getKeywordStrategy(blogIndexLevel: string): 'broad' | 'medium' | 'narrow' {
+function getKeywordStrategy(blogIndexLevel: string): 'broad' | 'medium' | 'narrow' | 'niche' {
   // 최적화 1~3: 넓은 지역 (구/시 단위)
   if (['optimal1', 'optimal2', 'optimal3'].includes(blogIndexLevel)) {
     return 'broad';
   }
-  // 준최적화 상위 4~7: 동 단위
-  if (['sub4', 'sub5', 'sub6', 'sub7'].includes(blogIndexLevel)) {
+  // 준최적화 상위 5~7: 동 단위
+  if (['sub5', 'sub6', 'sub7'].includes(blogIndexLevel)) {
     return 'medium';
   }
-  // 준최적화 하위 0~3: 동 + 세부시술
-  return 'narrow';
+  // 준최적화 하위 1~4: 동 + 세부 키워드 조합
+  if (['sub1', 'sub2', 'sub3', 'sub4'].includes(blogIndexLevel)) {
+    return 'narrow';
+  }
+  // 일반(sub0): 초세부 틈새 키워드
+  return 'niche';
 }
 
-function getStrategyDescription(strategy: 'broad' | 'medium' | 'narrow'): string {
+function getStrategyDescription(strategy: 'broad' | 'medium' | 'narrow' | 'niche'): string {
   switch (strategy) {
     case 'broad': return '시/구 단위의 넓은 지역 키워드로 경쟁 가능';
-    case 'medium': return '동 단위의 중간 지역 키워드 추천';
-    case 'narrow': return '동 + 세부시술 조합의 좁은 틈새 키워드';
+    case 'medium': return '동 단위 키워드 추천';
+    case 'narrow': return '동 + 세부 키워드 조합 (예: 역삼동여자눈썹문신)';
+    case 'niche': return '초세부 틈새 키워드 (예: 신사동망한눈썹문신)';
   }
 }
 
@@ -98,9 +103,10 @@ export async function POST(request: NextRequest) {
 현재 키워드 전략: ${strategyDesc}
 
 블로그 지수에 따른 키워드 전략:
-- 최적1~3 (높음): 시/구 단위의 넓은 지역 키워드로 경쟁 가능 (예: "${locationDistrict}피부관리", "${locationCity}눈썹문신")
-- 준최4~7 (중간): 동 단위의 중간 지역 키워드 추천 (예: "${locationNeighborhood}피부관리", "${locationNeighborhood}눈썹문신")
-- 준최0~3 (낮음): 동 + 세부시술 조합의 좁은 틈새 키워드 (예: "${locationNeighborhood}여드름관리", "${locationNeighborhood}자연눈썹")
+- 최적1~3: 시/구 단위의 넓은 지역 키워드로 경쟁 가능 (예: "${locationDistrict}피부관리", "${locationCity}눈썹문신")
+- 준최5~7: 동 단위 키워드 추천 (예: "${locationNeighborhood}피부관리", "${locationNeighborhood}눈썹문신")
+- 준최1~4: 동 + 세부 키워드 조합 (예: "${locationNeighborhood}여자눈썹문신", "${locationNeighborhood}자연눈썹", "${locationNeighborhood}남자눈썹문신")
+- 일반: 초세부 틈새 키워드 (예: "${locationNeighborhood}망한눈썹문신", "${locationNeighborhood}눈썹문신복구", "${locationNeighborhood}처진눈썹")
 
 위 전략에 맞춰 최적의 검색 키워드 5개를 추천해주세요.
 각 키워드는 실제 네이버에서 검색될 수 있는 형태여야 합니다.
@@ -169,6 +175,9 @@ export async function POST(request: NextRequest) {
   }
 }
 
+// 세부 키워드 접두사 (준최 1~4, 일반용)
+const DETAIL_PREFIXES = ['여자', '남자', '자연', '망한', '복구', '실패', '처진', '교정'];
+
 // 기본 키워드 생성 함수
 function generateFallbackKeywords(
   businessCategory: string,
@@ -179,15 +188,31 @@ function generateFallbackKeywords(
   const baseKeywords = BUSINESS_KEYWORDS[businessCategory] || ['관리'];
   const strategy = getKeywordStrategy(blogIndexLevel);
 
-  // 전략에 따라 지역 범위 결정
-  const location = strategy === 'broad' ? district : neighborhood;
-
-  return baseKeywords.slice(0, 5).map((kw) => ({
-    keyword: `${location}${kw}`,
-    reason: strategy === 'broad'
-      ? '구 단위 경쟁 키워드'
-      : strategy === 'narrow'
-      ? '동 + 세부시술 틈새 키워드'
-      : '동 단위 안정 키워드',
-  }));
+  // 전략에 따라 키워드 형태 결정
+  if (strategy === 'broad') {
+    // 최적: 구 단위
+    return baseKeywords.slice(0, 5).map((kw) => ({
+      keyword: `${district}${kw}`,
+      reason: '구 단위 경쟁 키워드',
+    }));
+  } else if (strategy === 'medium') {
+    // 준최 5~7: 동 단위
+    return baseKeywords.slice(0, 5).map((kw) => ({
+      keyword: `${neighborhood}${kw}`,
+      reason: '동 단위 안정 키워드',
+    }));
+  } else if (strategy === 'narrow') {
+    // 준최 1~4: 동 + 세부
+    return baseKeywords.slice(0, 5).map((kw, idx) => ({
+      keyword: `${neighborhood}${DETAIL_PREFIXES[idx % DETAIL_PREFIXES.length]}${kw}`,
+      reason: '동 + 세부 키워드 조합',
+    }));
+  } else {
+    // 일반: 초세부 틈새
+    const nicheKeywords = ['망한', '실패', '복구', '교정', '처진'];
+    return baseKeywords.slice(0, 5).map((kw, idx) => ({
+      keyword: `${neighborhood}${nicheKeywords[idx % nicheKeywords.length]}${kw}`,
+      reason: '초세부 틈새 키워드',
+    }));
+  }
 }
