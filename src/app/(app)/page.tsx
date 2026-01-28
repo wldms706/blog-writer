@@ -81,6 +81,7 @@ export default function Home() {
           <StepKeyword
             value={formData.keyword}
             onChange={(value) => setFormData({ ...formData, keyword: value })}
+            businessCategory={formData.businessCategory}
           />
         );
       case 3:
