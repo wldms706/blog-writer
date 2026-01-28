@@ -1,3 +1,5 @@
+import { createClient } from '@/lib/supabase/client';
+
 export type HistoryItem = {
   id: string;
   createdAt: string;
@@ -13,39 +15,74 @@ export type AppSettings = {
   keywordPresets: string[];
 };
 
-const HISTORY_KEY = 'blog-writer-history';
-const SETTINGS_KEY = 'blog-writer-settings';
-
 // --- History ---
 
-export function saveHistory(item: Omit<HistoryItem, 'id' | 'createdAt'>): HistoryItem {
-  const entry: HistoryItem = {
-    ...item,
-    id: crypto.randomUUID(),
-    createdAt: new Date().toISOString(),
+export async function saveHistory(
+  item: Omit<HistoryItem, 'id' | 'createdAt'>,
+  userId: string,
+): Promise<HistoryItem | null> {
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .from('histories')
+    .insert({
+      user_id: userId,
+      keyword: item.keyword,
+      business_category: item.businessCategory,
+      topic: item.topic,
+      purpose: item.purpose,
+      content: item.content,
+    })
+    .select()
+    .single();
+
+  if (error) {
+    console.error('Save history error:', error);
+    return null;
+  }
+
+  return {
+    id: data.id,
+    createdAt: data.created_at,
+    keyword: data.keyword,
+    businessCategory: data.business_category || '',
+    topic: data.topic || '',
+    purpose: data.purpose || '',
+    content: data.content,
   };
-  const list = getAllHistory();
-  list.unshift(entry);
-  localStorage.setItem(HISTORY_KEY, JSON.stringify(list));
-  return entry;
 }
 
-export function getAllHistory(): HistoryItem[] {
-  try {
-    const raw = localStorage.getItem(HISTORY_KEY);
-    return raw ? JSON.parse(raw) : [];
-  } catch {
+export async function getAllHistory(userId: string): Promise<HistoryItem[]> {
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .from('histories')
+    .select('*')
+    .eq('user_id', userId)
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    console.error('Get history error:', error);
     return [];
   }
+
+  return (data || []).map((row) => ({
+    id: row.id,
+    createdAt: row.created_at,
+    keyword: row.keyword,
+    businessCategory: row.business_category || '',
+    topic: row.topic || '',
+    purpose: row.purpose || '',
+    content: row.content,
+  }));
 }
 
-export function deleteHistory(id: string) {
-  const list = getAllHistory().filter((item) => item.id !== id);
-  localStorage.setItem(HISTORY_KEY, JSON.stringify(list));
+export async function deleteHistory(id: string) {
+  const supabase = createClient();
+  await supabase.from('histories').delete().eq('id', id);
 }
 
-export function clearAllHistory() {
-  localStorage.removeItem(HISTORY_KEY);
+export async function clearAllHistory(userId: string) {
+  const supabase = createClient();
+  await supabase.from('histories').delete().eq('user_id', userId);
 }
 
 // --- Settings ---
@@ -55,15 +92,29 @@ const defaultSettings: AppSettings = {
   keywordPresets: [],
 };
 
-export function getSettings(): AppSettings {
-  try {
-    const raw = localStorage.getItem(SETTINGS_KEY);
-    return raw ? { ...defaultSettings, ...JSON.parse(raw) } : defaultSettings;
-  } catch {
+export async function getSettings(userId: string): Promise<AppSettings> {
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .from('settings')
+    .select('*')
+    .eq('user_id', userId)
+    .single();
+
+  if (error || !data) {
     return defaultSettings;
   }
+
+  return {
+    defaultBusinessCategory: data.default_business_category,
+    keywordPresets: data.keyword_presets || [],
+  };
 }
 
-export function saveSettings(settings: AppSettings) {
-  localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+export async function saveSettings(userId: string, settings: AppSettings) {
+  const supabase = createClient();
+  await supabase.from('settings').upsert({
+    user_id: userId,
+    default_business_category: settings.defaultBusinessCategory,
+    keyword_presets: settings.keywordPresets,
+  });
 }

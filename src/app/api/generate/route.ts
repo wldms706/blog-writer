@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { createClient } from '@/lib/supabase/server';
+import { checkAndIncrementUsage } from '@/lib/usage';
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`;
@@ -34,6 +36,23 @@ const SYSTEM_PROMPT = `당신은 뷰티샵 원장의 블로그 글을 대신 작
 export async function POST(request: NextRequest) {
   if (!GEMINI_API_KEY) {
     return NextResponse.json({ error: 'API 키가 설정되지 않았습니다.' }, { status: 500 });
+  }
+
+  // 인증 확인
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) {
+    return NextResponse.json({ error: '로그인이 필요합니다.' }, { status: 401 });
+  }
+
+  // 사용량 체크
+  const usage = await checkAndIncrementUsage(user.id);
+  if (!usage.allowed) {
+    return NextResponse.json(
+      { error: '오늘의 무료 생성 횟수(3회)를 모두 사용했습니다.', remaining: 0 },
+      { status: 403 },
+    );
   }
 
   try {

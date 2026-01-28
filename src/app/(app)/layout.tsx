@@ -1,7 +1,12 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
+import { createClient } from "@/lib/supabase/server";
+import LogoutButton from "./LogoutButton";
 
-export default function AppLayout({ children }: { children: ReactNode }) {
+export default async function AppLayout({ children }: { children: ReactNode }) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
   return (
     <div className="min-h-dvh bg-slate-50 text-slate-900">
       {/* Topbar */}
@@ -23,9 +28,10 @@ export default function AppLayout({ children }: { children: ReactNode }) {
               설정
             </Link>
             <div className="h-8 w-px bg-slate-200" />
-            <Link href="/" className="rounded-lg bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700">
-              시작
-            </Link>
+            {user && (
+              <span className="hidden text-xs text-slate-400 sm:block">{user.email}</span>
+            )}
+            <LogoutButton />
           </nav>
         </div>
       </header>

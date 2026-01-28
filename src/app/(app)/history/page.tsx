@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { getAllHistory, deleteHistory, type HistoryItem } from '@/lib/storage';
 import { BUSINESS_CATEGORIES } from '@/data/constants';
+import { createClient } from '@/lib/supabase/client';
 
 const countCharsWithoutSpaces = (text: string) => text.replace(/\s/g, '').length;
 
@@ -11,14 +12,24 @@ export default function HistoryPage() {
   const [items, setItems] = useState<HistoryItem[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    setItems(getAllHistory());
+    async function load() {
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const history = await getAllHistory(user.id);
+        setItems(history);
+      }
+      setLoading(false);
+    }
+    load();
   }, []);
 
-  const handleDelete = (id: string) => {
-    deleteHistory(id);
-    setItems(getAllHistory());
+  const handleDelete = async (id: string) => {
+    await deleteHistory(id);
+    setItems((prev) => prev.filter((i) => i.id !== id));
     if (selectedId === id) setSelectedId(null);
   };
 
@@ -29,6 +40,15 @@ export default function HistoryPage() {
   };
 
   const selected = items.find((i) => i.id === selectedId);
+
+  if (loading) {
+    return (
+      <div className="py-16 text-center">
+        <div className="mx-auto h-8 w-8 animate-spin rounded-full border-2 border-slate-200 border-t-blue-600" />
+        <p className="mt-3 text-sm text-slate-500">불러오는 중...</p>
+      </div>
+    );
+  }
 
   if (items.length === 0) {
     return (

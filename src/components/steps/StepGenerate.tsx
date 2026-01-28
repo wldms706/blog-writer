@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { BUSINESS_CATEGORIES, TOPIC_CATEGORIES, PURPOSES, READER_STATES } from '@/data/constants';
 import { FormData } from '@/types';
 import { saveHistory } from '@/lib/storage';
+import { createClient } from '@/lib/supabase/client';
 
 interface StepGenerateProps {
   onReset: () => void;
@@ -99,13 +100,17 @@ export default function StepGenerate({ onReset, formData }: StepGenerateProps) {
         setCurrentMessage(UX_MESSAGES.complete);
 
         // 히스토리에 자동 저장
-        saveHistory({
-          keyword: formData.keyword || '',
-          businessCategory: formData.businessCategory || '',
-          topic: formData.topic || '',
-          purpose: formData.purpose || '',
-          content: data.content,
-        });
+        const supabase = createClient();
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          saveHistory({
+            keyword: formData.keyword || '',
+            businessCategory: formData.businessCategory || '',
+            topic: formData.topic || '',
+            purpose: formData.purpose || '',
+            content: data.content,
+          }, user.id);
+        }
       } catch (err) {
         if (cancelled) return;
         console.error('Generate error:', err);
