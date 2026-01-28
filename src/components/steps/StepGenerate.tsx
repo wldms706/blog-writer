@@ -24,84 +24,6 @@ const UX_MESSAGES = {
 // 공백 제외 글자수 계산
 const countCharsWithoutSpaces = (text: string) => text.replace(/\s/g, '').length;
 
-// 키워드를 포함한 샘플 콘텐츠 생성
-const generateSampleContent = (keyword: string) => `${keyword}, 어떤 기준으로 선택해야 할까요?
-
-"${keyword.replace(/[가-힣]+(?=눈썹|반영구|피부|두피|네일|헤어)/, '')} 어디서 하면 좋을까요?"
-
-많은 분들이 이 질문을 합니다.
-인스타그램을 뒤지고, 블로그를 읽고, 지인에게 물어봅니다.
-그런데 정작 무엇을 기준으로 선택해야 하는지는 잘 모르는 경우가 많습니다.
-
-검색을 하면 수많은 정보가 쏟아지지만, 그 정보들이 정말 나에게 맞는 판단 기준이 되는지는 별개의 문제입니다. ${keyword}에 대해 알아보고 계신다면, 단순히 "어디가 잘하나요?"보다는 "어떤 기준으로 골라야 하는지"부터 정리해보는 것이 훨씬 도움이 됩니다.
-
-
-흔한 선택 기준의 한계
-
-"후기가 좋은 곳"
-"사진이 예쁜 곳"
-"가격이 합리적인 곳"
-
-이런 기준으로 선택하시는 분들이 많습니다.
-물론 참고할 수 있는 정보입니다.
-
-하지만 후기는 개인의 경험이고,
-사진은 조명과 각도에 따라 달라지며,
-가격만으로는 퀄리티를 판단하기 어렵습니다.
-
-실제로 같은 곳을 다녀와도 만족도가 다른 경우가 많습니다. 이는 개인마다 기대치와 상태가 다르기 때문입니다. 그렇기에 남의 후기보다 나만의 판단 기준을 세우는 것이 더 중요합니다.
-
-
-진짜 확인해야 할 3가지 기준
-
-1. 상담 과정이 충분한가
-
-좋은 곳은 시술 전 충분한 시간을 들여 상담합니다.
-현재 상태 분석, 원하는 결과 파악, 관리 방법 안내까지 꼼꼼하게 진행합니다.
-
-"빨리 예약하세요"보다 "어떤 스타일을 원하세요?"라고 먼저 묻는 곳을 찾아보세요.
-
-${keyword}을(를) 선택할 때 가장 중요한 것은 상담의 질입니다. 충분한 상담은 결과의 만족도를 높여줄 뿐만 아니라, 시술 후 불필요한 걱정을 줄여주는 역할도 합니다. 내 상태를 정확히 파악하고, 그에 맞는 방향을 제안하는 곳인지 확인해보세요.
-
-2. 다양한 케이스를 보여줄 수 있는가
-
-포트폴리오에서 다양한 스타일을 확인해보세요.
-모든 결과물이 비슷하다면, 나에게 맞는 맞춤 결과를 기대하기 어려울 수 있습니다.
-
-${keyword} 포트폴리오를 볼 때는 다양성을 확인하세요. 같은 시술이라도 사람마다 얼굴형, 피부톤, 기존 상태가 다르기 때문에 결과물도 달라야 자연스럽습니다. 한 가지 스타일만 반복되는 곳보다, 여러 케이스에 맞춰 다르게 접근하는 곳이 신뢰할 수 있습니다.
-
-3. 이후 관리에 대해 설명해주는가
-
-${keyword}은(는) 한 번으로 끝나지 않습니다.
-관리 주기, 자연스러운 변화 과정, 수정이 필요할 때의 대응 방식까지 안내해주는 곳을 찾아보세요.
-
-이런 부분까지 미리 안내해주는 곳이 신뢰할 수 있습니다. 사후 관리에 대한 설명이 구체적일수록 전문성을 갖춘 곳이라 판단할 수 있습니다. 시술 전에 관리 방법과 주의사항을 꼼꼼히 안내받으셨다면, 그만큼 체계적으로 운영되는 곳일 가능성이 높습니다.
-
-
-모든 분께 필요한 것은 아닙니다
-
-현재 상태에 불편함이 없다면,
-꼭 해야 할 이유는 없습니다.
-
-다만, 더 나은 결과를 원하거나
-관리가 어려운 분들에게는
-좋은 선택지가 될 수 있습니다.
-
-중요한 것은 외부의 권유가 아니라, 본인이 느끼는 필요에 따라 결정하는 것입니다. 유행이라서, 혹은 주변에서 추천해서가 아니라 내가 정말 원하는지를 먼저 생각해보시길 바랍니다.
-
-
-시간이 지나면 달라질 수 있습니다
-
-상황에 따라 결과는 달라질 수 있습니다.
-그래서 첫 선택보다 꾸준한 관리가 더 중요할 수 있습니다.
-
-처음 결과가 좋더라도, 시간이 지나면 자연스럽게 변화가 생깁니다. 이는 정상적인 과정이며, 그래서 정기적인 관리와 점검이 필요합니다. 처음부터 관리 계획을 함께 안내받을 수 있는 곳을 선택한다면 더 오래 만족스러운 결과를 유지할 수 있습니다.
-
-
-선택이 중요합니다.
-충분히 알아보고 계신가요?
-어떤 기준으로 선택하실 건가요?`;
-
 export default function StepGenerate({ onReset, formData }: StepGenerateProps) {
   const [phase, setPhase] = useState<'generating' | 'autofix' | 'complete'>('generating');
   const [currentMessage, setCurrentMessage] = useState(UX_MESSAGES.generating);
@@ -113,49 +35,90 @@ export default function StepGenerate({ onReset, formData }: StepGenerateProps) {
   const purpose = PURPOSES.find((p) => p.id === formData.purpose);
   const reader = READER_STATES.find((r) => r.id === formData.readerState);
 
-  // 생성 및 검증 시뮬레이션
+  // Gemini API를 통한 글 생성
   useEffect(() => {
-    const generatedContent = generateSampleContent(formData.keyword || '눈썹문신');
+    let cancelled = false;
 
-    // Phase 1: 생성 (2초)
-    const generateTimer = setTimeout(() => {
-      setPhase('autofix');
-      setCurrentMessage(UX_MESSAGES.autoFix);
+    async function generate() {
+      try {
+        // Phase 1: 생성 중 UX 메시지 순환
+        const uxMessages = [
+          UX_MESSAGES.generating,
+          UX_MESSAGES.charMin,
+          UX_MESSAGES.keywordLow,
+          UX_MESSAGES.repeatOver,
+        ];
+        let msgIdx = 0;
+        const messageInterval = setInterval(() => {
+          msgIdx = (msgIdx + 1) % uxMessages.length;
+          if (!cancelled) setCurrentMessage(uxMessages[msgIdx]);
+        }, 1500);
 
-      // Phase 2: 자동 보정 메시지들 순환
-      const messages = [
-        UX_MESSAGES.charMin,
-        UX_MESSAGES.keywordLow,
-        UX_MESSAGES.repeatOver,
-      ];
+        const res = await fetch('/api/generate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            keyword: formData.keyword,
+            businessCategory: business?.name || formData.businessCategory,
+            topic: topic?.name || formData.topic,
+            purpose: purpose?.name || formData.purpose,
+            readerState: reader?.name || formData.readerState,
+          }),
+        });
 
-      let messageIndex = 0;
-      const messageInterval = setInterval(() => {
-        if (messageIndex < messages.length) {
-          setCurrentMessage(messages[messageIndex]);
-          messageIndex++;
-        } else {
-          clearInterval(messageInterval);
-          setContent(generatedContent);
-          setPhase('complete');
-          setCurrentMessage(UX_MESSAGES.complete);
+        clearInterval(messageInterval);
 
-          // 히스토리에 자동 저장
-          saveHistory({
-            keyword: formData.keyword || '눈썹문신',
-            businessCategory: formData.businessCategory || '',
-            topic: formData.topic || '',
-            purpose: formData.purpose || '',
-            content: generatedContent,
-          });
+        if (cancelled) return;
+
+        if (!res.ok) {
+          throw new Error('API 요청 실패');
         }
-      }, 800);
 
-      return () => clearInterval(messageInterval);
-    }, 2000);
+        const data = await res.json();
 
-    return () => clearTimeout(generateTimer);
-  }, [formData.keyword]);
+        if (!data.content) {
+          throw new Error('생성된 텍스트가 없습니다');
+        }
+
+        // Phase 2: 자동 보정 메시지
+        setPhase('autofix');
+        setCurrentMessage(UX_MESSAGES.autoFix);
+
+        await new Promise((r) => setTimeout(r, 1000));
+        if (cancelled) return;
+
+        setCurrentMessage(UX_MESSAGES.forbidden);
+        await new Promise((r) => setTimeout(r, 800));
+        if (cancelled) return;
+
+        // 완료
+        setContent(data.content);
+        setPhase('complete');
+        setCurrentMessage(UX_MESSAGES.complete);
+
+        // 히스토리에 자동 저장
+        saveHistory({
+          keyword: formData.keyword || '',
+          businessCategory: formData.businessCategory || '',
+          topic: formData.topic || '',
+          purpose: formData.purpose || '',
+          content: data.content,
+        });
+      } catch (err) {
+        if (cancelled) return;
+        console.error('Generate error:', err);
+        setContent('글 생성 중 오류가 발생했습니다. 다시 시도해주세요.');
+        setPhase('complete');
+        setCurrentMessage('오류가 발생했습니다.');
+      }
+    }
+
+    generate();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [formData.keyword, formData.businessCategory, formData.topic, formData.purpose, formData.readerState]);
 
   const handleCopy = async () => {
     await navigator.clipboard.writeText(content);
