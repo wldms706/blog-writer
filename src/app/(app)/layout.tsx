@@ -16,16 +16,16 @@ export default function AppLayout({ children }: { children: ReactNode }) {
           </Link>
 
           <nav className="flex items-center gap-2">
-            <button className="rounded-lg px-3 py-1.5 text-sm text-slate-600 hover:bg-slate-100">
+            <Link href="/history" className="rounded-lg px-3 py-1.5 text-sm text-slate-600 hover:bg-slate-100">
               히스토리
-            </button>
-            <button className="rounded-lg px-3 py-1.5 text-sm text-slate-600 hover:bg-slate-100">
+            </Link>
+            <Link href="/settings" className="rounded-lg px-3 py-1.5 text-sm text-slate-600 hover:bg-slate-100">
               설정
-            </button>
+            </Link>
             <div className="h-8 w-px bg-slate-200" />
-            <button className="rounded-lg bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700">
+            <Link href="/" className="rounded-lg bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700">
               시작
-            </button>
+            </Link>
           </nav>
         </div>
       </header>

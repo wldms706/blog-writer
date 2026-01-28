@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { BUSINESS_CATEGORIES, TOPIC_CATEGORIES, PURPOSES, READER_STATES } from '@/data/constants';
 import { FormData } from '@/types';
+import { saveHistory } from '@/lib/storage';
 
 interface StepGenerateProps {
   onReset: () => void;
@@ -138,6 +139,15 @@ export default function StepGenerate({ onReset, formData }: StepGenerateProps) {
           setContent(generatedContent);
           setPhase('complete');
           setCurrentMessage(UX_MESSAGES.complete);
+
+          // 히스토리에 자동 저장
+          saveHistory({
+            keyword: formData.keyword || '눈썹문신',
+            businessCategory: formData.businessCategory || '',
+            topic: formData.topic || '',
+            purpose: formData.purpose || '',
+            content: generatedContent,
+          });
         }
       }, 800);
 
