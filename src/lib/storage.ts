@@ -15,6 +15,15 @@ export type AppSettings = {
   keywordPresets: string[];
 };
 
+export type UserProfile = {
+  locationCity: string;
+  locationDistrict: string;
+  locationNeighborhood: string;
+  blogUrl: string;
+  blogIndexLevel: 'high' | 'medium' | 'low' | null;
+  blogIndexCheckedAt: string | null;
+};
+
 // --- History ---
 
 export async function saveHistory(
@@ -117,4 +126,54 @@ export async function saveSettings(userId: string, settings: AppSettings) {
     default_business_category: settings.defaultBusinessCategory,
     keyword_presets: settings.keywordPresets,
   });
+}
+
+// --- Profile (지역 + 블로그 정보) ---
+
+const defaultProfile: UserProfile = {
+  locationCity: '',
+  locationDistrict: '',
+  locationNeighborhood: '',
+  blogUrl: '',
+  blogIndexLevel: null,
+  blogIndexCheckedAt: null,
+};
+
+export async function getProfile(userId: string): Promise<UserProfile> {
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('location_city, location_district, location_neighborhood, blog_url, blog_index_level, blog_index_checked_at')
+    .eq('id', userId)
+    .single();
+
+  if (error || !data) {
+    return defaultProfile;
+  }
+
+  return {
+    locationCity: data.location_city || '',
+    locationDistrict: data.location_district || '',
+    locationNeighborhood: data.location_neighborhood || '',
+    blogUrl: data.blog_url || '',
+    blogIndexLevel: data.blog_index_level as UserProfile['blogIndexLevel'],
+    blogIndexCheckedAt: data.blog_index_checked_at,
+  };
+}
+
+export async function saveProfile(userId: string, profile: Partial<UserProfile>) {
+  const supabase = createClient();
+
+  const updateData: Record<string, unknown> = {};
+  if (profile.locationCity !== undefined) updateData.location_city = profile.locationCity;
+  if (profile.locationDistrict !== undefined) updateData.location_district = profile.locationDistrict;
+  if (profile.locationNeighborhood !== undefined) updateData.location_neighborhood = profile.locationNeighborhood;
+  if (profile.blogUrl !== undefined) updateData.blog_url = profile.blogUrl;
+  if (profile.blogIndexLevel !== undefined) updateData.blog_index_level = profile.blogIndexLevel;
+  if (profile.blogIndexCheckedAt !== undefined) updateData.blog_index_checked_at = profile.blogIndexCheckedAt;
+
+  await supabase
+    .from('profiles')
+    .update(updateData)
+    .eq('id', userId);
 }
