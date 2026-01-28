@@ -25,6 +25,28 @@ const UX_MESSAGES = {
 // 공백 제외 글자수 계산
 const countCharsWithoutSpaces = (text: string) => text.replace(/\s/g, '').length;
 
+// 키워드 하이라이트 함수
+const highlightKeyword = (text: string, keyword: string) => {
+  if (!keyword || !text) return text;
+
+  // 키워드를 정규식으로 이스케이프 처리
+  const escapedKeyword = keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const regex = new RegExp(`(${escapedKeyword})`, 'gi');
+
+  const parts = text.split(regex);
+
+  return parts.map((part, index) => {
+    if (part.toLowerCase() === keyword.toLowerCase()) {
+      return (
+        <mark key={index} className="bg-yellow-200 text-yellow-900 px-0.5 rounded">
+          {part}
+        </mark>
+      );
+    }
+    return part;
+  });
+};
+
 export default function StepGenerate({ onReset, formData }: StepGenerateProps) {
   const [phase, setPhase] = useState<'generating' | 'autofix' | 'complete' | 'error'>('generating');
   const [currentMessage, setCurrentMessage] = useState(UX_MESSAGES.generating);
@@ -273,9 +295,14 @@ export default function StepGenerate({ onReset, formData }: StepGenerateProps) {
 
           <div className="p-6 rounded-xl bg-background-subtle border border-border-light">
             <div className="whitespace-pre-wrap text-text-primary leading-relaxed text-[15px]">
-              {content}
+              {highlightKeyword(content, formData.keyword)}
             </div>
           </div>
+
+          {/* 키워드 하이라이트 안내 */}
+          <p className="text-xs text-slate-400 text-center">
+            <mark className="bg-yellow-200 text-yellow-900 px-1 rounded text-[10px]">노란색</mark> 표시는 핵심 키워드입니다
+          </p>
         </div>
 
         {/* 안전 뱃지 - 간결하게 */}
