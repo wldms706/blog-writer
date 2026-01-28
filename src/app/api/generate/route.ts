@@ -75,6 +75,14 @@ export async function POST(request: NextRequest) {
     if (!response.ok) {
       const errorData = await response.text();
       console.error('Gemini API error:', errorData);
+
+      if (response.status === 429) {
+        return NextResponse.json(
+          { error: 'API 사용량 한도를 초과했습니다. 잠시 후 다시 시도해주세요.' },
+          { status: 429 },
+        );
+      }
+
       return NextResponse.json({ error: 'AI 생성에 실패했습니다.' }, { status: 500 });
     }
 

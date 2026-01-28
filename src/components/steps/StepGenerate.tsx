@@ -25,10 +25,12 @@ const UX_MESSAGES = {
 const countCharsWithoutSpaces = (text: string) => text.replace(/\s/g, '').length;
 
 export default function StepGenerate({ onReset, formData }: StepGenerateProps) {
-  const [phase, setPhase] = useState<'generating' | 'autofix' | 'complete'>('generating');
+  const [phase, setPhase] = useState<'generating' | 'autofix' | 'complete' | 'error'>('generating');
   const [currentMessage, setCurrentMessage] = useState(UX_MESSAGES.generating);
+  const [errorMessage, setErrorMessage] = useState('');
   const [content, setContent] = useState('');
   const [copied, setCopied] = useState(false);
+  const [retryCount, setRetryCount] = useState(0);
 
   const business = BUSINESS_CATEGORIES.find((b) => b.id === formData.businessCategory);
   const topic = TOPIC_CATEGORIES.find((t) => t.id === formData.topic);
@@ -70,11 +72,11 @@ export default function StepGenerate({ onReset, formData }: StepGenerateProps) {
 
         if (cancelled) return;
 
-        if (!res.ok) {
-          throw new Error('API 요청 실패');
-        }
-
         const data = await res.json();
+
+        if (!res.ok) {
+          throw new Error(data.error || 'API 요청 실패');
+        }
 
         if (!data.content) {
           throw new Error('생성된 텍스트가 없습니다');
@@ -107,9 +109,8 @@ export default function StepGenerate({ onReset, formData }: StepGenerateProps) {
       } catch (err) {
         if (cancelled) return;
         console.error('Generate error:', err);
-        setContent('글 생성 중 오류가 발생했습니다. 다시 시도해주세요.');
-        setPhase('complete');
-        setCurrentMessage('오류가 발생했습니다.');
+        setErrorMessage(err instanceof Error ? err.message : '알 수 없는 오류가 발생했습니다.');
+        setPhase('error');
       }
     }
 
@@ -118,13 +119,47 @@ export default function StepGenerate({ onReset, formData }: StepGenerateProps) {
     return () => {
       cancelled = true;
     };
-  }, [formData.keyword, formData.businessCategory, formData.topic, formData.purpose, formData.readerState]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [formData.keyword, formData.businessCategory, formData.topic, formData.purpose, formData.readerState, retryCount]);
 
   const handleCopy = async () => {
     await navigator.clipboard.writeText(content);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
+
+  const handleRetry = () => {
+    setPhase('generating');
+    setCurrentMessage(UX_MESSAGES.generating);
+    setErrorMessage('');
+    setContent('');
+    setRetryCount((c) => c + 1);
+  };
+
+  // 에러 화면
+  if (phase === 'error') {
+    return (
+      <div className="animate-fade-in">
+        <div className="max-w-xl mx-auto">
+          <div className="card p-10 text-center">
+            <div className="mb-6">
+              <div className="w-16 h-16 mx-auto rounded-full bg-red-50 flex items-center justify-center">
+                <svg className="w-8 h-8 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                </svg>
+              </div>
+            </div>
+            <p className="text-lg font-medium text-text-primary mb-2">글 생성에 실패했습니다</p>
+            <p className="text-sm text-text-secondary mb-6">{errorMessage}</p>
+            <div className="flex gap-3 justify-center">
+              <button onClick={onReset} className="btn-secondary">처음으로</button>
+              <button onClick={handleRetry} className="btn-primary">다시 시도</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   // 생성 중 또는 자동 보정 중 화면
   if (phase === 'generating' || phase === 'autofix') {
