@@ -2,6 +2,9 @@ import { createClient as createServerSupabase } from '@/lib/supabase/server';
 
 const FREE_DAILY_LIMIT = 3;
 
+// 관리자 이메일 - 무제한 사용 가능
+const ADMIN_EMAILS = ['wldms706@naver.com'];
+
 export async function checkAndIncrementUsage(userId: string): Promise<{
   allowed: boolean;
   remaining: number;
@@ -13,7 +16,7 @@ export async function checkAndIncrementUsage(userId: string): Promise<{
   // 프로필 조회
   const { data: profile } = await supabase
     .from('profiles')
-    .select('plan, daily_usage, last_usage_date')
+    .select('email, plan, daily_usage, last_usage_date')
     .eq('id', userId)
     .single();
 
@@ -21,8 +24,9 @@ export async function checkAndIncrementUsage(userId: string): Promise<{
     return { allowed: false, remaining: 0, plan: 'free' };
   }
 
-  // 유료 유저는 무제한
-  if (profile.plan === 'paid') {
+  // 관리자 또는 유료 유저는 무제한
+  const isAdmin = profile.email && ADMIN_EMAILS.includes(profile.email);
+  if (isAdmin || profile.plan === 'paid') {
     await supabase
       .from('profiles')
       .update({
