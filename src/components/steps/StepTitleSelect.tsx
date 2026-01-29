@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { ContentType, BrandingType, BrandingInfo } from '@/types';
 
 interface TitleOption {
   title: string;
@@ -15,6 +16,9 @@ interface StepTitleSelectProps {
   topic: string;
   purpose: string;
   readerState: string;
+  contentType?: ContentType;
+  brandingType?: BrandingType | null;
+  brandingInfo?: BrandingInfo;
 }
 
 export default function StepTitleSelect({
@@ -25,6 +29,9 @@ export default function StepTitleSelect({
   topic,
   purpose,
   readerState,
+  contentType = 'seo',
+  brandingType,
+  brandingInfo,
 }: StepTitleSelectProps) {
   const [titles, setTitles] = useState<TitleOption[]>([]);
   const [loading, setLoading] = useState(false);
@@ -43,7 +50,16 @@ export default function StepTitleSelect({
       const res = await fetch('/api/generate-titles', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ keyword, businessCategory, topic, purpose, readerState }),
+        body: JSON.stringify({
+          keyword,
+          businessCategory,
+          topic,
+          purpose,
+          readerState,
+          contentType,
+          brandingType,
+          brandingInfo,
+        }),
       });
 
       const data = await res.json();
@@ -67,7 +83,9 @@ export default function StepTitleSelect({
           블로그 제목을 선택해주세요
         </h2>
         <p className="text-text-secondary">
-          클릭률을 높이는 AI 추천 제목 중 하나를 선택하세요
+          {contentType === 'seo'
+            ? '클릭률을 높이는 AI 추천 제목 중 하나를 선택하세요'
+            : '브랜드 가치를 담은 AI 추천 제목 중 하나를 선택하세요'}
         </p>
       </div>
 

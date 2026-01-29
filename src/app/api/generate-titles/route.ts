@@ -4,6 +4,12 @@ import { createClient } from '@/lib/supabase/server';
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`;
 
+const BRANDING_TYPE_NAMES: Record<string, string> = {
+  intro: '자기소개',
+  philosophy: '철학/신념',
+  story: '샵 스토리',
+};
+
 export async function POST(request: NextRequest) {
   if (!GEMINI_API_KEY) {
     return NextResponse.json({ error: 'API 키가 설정되지 않았습니다.' }, { status: 500 });
@@ -18,9 +24,104 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const { keyword, businessCategory, topic, purpose, readerState } = await request.json();
+    const {
+      keyword,
+      businessCategory,
+      topic,
+      purpose,
+      readerState,
+      contentType = 'seo',
+      brandingType,
+      brandingInfo,
+    } = await request.json();
 
-    const prompt = `당신은 네이버 블로그 제목 전문가입니다. 클릭률을 높이는 제목을 만들어주세요.
+    let prompt: string;
+
+    if (contentType === 'branding') {
+      // 브랜딩 글 제목 생성 프롬프트
+      const brandingTypeName = BRANDING_TYPE_NAMES[brandingType] || '브랜딩';
+
+      // 구조화된 브랜딩 정보에서 핵심 키워드 추출
+      let infoSummary = '';
+      if (brandingInfo && brandingType) {
+        const info = brandingInfo[brandingType];
+        if (brandingType === 'intro' && info) {
+          const { experience, specialty, startReason } = info;
+          infoSummary = `경력: ${experience || '미입력'}, 전문분야: ${specialty || '미입력'}, 시작계기: ${startReason || '미입력'}`;
+        } else if (brandingType === 'philosophy' && info) {
+          const { coreValue, difference } = info;
+          infoSummary = `핵심가치: ${coreValue || '미입력'}, 차별점: ${difference || '미입력'}`;
+        } else if (brandingType === 'story' && info) {
+          const { location, spaceFeature, atmosphere } = info;
+          infoSummary = `위치: ${location || '미입력'}, 공간특징: ${spaceFeature || '미입력'}, 분위기: ${atmosphere || '미입력'}`;
+        }
+      }
+
+      prompt = `당신은 네이버 블로그 제목 전문가입니다. 브랜딩 글의 제목을 만들어주세요.
+
+키워드: ${keyword}
+업종: ${businessCategory}
+브랜딩 종류: ${brandingTypeName}
+샵 정보: ${infoSummary || '없음'}
+
+## 브랜딩 글 제목 작성 규칙
+
+### 브랜딩 종류별 스타일:
+${brandingType === 'intro' ? `
+**자기소개 제목 스타일:**
+- 진정성 있는 인사말 느낌
+- 원장/전문가의 가치관이 드러나는 제목
+- 위 "샵 정보"에서 경력, 전문분야 등을 활용
+- 예시: "눈썹 하나에 진심을 다하는 이유"
+- 예시: "${keyword} 10년차가 첫 고객을 대하는 마음"
+- 예시: "당신의 아름다움을 존중하는 ${keyword} 전문가"
+` : ''}
+${brandingType === 'philosophy' ? `
+**철학/신념 제목 스타일:**
+- 샵이 추구하는 가치가 드러나는 제목
+- 깊이 있고 진지한 느낌
+- 위 "샵 정보"에서 핵심가치, 차별점 등을 활용
+- 예시: "자연스러움, 그것이 진짜 아름다움입니다"
+- 예시: "왜 ${keyword}에서 '덜'이 '더'가 되는지"
+- 예시: "트렌드보다 당신다움을 먼저 생각합니다"
+` : ''}
+${brandingType === 'story' ? `
+**샵 스토리 제목 스타일:**
+- 공간과 분위기가 느껴지는 제목
+- 따뜻하고 편안한 느낌
+- 위 "샵 정보"에서 위치, 분위기 등을 활용
+- 예시: "신사동 조용한 골목, 작은 ${keyword} 이야기"
+- 예시: "1인샵을 시작한 이유"
+- 예시: "이곳에서 보내는 특별한 시간"
+` : ''}
+
+### 필수 요소:
+1. 브랜드 가치와 진정성이 느껴지는 제목
+2. 궁금증을 유발하되 과하지 않게
+3. 키워드를 자연스럽게 포함
+4. 위 샵 정보를 반영하여 개성 있는 제목 생성
+
+### 금지 사항:
+- 1인칭 표현 ("저는", "제가", "저희") 절대 금지
+- 영업/유도 표현 ("예약하세요", "상담받으세요") 금지
+- 과대광고 표현 금지
+- 마크다운 문법 사용 금지
+
+### 형식:
+- 제목 길이: 15~35자 권장
+
+반드시 다음 JSON 형식으로만 응답하세요:
+{
+  "titles": [
+    {"title": "제목1", "style": "스타일 설명"},
+    {"title": "제목2", "style": "스타일 설명"},
+    {"title": "제목3", "style": "스타일 설명"}
+  ]
+}`;
+
+    } else {
+      // SEO 글 제목 생성 프롬프트 (기존)
+      prompt = `당신은 네이버 블로그 제목 전문가입니다. 클릭률을 높이는 제목을 만들어주세요.
 
 키워드: ${keyword}
 업종: ${businessCategory}
@@ -59,6 +160,7 @@ export async function POST(request: NextRequest) {
     {"title": "제목3", "style": "스타일 설명"}
   ]
 }`;
+    }
 
     const response = await fetch(GEMINI_URL, {
       method: 'POST',
@@ -94,6 +196,16 @@ export async function POST(request: NextRequest) {
     }
 
     // 파싱 실패 시 기본 제목
+    if (contentType === 'branding') {
+      return NextResponse.json({
+        titles: [
+          { title: `${keyword}에서 진심을 다하는 이유`, style: '진정성 강조형' },
+          { title: `당신다움을 찾아드리는 ${keyword} 이야기`, style: '가치 전달형' },
+          { title: `${keyword}, 그 시작과 철학`, style: '스토리텔링형' },
+        ],
+      });
+    }
+
     return NextResponse.json({
       titles: [
         { title: `${keyword} 전문가가 알려주는 숨은 비밀 3가지`, style: '비밀 공개형' },

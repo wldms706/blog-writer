@@ -10,6 +10,30 @@ export const STEPS: Step[] = [
   { id: 7, title: '글 생성', subtitle: '블로그 글이 생성됩니다' },
 ];
 
+// SEO 글 작성 단계
+export const SEO_STEPS: Step[] = [
+  { id: 1, title: '글 유형', subtitle: '어떤 글을 작성할까요?' },
+  { id: 2, title: '업종', subtitle: '어떤 뷰티 업종인가요?' },
+  { id: 3, title: '키워드', subtitle: '검색 키워드를 입력해주세요' },
+  { id: 4, title: '주제', subtitle: '어떤 주제로 글을 쓸까요?' },
+  { id: 5, title: '목적', subtitle: '이 글의 목적은 무엇인가요?' },
+  { id: 6, title: '독자 상태', subtitle: '독자는 어떤 상태인가요?' },
+  { id: 7, title: '규칙 확인', subtitle: '적용되는 규칙을 확인해주세요' },
+  { id: 8, title: '제목 선택', subtitle: '블로그 제목을 선택해주세요' },
+  { id: 9, title: '글 생성', subtitle: '블로그 글이 생성됩니다' },
+];
+
+// 브랜딩 글 작성 단계
+export const BRANDING_STEPS: Step[] = [
+  { id: 1, title: '글 유형', subtitle: '어떤 글을 작성할까요?' },
+  { id: 2, title: '업종', subtitle: '어떤 뷰티 업종인가요?' },
+  { id: 3, title: '브랜딩 종류', subtitle: '어떤 브랜딩 글인가요?' },
+  { id: 4, title: '키워드', subtitle: '검색 키워드를 입력해주세요' },
+  { id: 5, title: '추가 정보', subtitle: '글에 담을 내용을 입력해주세요' },
+  { id: 6, title: '제목 선택', subtitle: '블로그 제목을 선택해주세요' },
+  { id: 7, title: '글 생성', subtitle: '블로그 글이 생성됩니다' },
+];
+
 export const BUSINESS_CATEGORIES: BusinessCategory[] = [
   {
     id: 'semi-permanent',
@@ -58,6 +82,13 @@ export const BUSINESS_CATEGORIES: BusinessCategory[] = [
     name: '왁싱',
     icon: '🪶',
     description: '페이스, 바디 왁싱 전문',
+    hasRegulation: false,
+  },
+  {
+    id: 'eyelash',
+    name: '속눈썹',
+    icon: '👁️',
+    description: '속눈썹 연장, 펌, 리프팅',
     hasRegulation: false,
   },
 ];

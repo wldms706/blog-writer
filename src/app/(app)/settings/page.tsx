@@ -1,11 +1,13 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { getSettings, saveSettings, clearAllHistory, getProfile, saveProfile, type AppSettings, type UserProfile, type BlogIndexLevel } from '@/lib/storage';
 import { BUSINESS_CATEGORIES } from '@/data/constants';
 import { createClient } from '@/lib/supabase/client';
 
 export default function SettingsPage() {
+  const router = useRouter();
   const [settings, setSettings] = useState<AppSettings>({
     defaultBusinessCategory: null,
     keywordPresets: [],
@@ -18,7 +20,6 @@ export default function SettingsPage() {
     blogIndexLevel: null,
     blogIndexCheckedAt: null,
   });
-  const [newPreset, setNewPreset] = useState('');
   const [showClearConfirm, setShowClearConfirm] = useState(false);
   const [toast, setToast] = useState('');
   const [loading, setLoading] = useState(true);
@@ -61,24 +62,6 @@ export default function SettingsPage() {
       await saveProfile(userId, updated);
       showToast('저장되었습니다');
     }
-  };
-
-  const handleAddPreset = () => {
-    const trimmed = newPreset.trim();
-    if (!trimmed || settings.keywordPresets.includes(trimmed)) return;
-    if (settings.keywordPresets.length >= 5) {
-      showToast('최대 5개까지 저장 가능합니다');
-      return;
-    }
-    handleSaveSettings({ ...settings, keywordPresets: [...settings.keywordPresets, trimmed] });
-    setNewPreset('');
-  };
-
-  const handleRemovePreset = (keyword: string) => {
-    handleSaveSettings({
-      ...settings,
-      keywordPresets: settings.keywordPresets.filter((k) => k !== keyword),
-    });
   };
 
   const handleClearHistory = async () => {
@@ -345,50 +328,6 @@ export default function SettingsPage() {
           </select>
         </div>
 
-        {/* 키워드 프리셋 */}
-        <div className="rounded-xl border border-slate-200 bg-white p-4">
-          <label className="mb-2 block text-sm font-medium text-slate-900">키워드 프리셋</label>
-          <p className="mb-3 text-xs text-slate-500">자주 사용하는 키워드를 저장하세요 (최대 5개)</p>
-
-          <div className="mb-3 flex gap-2">
-            <input
-              type="text"
-              value={newPreset}
-              onChange={(e) => setNewPreset(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleAddPreset()}
-              placeholder="키워드 입력"
-              className="flex-1 rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-blue-500"
-            />
-            <button
-              onClick={handleAddPreset}
-              className="rounded-lg bg-blue-600 px-3 py-2 text-sm font-medium text-white hover:bg-blue-700"
-            >
-              추가
-            </button>
-          </div>
-
-          {settings.keywordPresets.length > 0 ? (
-            <div className="flex flex-wrap gap-2">
-              {settings.keywordPresets.map((kw) => (
-                <span
-                  key={kw}
-                  className="inline-flex items-center gap-1 rounded-lg bg-slate-100 px-2.5 py-1 text-xs text-slate-700"
-                >
-                  {kw}
-                  <button
-                    onClick={() => handleRemovePreset(kw)}
-                    className="ml-0.5 text-slate-400 hover:text-red-500"
-                  >
-                    &times;
-                  </button>
-                </span>
-              ))}
-            </div>
-          ) : (
-            <p className="text-xs text-slate-400">저장된 키워드가 없습니다</p>
-          )}
-        </div>
-
         {/* 히스토리 삭제 */}
         <div className="rounded-xl border border-red-100 bg-white p-4">
           <label className="mb-2 block text-sm font-medium text-slate-900">데이터 관리</label>
@@ -419,6 +358,14 @@ export default function SettingsPage() {
             </div>
           )}
         </div>
+
+        {/* 저장하고 글쓰기 버튼 */}
+        <button
+          onClick={() => router.push('/')}
+          className="w-full rounded-xl bg-blue-600 py-3 text-sm font-medium text-white hover:bg-blue-700 transition-colors"
+        >
+          저장하고 글쓰기
+        </button>
       </div>
 
       {/* 토스트 */}

@@ -1,28 +1,34 @@
 'use client';
 
-import { STEPS } from '@/data/constants';
+import { SEO_STEPS, BRANDING_STEPS } from '@/data/constants';
+import { ContentType } from '@/types';
 
 interface StepProgressProps {
   currentStep: number;
+  totalSteps?: number;
+  contentType?: ContentType;
 }
 
-export default function StepProgress({ currentStep }: StepProgressProps) {
+export default function StepProgress({ currentStep, totalSteps, contentType = 'seo' }: StepProgressProps) {
+  const steps = contentType === 'seo' ? SEO_STEPS : BRANDING_STEPS;
+  const total = totalSteps || steps.length;
+
   return (
     <div className="w-full max-w-3xl mx-auto px-4">
       {/* Mobile: Simple Progress Bar */}
       <div className="md:hidden">
         <div className="flex items-center justify-between mb-2">
           <span className="text-sm font-medium text-text-secondary">
-            {STEPS[currentStep - 1]?.title}
+            {steps[currentStep - 1]?.title}
           </span>
           <span className="text-sm text-text-muted">
-            {currentStep} / {STEPS.length}
+            {currentStep} / {total}
           </span>
         </div>
         <div className="h-1.5 bg-background-subtle rounded-full overflow-hidden">
           <div
             className="h-full bg-gradient-to-r from-primary to-accent rounded-full transition-all duration-500 ease-out"
-            style={{ width: `${(currentStep / STEPS.length) * 100}%` }}
+            style={{ width: `${(currentStep / total) * 100}%` }}
           />
         </div>
       </div>
@@ -36,10 +42,10 @@ export default function StepProgress({ currentStep }: StepProgressProps) {
           {/* Progress Line */}
           <div
             className="absolute top-4 left-0 h-0.5 bg-gradient-to-r from-primary to-accent transition-all duration-500 ease-out"
-            style={{ width: `${((currentStep - 1) / (STEPS.length - 1)) * 100}%` }}
+            style={{ width: `${((currentStep - 1) / (total - 1)) * 100}%` }}
           />
 
-          {STEPS.map((step) => (
+          {steps.map((step) => (
             <div
               key={step.id}
               className="flex flex-col items-center relative z-10"

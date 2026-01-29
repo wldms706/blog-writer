@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import StepProgress from '@/components/StepProgress';
+import StepContentType from '@/components/steps/StepContentType';
 import StepBusiness from '@/components/steps/StepBusiness';
 import StepKeyword from '@/components/steps/StepKeyword';
 import StepTopic from '@/components/steps/StepTopic';
@@ -10,9 +11,18 @@ import StepReader from '@/components/steps/StepReader';
 import StepRules from '@/components/steps/StepRules';
 import StepTitleSelect from '@/components/steps/StepTitleSelect';
 import StepGenerate from '@/components/steps/StepGenerate';
-import { FormData } from '@/types';
+import StepBrandingType from '@/components/steps/StepBrandingType';
+import StepBrandingInfo from '@/components/steps/StepBrandingInfo';
+import { FormData, ContentType, BrandingType, BrandingInfo } from '@/types';
+
+const initialBrandingInfo: BrandingInfo = {
+  intro: { experience: '', specialty: '', startReason: '', customerMind: '' },
+  philosophy: { coreValue: '', difference: '', whyPhilosophy: '', message: '' },
+  story: { location: '', startTime: '', spaceFeature: '', atmosphere: '' },
+};
 
 const initialFormData: FormData = {
+  contentType: 'seo',
   businessCategory: null,
   keyword: '',
   topic: null,
@@ -21,35 +31,76 @@ const initialFormData: FormData = {
   rulesConfirmed: false,
   selectedTitle: '',
   additionalContext: '',
+  brandingType: null,
+  brandingInfo: initialBrandingInfo,
 };
+
+// SEO: 글유형 → 업종 → 키워드 → 주제 → 목적 → 독자상태 → 규칙 → 제목 → 생성
+// Branding: 글유형 → 업종 → 브랜딩종류 → 키워드 → 추가정보 → 제목 → 생성
+
+type StepId =
+  | 'contentType'
+  | 'business'
+  | 'keyword'
+  | 'topic'
+  | 'purpose'
+  | 'reader'
+  | 'rules'
+  | 'title'
+  | 'generate'
+  | 'brandingType'
+  | 'brandingInfo';
 
 export default function Home() {
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState<FormData>(initialFormData);
 
-  const canProceed = () => {
-    switch (currentStep) {
-      case 1:
+  // 현재 콘텐츠 타입에 따른 스텝 배열
+  const steps: StepId[] = useMemo(() => {
+    if (formData.contentType === 'seo') {
+      return ['contentType', 'business', 'keyword', 'topic', 'purpose', 'reader', 'rules', 'title', 'generate'];
+    } else {
+      return ['contentType', 'business', 'brandingType', 'keyword', 'brandingInfo', 'title', 'generate'];
+    }
+  }, [formData.contentType]);
+
+  const totalSteps = steps.length;
+  const currentStepId = steps[currentStep - 1];
+  const isGenerateStep = currentStepId === 'generate';
+
+  const canProceed = useCallback(() => {
+    switch (currentStepId) {
+      case 'contentType':
+        return true; // Always has a default value
+      case 'business':
         return formData.businessCategory !== null;
-      case 2:
+      case 'keyword':
         return formData.keyword.trim().length > 0;
-      case 3:
+      case 'topic':
         return formData.topic !== null;
-      case 4:
+      case 'purpose':
         return formData.purpose !== null;
-      case 5:
+      case 'reader':
         return formData.readerState !== null;
-      case 6:
+      case 'rules':
         return formData.rulesConfirmed;
-      case 7:
+      case 'title':
         return formData.selectedTitle.trim().length > 0;
+      case 'brandingType':
+        return formData.brandingType !== null;
+      case 'brandingInfo': {
+        if (!formData.brandingType) return false;
+        const info = formData.brandingInfo[formData.brandingType];
+        // 해당 타입의 모든 필드 중 하나 이상 입력되었는지 확인
+        return Object.values(info).some((v) => v.trim().length > 0);
+      }
       default:
         return false;
     }
-  };
+  }, [currentStepId, formData]);
 
   const handleNext = () => {
-    if (canProceed() && currentStep < 8) {
+    if (canProceed() && currentStep < totalSteps) {
       setCurrentStep(currentStep + 1);
     }
   };
@@ -65,13 +116,28 @@ export default function Home() {
     setCurrentStep(1);
   };
 
+  const handleContentTypeChange = (type: ContentType) => {
+    // 콘텐츠 타입 변경 시 관련 필드 리셋
+    setFormData({
+      ...initialFormData,
+      contentType: type,
+    });
+  };
+
   const handleRulesConfirm = useCallback((confirmed: boolean) => {
     setFormData((prev) => ({ ...prev, rulesConfirmed: confirmed }));
   }, []);
 
   const renderStep = () => {
-    switch (currentStep) {
-      case 1:
+    switch (currentStepId) {
+      case 'contentType':
+        return (
+          <StepContentType
+            selected={formData.contentType}
+            onSelect={handleContentTypeChange}
+          />
+        );
+      case 'business':
         return (
           <StepBusiness
             selected={formData.businessCategory}
@@ -80,7 +146,7 @@ export default function Home() {
             }
           />
         );
-      case 2:
+      case 'keyword':
         return (
           <StepKeyword
             value={formData.keyword}
@@ -88,28 +154,28 @@ export default function Home() {
             businessCategory={formData.businessCategory}
           />
         );
-      case 3:
+      case 'topic':
         return (
           <StepTopic
             selected={formData.topic}
             onSelect={(id) => setFormData({ ...formData, topic: id })}
           />
         );
-      case 4:
+      case 'purpose':
         return (
           <StepPurpose
             selected={formData.purpose}
             onSelect={(id) => setFormData({ ...formData, purpose: id })}
           />
         );
-      case 5:
+      case 'reader':
         return (
           <StepReader
             selected={formData.readerState}
             onSelect={(id) => setFormData({ ...formData, readerState: id })}
           />
         );
-      case 6:
+      case 'rules':
         return (
           <StepRules
             businessCategory={formData.businessCategory}
@@ -117,37 +183,67 @@ export default function Home() {
             onConfirm={handleRulesConfirm}
           />
         );
-      case 7:
+      case 'title':
         return (
           <StepTitleSelect
             value={formData.selectedTitle}
             onChange={(value) => setFormData({ ...formData, selectedTitle: value })}
             keyword={formData.keyword}
             businessCategory={formData.businessCategory || ''}
-            topic={formData.topic || ''}
-            purpose={formData.purpose || ''}
+            topic={formData.contentType === 'seo' ? (formData.topic || '') : formData.brandingType || ''}
+            purpose={formData.contentType === 'seo' ? (formData.purpose || '') : 'branding'}
             readerState={formData.readerState || ''}
+            contentType={formData.contentType}
+            brandingType={formData.brandingType}
+            brandingInfo={formData.brandingInfo}
           />
         );
-      case 8:
+      case 'generate':
         return <StepGenerate onReset={handleReset} formData={formData} />;
+      case 'brandingType':
+        return (
+          <StepBrandingType
+            selected={formData.brandingType}
+            onSelect={(type: BrandingType) => setFormData({ ...formData, brandingType: type })}
+          />
+        );
+      case 'brandingInfo':
+        return (
+          <StepBrandingInfo
+            value={formData.brandingInfo}
+            onChange={(value) => setFormData({ ...formData, brandingInfo: value })}
+            brandingType={formData.brandingType}
+          />
+        );
       default:
         return null;
     }
+  };
+
+  // 다음 버튼 텍스트
+  const getNextButtonText = () => {
+    if (currentStep === totalSteps - 1) {
+      return '글 생성하기';
+    }
+    return '다음';
   };
 
   return (
     <div>
       {/* Progress */}
       <div className="mb-6">
-        <StepProgress currentStep={currentStep} />
+        <StepProgress
+          currentStep={currentStep}
+          totalSteps={totalSteps}
+          contentType={formData.contentType}
+        />
       </div>
 
       {/* Step Content */}
       <div className="min-h-[400px]">{renderStep()}</div>
 
       {/* Bottom Navigation */}
-      {currentStep < 8 && (
+      {!isGenerateStep && (
         <div className="mt-6 flex items-center justify-between border-t border-slate-100 pt-4">
           <button
             onClick={handleBack}
@@ -177,7 +273,7 @@ export default function Home() {
           </button>
 
           <div className="text-xs text-slate-400">
-            {currentStep} / 8 단계
+            {currentStep} / {totalSteps} 단계
           </div>
 
           <button
@@ -191,7 +287,7 @@ export default function Home() {
               }
             `}
           >
-            {currentStep === 7 ? '글 생성하기' : '다음'}
+            {getNextButtonText()}
             <svg
               className="w-4 h-4"
               fill="none"

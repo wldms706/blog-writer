@@ -60,6 +60,14 @@ export default function StepGenerate({ onReset, formData }: StepGenerateProps) {
   const purpose = PURPOSES.find((p) => p.id === formData.purpose);
   const reader = READER_STATES.find((r) => r.id === formData.readerState);
 
+  const BRANDING_TYPE_NAMES: Record<string, string> = {
+    intro: '자기소개',
+    philosophy: '철학/신념',
+    story: '샵 스토리',
+  };
+
+  const isBranding = formData.contentType === 'branding';
+
   // Gemini API를 통한 글 생성
   useEffect(() => {
     let cancelled = false;
@@ -89,6 +97,9 @@ export default function StepGenerate({ onReset, formData }: StepGenerateProps) {
             purpose: purpose?.name || formData.purpose,
             readerState: reader?.name || formData.readerState,
             selectedTitle: formData.selectedTitle,
+            contentType: formData.contentType,
+            brandingType: formData.brandingType,
+            brandingInfo: formData.brandingInfo,
           }),
         });
 
@@ -129,8 +140,8 @@ export default function StepGenerate({ onReset, formData }: StepGenerateProps) {
           saveHistory({
             keyword: formData.keyword || '',
             businessCategory: formData.businessCategory || '',
-            topic: formData.topic || '',
-            purpose: formData.purpose || '',
+            topic: formData.contentType === 'branding' ? (formData.brandingType || '') : (formData.topic || ''),
+            purpose: formData.contentType === 'branding' ? 'branding' : (formData.purpose || ''),
             content: data.content,
           }, user.id);
         }
@@ -148,7 +159,7 @@ export default function StepGenerate({ onReset, formData }: StepGenerateProps) {
       cancelled = true;
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [formData.keyword, formData.businessCategory, formData.topic, formData.purpose, formData.readerState, retryCount]);
+  }, [formData.keyword, formData.businessCategory, formData.topic, formData.purpose, formData.readerState, formData.contentType, formData.brandingType, retryCount]);
 
   const handleCopy = async () => {
     await navigator.clipboard.writeText(content);
@@ -243,18 +254,29 @@ export default function StepGenerate({ onReset, formData }: StepGenerateProps) {
         {/* 설정 요약 - 간결하게 */}
         <div className="card p-4">
           <div className="flex flex-wrap gap-2">
+            <span className="px-3 py-1.5 rounded-full bg-purple-100 text-purple-700 text-sm font-medium">
+              {isBranding ? '브랜딩' : 'SEO'}
+            </span>
             <span className="px-3 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-medium">
               {business?.icon} {business?.name}
             </span>
             <span className="px-3 py-1.5 rounded-full bg-accent/10 text-accent-dark text-sm font-medium">
               {formData.keyword}
             </span>
-            <span className="px-3 py-1.5 rounded-full bg-background-subtle text-text-secondary text-sm">
-              {topic?.name}
-            </span>
-            <span className="px-3 py-1.5 rounded-full bg-background-subtle text-text-secondary text-sm">
-              {purpose?.name}
-            </span>
+            {isBranding ? (
+              <span className="px-3 py-1.5 rounded-full bg-background-subtle text-text-secondary text-sm">
+                {formData.brandingType ? BRANDING_TYPE_NAMES[formData.brandingType] : ''}
+              </span>
+            ) : (
+              <>
+                <span className="px-3 py-1.5 rounded-full bg-background-subtle text-text-secondary text-sm">
+                  {topic?.name}
+                </span>
+                <span className="px-3 py-1.5 rounded-full bg-background-subtle text-text-secondary text-sm">
+                  {purpose?.name}
+                </span>
+              </>
+            )}
           </div>
         </div>
 
