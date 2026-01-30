@@ -63,9 +63,11 @@ export default function SelectionCard({
 
       {/* Badge */}
       {badge && (
-        <span className={`absolute left-4 px-2 py-0.5 text-xs font-medium rounded-full bg-warning/20 text-warning ${compact ? 'top-3' : 'top-4'}`}>
-          {badge}
-        </span>
+        <div className="mb-2">
+          <span className="px-2 py-0.5 text-xs font-medium rounded-full bg-warning/20 text-warning">
+            {badge}
+          </span>
+        </div>
       )}
 
       <div className={`flex items-start pr-6 ${compact ? 'gap-2' : 'gap-4 pr-8'}`}>
