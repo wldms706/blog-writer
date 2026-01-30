@@ -141,30 +141,30 @@ export default function SettingsPage() {
         <div className="rounded-xl border border-blue-100 bg-white p-4">
           <label className="mb-2 block text-sm font-medium text-slate-900">샵 위치</label>
           <p className="mb-3 text-xs text-slate-500">키워드 추천에 사용됩니다 (예: 서울시 강남구 신사동)</p>
-          <div className="grid grid-cols-3 gap-2">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
             <input
               type="text"
               value={profile.locationCity}
               onChange={(e) => setProfile({ ...profile, locationCity: e.target.value })}
               onBlur={() => handleSaveProfile({ locationCity: profile.locationCity })}
-              placeholder="시/도"
-              className="rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-blue-500"
+              placeholder="시/도 (예: 서울시)"
+              className="rounded-lg border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-blue-500"
             />
             <input
               type="text"
               value={profile.locationDistrict}
               onChange={(e) => setProfile({ ...profile, locationDistrict: e.target.value })}
               onBlur={() => handleSaveProfile({ locationDistrict: profile.locationDistrict })}
-              placeholder="구"
-              className="rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-blue-500"
+              placeholder="구 (예: 강남구)"
+              className="rounded-lg border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-blue-500"
             />
             <input
               type="text"
               value={profile.locationNeighborhood}
               onChange={(e) => setProfile({ ...profile, locationNeighborhood: e.target.value })}
               onBlur={() => handleSaveProfile({ locationNeighborhood: profile.locationNeighborhood })}
-              placeholder="동"
-              className="rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-blue-500"
+              placeholder="동 (선택)"
+              className="rounded-lg border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-blue-500"
             />
           </div>
           {profile.locationCity && profile.locationNeighborhood && (
@@ -253,7 +253,7 @@ export default function SettingsPage() {
             {/* 준최 하위 그룹 (1~4) */}
             <div className="mb-2">
               <p className="mb-1 text-[10px] text-yellow-600 font-medium">준최적화 1~4 (동+세부 조합)</p>
-              <div className="grid grid-cols-4 gap-1.5">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
                 {BLOG_INDEX_OPTIONS.filter(o => o.group === 'sub-low').map((option) => (
                   <button
                     key={option.value}

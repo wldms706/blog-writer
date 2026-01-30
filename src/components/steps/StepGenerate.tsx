@@ -315,8 +315,8 @@ export default function StepGenerate({ onReset, formData }: StepGenerateProps) {
             </button>
           </div>
 
-          <div className="p-6 rounded-xl bg-background-subtle border border-border-light">
-            <div className="whitespace-pre-wrap text-text-primary leading-relaxed text-[15px]">
+          <div className="p-4 sm:p-6 rounded-xl bg-background-subtle border border-border-light">
+            <div className="whitespace-pre-wrap text-text-primary leading-relaxed text-sm sm:text-[15px]">
               {highlightKeyword(content, formData.keyword)}
             </div>
           </div>

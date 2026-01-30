@@ -248,7 +248,7 @@ export default function Home() {
           <button
             onClick={handleBack}
             disabled={currentStep === 1}
-            className={`flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-medium transition-all
+            className={`flex items-center gap-1 sm:gap-2 rounded-xl px-3 sm:px-5 py-2.5 text-sm font-medium transition-all
               ${
                 currentStep === 1
                   ? 'text-slate-300 cursor-not-allowed'
@@ -269,17 +269,17 @@ export default function Home() {
                 d="M15 19l-7-7 7-7"
               />
             </svg>
-            이전
+            <span className="hidden sm:inline">이전</span>
           </button>
 
           <div className="text-xs text-slate-400">
-            {currentStep} / {totalSteps} 단계
+            {currentStep} / {totalSteps}
           </div>
 
           <button
             onClick={handleNext}
             disabled={!canProceed()}
-            className={`flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-medium transition-all
+            className={`flex items-center gap-1 sm:gap-2 rounded-xl px-3 sm:px-5 py-2.5 text-sm font-medium transition-all
               ${
                 canProceed()
                   ? 'bg-blue-600 text-white hover:bg-blue-700'
