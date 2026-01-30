@@ -168,40 +168,66 @@ export async function getProfile(userId: string): Promise<UserProfile> {
   };
 }
 
-export async function saveProfile(userId: string, profile: Partial<UserProfile>) {
+export async function saveProfile(userId: string, profile: Partial<UserProfile>): Promise<boolean> {
   const supabase = createClient();
 
   // 먼저 기존 프로필 조회
-  const { data: existing } = await supabase
+  const { data: existing, error: selectError } = await supabase
     .from('profiles')
     .select('*')
     .eq('id', userId)
     .single();
 
-  const upsertData: Record<string, unknown> = {
-    id: userId,
-    // 기존 값 유지
-    location_city: existing?.location_city || '',
-    location_district: existing?.location_district || '',
-    location_neighborhood: existing?.location_neighborhood || '',
-    blog_url: existing?.blog_url || '',
-    blog_index_level: existing?.blog_index_level || null,
-    blog_index_checked_at: existing?.blog_index_checked_at || null,
-  };
+  // 프로필이 없으면 새로 생성
+  if (selectError || !existing) {
+    console.log('Profile not found, creating new profile for user:', userId);
 
-  // 새 값으로 업데이트
-  if (profile.locationCity !== undefined) upsertData.location_city = profile.locationCity;
-  if (profile.locationDistrict !== undefined) upsertData.location_district = profile.locationDistrict;
-  if (profile.locationNeighborhood !== undefined) upsertData.location_neighborhood = profile.locationNeighborhood;
-  if (profile.blogUrl !== undefined) upsertData.blog_url = profile.blogUrl;
-  if (profile.blogIndexLevel !== undefined) upsertData.blog_index_level = profile.blogIndexLevel;
-  if (profile.blogIndexCheckedAt !== undefined) upsertData.blog_index_checked_at = profile.blogIndexCheckedAt;
+    // 사용자 정보 가져오기
+    const { data: { user } } = await supabase.auth.getUser();
 
-  const { error } = await supabase
-    .from('profiles')
-    .upsert(upsertData, { onConflict: 'id' });
+    const insertData: Record<string, unknown> = {
+      id: userId,
+      email: user?.email || '',
+      plan: 'free',
+      daily_usage: 0,
+    };
 
-  if (error) {
-    console.error('Save profile error:', error);
+    // 프로필 데이터 추가
+    if (profile.locationCity !== undefined) insertData.location_city = profile.locationCity;
+    if (profile.locationDistrict !== undefined) insertData.location_district = profile.locationDistrict;
+    if (profile.locationNeighborhood !== undefined) insertData.location_neighborhood = profile.locationNeighborhood;
+    if (profile.blogUrl !== undefined) insertData.blog_url = profile.blogUrl;
+    if (profile.blogIndexLevel !== undefined) insertData.blog_index_level = profile.blogIndexLevel;
+    if (profile.blogIndexCheckedAt !== undefined) insertData.blog_index_checked_at = profile.blogIndexCheckedAt;
+
+    const { error: insertError } = await supabase
+      .from('profiles')
+      .insert(insertData);
+
+    if (insertError) {
+      console.error('Profile insert error:', insertError);
+      return false;
+    }
+    return true;
   }
+
+  // 기존 프로필 업데이트
+  const updateData: Record<string, unknown> = {};
+  if (profile.locationCity !== undefined) updateData.location_city = profile.locationCity;
+  if (profile.locationDistrict !== undefined) updateData.location_district = profile.locationDistrict;
+  if (profile.locationNeighborhood !== undefined) updateData.location_neighborhood = profile.locationNeighborhood;
+  if (profile.blogUrl !== undefined) updateData.blog_url = profile.blogUrl;
+  if (profile.blogIndexLevel !== undefined) updateData.blog_index_level = profile.blogIndexLevel;
+  if (profile.blogIndexCheckedAt !== undefined) updateData.blog_index_checked_at = profile.blogIndexCheckedAt;
+
+  const { error: updateError } = await supabase
+    .from('profiles')
+    .update(updateData)
+    .eq('id', userId);
+
+  if (updateError) {
+    console.error('Profile update error:', updateError);
+    return false;
+  }
+  return true;
 }

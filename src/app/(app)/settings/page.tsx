@@ -59,8 +59,12 @@ export default function SettingsPage() {
   const handleSaveProfile = async (updated: Partial<UserProfile>) => {
     setProfile((prev) => ({ ...prev, ...updated }));
     if (userId) {
-      await saveProfile(userId, updated);
-      showToast('저장되었습니다');
+      const success = await saveProfile(userId, updated);
+      if (success) {
+        showToast('저장되었습니다');
+      } else {
+        showToast('저장에 실패했습니다. 다시 시도해주세요.');
+      }
     }
   };
 

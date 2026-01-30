@@ -58,16 +58,35 @@ export async function POST(request: NextRequest) {
     }
 
     // 사용자 프로필에서 지역 정보와 블로그 지수 가져오기
-    const { data: profile } = await supabase
+    const { data: profile, error: profileError } = await supabase
       .from('profiles')
       .select('location_city, location_district, location_neighborhood, blog_index_level')
       .eq('id', user.id)
       .single();
 
-    const locationCity = profile?.location_city || '';
-    const locationDistrict = profile?.location_district || '';
-    const locationNeighborhood = profile?.location_neighborhood || '';
-    const blogIndexLevel = profile?.blog_index_level || 'medium';
+    // 프로필이 없으면 (신규 사용자) 생성 시도
+    if (profileError || !profile) {
+      console.log('Profile not found, attempting to create for user:', user.id);
+      const { error: insertError } = await supabase
+        .from('profiles')
+        .insert({ id: user.id, email: user.email });
+
+      if (insertError) {
+        console.error('Profile insert error:', insertError);
+      }
+
+      // 프로필 생성 후에도 설정 필요 안내
+      return NextResponse.json({
+        keywords: [],
+        message: '설정에서 지역 정보와 블로그 지수를 입력해주세요.',
+        needsLocation: true,
+      });
+    }
+
+    const locationCity = profile.location_city || '';
+    const locationDistrict = profile.location_district || '';
+    const locationNeighborhood = profile.location_neighborhood || '';
+    const blogIndexLevel = profile.blog_index_level || 'medium';
 
     // 지역 정보가 없으면 기본 메시지
     if (!locationCity && !locationDistrict && !locationNeighborhood) {
@@ -79,7 +98,7 @@ export async function POST(request: NextRequest) {
     }
 
     // 블로그 지수가 없으면
-    if (!profile?.blog_index_level) {
+    if (!profile.blog_index_level) {
       return NextResponse.json({
         keywords: [],
         message: '설정에서 블로그 지수를 선택해주세요.',
