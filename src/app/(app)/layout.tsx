@@ -12,8 +12,10 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
       {/* Topbar */}
       <header className="sticky top-0 z-50 border-b bg-white/80 backdrop-blur">
         <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4">
-          <Link href="/" className="flex items-center gap-2">
-            <div className="h-7 w-7 rounded-lg bg-blue-600" />
+          <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
+            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-blue-600">
+              <span className="text-sm font-bold text-white">찐</span>
+            </div>
             <div className="leading-tight">
               <div className="text-sm font-semibold">블로그 라이터</div>
               <div className="text-[11px] text-slate-500">규칙은 시스템이 책임집니다</div>

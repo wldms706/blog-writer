@@ -38,6 +38,7 @@
 
 ### 2. Supabase 인증 시스템 ✅
 - 이메일/비밀번호 회원가입 및 로그인
+- **Google 소셜 로그인** ✅ (Supabase OAuth Provider)
 - 미들웨어 기반 인증 보호
 - 로그아웃 기능
 - 세션 관리
@@ -170,10 +171,10 @@
 
 ## 진행 예정 (Stage 2)
 
-### 1. 소셜 로그인 🔜
+### 1. 소셜 로그인
+- [x] Google 로그인 ✅ (완료)
 - [ ] 카카오 로그인
 - [ ] 네이버 로그인
-- [ ] Supabase OAuth Provider 설정
 
 ### 2. 결제 시스템 🔜
 - [ ] 토스페이먼츠 or Stripe 연동
@@ -371,7 +372,8 @@ src/
 ---
 
 ## 배포 URL
-- Production: https://blog-writer-ebon.vercel.app
+- Production: https://blogwriter.co.kr (커스텀 도메인)
+- Vercel: https://blog-writer-ebon.vercel.app
 - GitHub: https://github.com/wldms706/blog-writer
 
 ---
@@ -380,6 +382,7 @@ src/
 
 | 날짜 | 내용 |
 |------|------|
+| 2026-01-30 | **Google 소셜 로그인** - Google OAuth 연동, 커스텀 도메인 blogwriter.co.kr 설정 |
 | 2026-01-29 | **속눈썹 업종 추가** - 속눈썹 연장, 펌, 리프팅 업종 지원 |
 | 2026-01-29 | **브랜딩 글 구체적 질문** - 브랜딩 종류별 4개 질문으로 정보 수집 |
 | 2026-01-29 | **브랜딩 글 작성 기능** - SEO/브랜딩 글 유형 선택, 자기소개/철학/샵스토리 지원 |
