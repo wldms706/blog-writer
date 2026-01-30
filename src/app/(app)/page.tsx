@@ -159,6 +159,7 @@ export default function Home() {
           <StepTopic
             selected={formData.topic}
             onSelect={(id) => setFormData({ ...formData, topic: id })}
+            businessCategory={formData.businessCategory}
           />
         );
       case 'purpose':

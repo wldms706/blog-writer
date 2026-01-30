@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import LogoutButton from "./LogoutButton";
+import HeaderLogo from "./HeaderLogo";
 
 export default async function AppLayout({ children }: { children: ReactNode }) {
   const supabase = await createClient();
@@ -12,15 +13,7 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
       {/* Topbar */}
       <header className="sticky top-0 z-50 border-b bg-white/80 backdrop-blur">
         <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4">
-          <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-            <div className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-lg bg-blue-600">
-              <span className="text-sm font-bold text-white">찐</span>
-            </div>
-            <div className="leading-tight">
-              <div className="text-sm font-semibold whitespace-nowrap">블로그 라이터</div>
-              <div className="hidden sm:block text-[11px] text-slate-500">규칙은 시스템이 책임집니다</div>
-            </div>
-          </Link>
+          <HeaderLogo />
 
           <nav className="flex items-center gap-1 sm:gap-2">
             <Link href="/history" className="rounded-lg px-2 sm:px-3 py-1.5 text-xs sm:text-sm text-slate-600 hover:bg-slate-100">

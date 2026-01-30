@@ -93,7 +93,8 @@ export const BUSINESS_CATEGORIES: BusinessCategory[] = [
   },
 ];
 
-export const TOPIC_CATEGORIES: TopicCategory[] = [
+// 공통 주제 (모든 업종)
+export const COMMON_TOPICS: TopicCategory[] = [
   {
     id: 'philosophy',
     name: '운영 철학',
@@ -131,6 +132,90 @@ export const TOPIC_CATEGORIES: TopicCategory[] = [
     icon: '☕',
   },
 ];
+
+// 업종별 세부 주제
+export const BUSINESS_SPECIFIC_TOPICS: Record<string, TopicCategory[]> = {
+  // 피부관리
+  'skin': [
+    { id: 'acne', name: '여드름/트러블', description: '여드름, 피부 트러블 관리 정보', icon: '🔴' },
+    { id: 'pigmentation', name: '색소침착/기미', description: '기미, 잡티, 색소침착 케어', icon: '🟤' },
+    { id: 'wrinkle', name: '주름/노화', description: '주름 개선, 안티에이징 관리', icon: '✨' },
+    { id: 'pore', name: '모공/피지', description: '모공 축소, 피지 조절 관리', icon: '🔘' },
+    { id: 'hydration', name: '보습/건조', description: '건조함 해결, 수분 공급', icon: '💧' },
+    { id: 'sensitive', name: '민감성 피부', description: '예민한 피부 진정 케어', icon: '🌸' },
+    { id: 'lifting', name: '탄력/리프팅', description: '처진 피부, 탄력 회복', icon: '⬆️' },
+  ],
+  // 반영구
+  'semi-permanent': [
+    { id: 'hairstroke', name: '헤어스트로크', description: '최상위 기법, 자연스럽고 오래 유지', icon: '⭐' },
+    { id: 'machine-feathering', name: '머신페더링', description: '최상위 기법, 덜 아프고 자연스러운 결', icon: '⭐' },
+    { id: 'embo', name: '엠보', description: '수작업 결 표현, 클래식 기법', icon: '🖌️' },
+    { id: 'machine-shading', name: '머신쉐딩', description: '그라데이션 음영 표현', icon: '🎨' },
+    { id: 'suji', name: '수지', description: '수지 기법, 자연스러운 눈썹', icon: '🪡' },
+    { id: 'combo', name: '콤보/복합', description: '엠보+쉐딩 등 복합 기법', icon: '🔀' },
+    { id: 'eyeliner', name: '아이라인', description: '아이라인 반영구 시술', icon: '👁️' },
+    { id: 'hairline', name: '헤어라인', description: '헤어라인 교정 시술', icon: '💇' },
+    { id: 'lips', name: '입술', description: '입술 반영구 시술 정보', icon: '💋' },
+    { id: 'retouch', name: '리터치/수정', description: '리터치 주기, 수정 관리', icon: '🔄' },
+  ],
+  // 두피/탈모
+  'scalp': [
+    { id: 'hair-loss-type', name: '탈모 유형', description: '탈모 종류별 원인과 관리', icon: '📊' },
+    { id: 'scalp-type', name: '두피 타입', description: '지성/건성/민감성 두피 케어', icon: '🧴' },
+    { id: 'prevention', name: '탈모 예방', description: '탈모 예방 습관과 관리', icon: '🛡️' },
+    { id: 'scaling', name: '두피 스케일링', description: '두피 각질, 노폐물 제거', icon: '🧹' },
+    { id: 'nutrition', name: '모발 영양', description: '모발에 좋은 영양 관리', icon: '🥗' },
+  ],
+  // 네일
+  'nail': [
+    { id: 'gel', name: '젤네일', description: '젤네일 종류와 관리법', icon: '💅' },
+    { id: 'care', name: '네일 케어', description: '손톱 건강, 기본 케어', icon: '🤲' },
+    { id: 'art', name: '네일 아트', description: '아트 디자인, 트렌드', icon: '🎨' },
+    { id: 'pedicure', name: '페디큐어', description: '발톱 관리, 페디큐어', icon: '🦶' },
+    { id: 'repair', name: '손상 복구', description: '손상된 손톱 회복 케어', icon: '🔧' },
+  ],
+  // 헤어
+  'hair': [
+    { id: 'cut', name: '커트/스타일', description: '헤어 커트, 스타일링', icon: '✂️' },
+    { id: 'perm', name: '펌', description: '펌 종류와 관리법', icon: '🌀' },
+    { id: 'color', name: '염색', description: '염색 컬러, 유지 관리', icon: '🎨' },
+    { id: 'clinic', name: '헤어 클리닉', description: '손상모 복구, 트리트먼트', icon: '💊' },
+    { id: 'styling', name: '셀프 스타일링', description: '집에서 하는 스타일링 팁', icon: '🪮' },
+  ],
+  // 메이크업
+  'makeup': [
+    { id: 'wedding', name: '웨딩', description: '웨딩 메이크업 정보', icon: '💍' },
+    { id: 'photo', name: '촬영/화보', description: '촬영용 메이크업', icon: '📸' },
+    { id: 'daily', name: '일상 메이크업', description: '데일리 메이크업 팁', icon: '🌞' },
+    { id: 'self', name: '셀프 메이크업', description: '셀프 메이크업 노하우', icon: '🪞' },
+    { id: 'correction', name: '커버/보정', description: '피부 결점 커버 테크닉', icon: '✨' },
+  ],
+  // 왁싱
+  'waxing': [
+    { id: 'face', name: '페이스 왁싱', description: '얼굴 왁싱 관리', icon: '😊' },
+    { id: 'body', name: '바디 왁싱', description: '팔, 다리, 겨드랑이 등', icon: '💪' },
+    { id: 'brazilian', name: '브라질리언', description: '브라질리언 왁싱 정보', icon: '🌴' },
+    { id: 'aftercare', name: '애프터케어', description: '왁싱 후 피부 관리', icon: '🧴' },
+  ],
+  // 속눈썹
+  'eyelash': [
+    { id: 'extension', name: '속눈썹 연장', description: '연장 종류와 관리', icon: '👁️' },
+    { id: 'perm', name: '속눈썹 펌', description: '펌 시술과 유지 관리', icon: '🌀' },
+    { id: 'lifting', name: '래쉬리프팅', description: '리프팅 시술 정보', icon: '⬆️' },
+    { id: 'care', name: '속눈썹 케어', description: '자연 속눈썹 관리법', icon: '🌱' },
+  ],
+};
+
+// 업종에 따른 주제 목록 반환 (세부 주제 + 공통 주제)
+export function getTopicsForBusiness(businessId: string | null): TopicCategory[] {
+  if (!businessId) return COMMON_TOPICS;
+
+  const specificTopics = BUSINESS_SPECIFIC_TOPICS[businessId] || [];
+  return [...specificTopics, ...COMMON_TOPICS];
+}
+
+// 하위 호환성을 위해 유지
+export const TOPIC_CATEGORIES: TopicCategory[] = COMMON_TOPICS;
 
 export const PURPOSES: Purpose[] = [
   {

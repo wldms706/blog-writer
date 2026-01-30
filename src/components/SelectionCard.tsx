@@ -8,6 +8,7 @@ interface SelectionCardProps {
   selected: boolean;
   onClick: () => void;
   badge?: string;
+  compact?: boolean;
 }
 
 export default function SelectionCard({
@@ -17,11 +18,13 @@ export default function SelectionCard({
   selected,
   onClick,
   badge,
+  compact = false,
 }: SelectionCardProps) {
   return (
     <button
       onClick={onClick}
-      className={`w-full text-left p-5 rounded-2xl border-2 transition-all duration-300 group relative overflow-hidden
+      className={`w-full text-left rounded-2xl border-2 transition-all duration-300 group relative overflow-hidden
+        ${compact ? 'p-3' : 'p-5'}
         ${
           selected
             ? 'border-primary bg-gradient-to-br from-primary/5 to-accent/5 shadow-lg'
@@ -31,7 +34,9 @@ export default function SelectionCard({
     >
       {/* Selection Indicator */}
       <div
-        className={`absolute top-4 right-4 w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all duration-300
+        className={`absolute right-3 flex items-center justify-center transition-all duration-300
+          ${compact ? 'top-3 w-4 h-4' : 'top-4 w-5 h-5'}
+          rounded-full border-2
           ${
             selected
               ? 'border-primary bg-primary'
@@ -41,7 +46,7 @@ export default function SelectionCard({
       >
         {selected && (
           <svg
-            className="w-3 h-3 text-white"
+            className={compact ? 'w-2.5 h-2.5 text-white' : 'w-3 h-3 text-white'}
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -58,26 +63,26 @@ export default function SelectionCard({
 
       {/* Badge */}
       {badge && (
-        <span className="absolute top-4 left-4 px-2 py-0.5 text-xs font-medium rounded-full bg-warning/20 text-warning">
+        <span className={`absolute left-4 px-2 py-0.5 text-xs font-medium rounded-full bg-warning/20 text-warning ${compact ? 'top-3' : 'top-4'}`}>
           {badge}
         </span>
       )}
 
-      <div className="flex items-start gap-4 pr-8">
+      <div className={`flex items-start pr-6 ${compact ? 'gap-2' : 'gap-4 pr-8'}`}>
         {icon && (
-          <span className="text-3xl flex-shrink-0 mt-0.5 group-hover:scale-110 transition-transform duration-300">
+          <span className={`flex-shrink-0 group-hover:scale-110 transition-transform duration-300 ${compact ? 'text-xl mt-0' : 'text-3xl mt-0.5'}`}>
             {icon}
           </span>
         )}
         <div className="flex-1 min-w-0">
           <h3
-            className={`text-lg font-semibold mb-1 transition-colors ${
+            className={`font-semibold transition-colors ${compact ? 'text-sm mb-0.5' : 'text-lg mb-1'} ${
               selected ? 'text-primary' : 'text-text-primary'
             }`}
           >
             {title}
           </h3>
-          <p className="text-sm text-text-secondary leading-relaxed">
+          <p className={`text-text-secondary leading-relaxed ${compact ? 'text-xs' : 'text-sm'}`}>
             {description}
           </p>
         </div>
