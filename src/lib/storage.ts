@@ -171,16 +171,37 @@ export async function getProfile(userId: string): Promise<UserProfile> {
 export async function saveProfile(userId: string, profile: Partial<UserProfile>) {
   const supabase = createClient();
 
-  const updateData: Record<string, unknown> = {};
-  if (profile.locationCity !== undefined) updateData.location_city = profile.locationCity;
-  if (profile.locationDistrict !== undefined) updateData.location_district = profile.locationDistrict;
-  if (profile.locationNeighborhood !== undefined) updateData.location_neighborhood = profile.locationNeighborhood;
-  if (profile.blogUrl !== undefined) updateData.blog_url = profile.blogUrl;
-  if (profile.blogIndexLevel !== undefined) updateData.blog_index_level = profile.blogIndexLevel;
-  if (profile.blogIndexCheckedAt !== undefined) updateData.blog_index_checked_at = profile.blogIndexCheckedAt;
-
-  await supabase
+  // 먼저 기존 프로필 조회
+  const { data: existing } = await supabase
     .from('profiles')
-    .update(updateData)
-    .eq('id', userId);
+    .select('*')
+    .eq('id', userId)
+    .single();
+
+  const upsertData: Record<string, unknown> = {
+    id: userId,
+    // 기존 값 유지
+    location_city: existing?.location_city || '',
+    location_district: existing?.location_district || '',
+    location_neighborhood: existing?.location_neighborhood || '',
+    blog_url: existing?.blog_url || '',
+    blog_index_level: existing?.blog_index_level || null,
+    blog_index_checked_at: existing?.blog_index_checked_at || null,
+  };
+
+  // 새 값으로 업데이트
+  if (profile.locationCity !== undefined) upsertData.location_city = profile.locationCity;
+  if (profile.locationDistrict !== undefined) upsertData.location_district = profile.locationDistrict;
+  if (profile.locationNeighborhood !== undefined) upsertData.location_neighborhood = profile.locationNeighborhood;
+  if (profile.blogUrl !== undefined) upsertData.blog_url = profile.blogUrl;
+  if (profile.blogIndexLevel !== undefined) upsertData.blog_index_level = profile.blogIndexLevel;
+  if (profile.blogIndexCheckedAt !== undefined) upsertData.blog_index_checked_at = profile.blogIndexCheckedAt;
+
+  const { error } = await supabase
+    .from('profiles')
+    .upsert(upsertData, { onConflict: 'id' });
+
+  if (error) {
+    console.error('Save profile error:', error);
+  }
 }
