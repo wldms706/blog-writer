@@ -1,12 +1,9 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
-
 export default function HeaderLogo() {
-  const router = useRouter();
-
   const handleClick = () => {
-    router.push('/');
+    // 전체 페이지 새로고침으로 폼 상태 초기화
+    window.location.href = '/';
   };
 
   return (
