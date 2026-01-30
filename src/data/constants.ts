@@ -14,8 +14,8 @@ export const STEPS: Step[] = [
 export const SEO_STEPS: Step[] = [
   { id: 1, title: '글 유형', subtitle: '어떤 글을 작성할까요?' },
   { id: 2, title: '업종', subtitle: '어떤 뷰티 업종인가요?' },
-  { id: 3, title: '키워드', subtitle: '검색 키워드를 입력해주세요' },
-  { id: 4, title: '주제', subtitle: '어떤 주제로 글을 쓸까요?' },
+  { id: 3, title: '주제', subtitle: '어떤 주제로 글을 쓸까요?' },
+  { id: 4, title: '키워드', subtitle: '검색 키워드를 입력해주세요' },
   { id: 5, title: '목적', subtitle: '이 글의 목적은 무엇인가요?' },
   { id: 6, title: '독자 상태', subtitle: '독자는 어떤 상태인가요?' },
   { id: 7, title: '규칙 확인', subtitle: '적용되는 규칙을 확인해주세요' },

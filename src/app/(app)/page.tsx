@@ -58,7 +58,7 @@ export default function Home() {
   // 현재 콘텐츠 타입에 따른 스텝 배열
   const steps: StepId[] = useMemo(() => {
     if (formData.contentType === 'seo') {
-      return ['contentType', 'business', 'keyword', 'topic', 'purpose', 'reader', 'rules', 'title', 'generate'];
+      return ['contentType', 'business', 'topic', 'keyword', 'purpose', 'reader', 'rules', 'title', 'generate'];
     } else {
       return ['contentType', 'business', 'brandingType', 'keyword', 'brandingInfo', 'title', 'generate'];
     }
