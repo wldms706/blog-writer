@@ -21,12 +21,6 @@ const BRANDING_TYPES = [
     name: '철학/신념',
     description: '왜 이 일을 하는지, 어떤 가치를 추구하는지',
   },
-  {
-    id: 'story' as BrandingType,
-    icon: '🏠',
-    name: '샵 스토리',
-    description: '샵의 역사, 공간, 분위기 소개',
-  },
 ];
 
 export default function StepBrandingType({ selected, onSelect }: StepBrandingTypeProps) {
@@ -41,7 +35,7 @@ export default function StepBrandingType({ selected, onSelect }: StepBrandingTyp
         </p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-3xl mx-auto">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-2xl mx-auto">
         {BRANDING_TYPES.map((type) => (
           <SelectionCard
             key={type.id}
@@ -64,7 +58,6 @@ export default function StepBrandingType({ selected, onSelect }: StepBrandingTyp
             <span>
               {selected === 'intro' && '원장님의 경력, 가치관, 인사말을 담은 글을 작성합니다'}
               {selected === 'philosophy' && '샵이 추구하는 가치와 철학을 담은 글을 작성합니다'}
-              {selected === 'story' && '샵의 시작, 공간, 분위기를 소개하는 글을 작성합니다'}
             </span>
           </div>
         </div>
