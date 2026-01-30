@@ -23,6 +23,37 @@ export default function StepKeyword({ value, onChange, businessCategory }: StepK
   const [blogIndexLevel, setBlogIndexLevel] = useState<string | null>(null);
   const [location, setLocation] = useState<string>('');
   const [showManualInput, setShowManualInput] = useState(false);
+  const [keywordWarning, setKeywordWarning] = useState<string | null>(null);
+
+  // 키워드 유효성 검사
+  const validateKeyword = (keyword: string): string | null => {
+    if (!keyword) return null;
+
+    // 공백 포함 체크
+    if (keyword.includes(' ')) {
+      return '키워드에 공백이 포함되어 있습니다. 네이버 검색 키워드는 붙여서 입력해주세요. (예: 천안눈썹문신)';
+    }
+
+    // 한글 자모 분리 체크 (ㄱ-ㅎ, ㅏ-ㅣ 단독 사용)
+    const incompleteHangul = /[ㄱ-ㅎㅏ-ㅣ]/;
+    if (incompleteHangul.test(keyword)) {
+      return '키워드에 오타가 있는 것 같습니다. 올바른 키워드인지 확인해주세요.';
+    }
+
+    // 특수문자 체크 (일부 허용: -, _)
+    const invalidChars = /[!@#$%^&*()+=\[\]{};':"\\|,.<>\/?]/;
+    if (invalidChars.test(keyword)) {
+      return '키워드에 특수문자가 포함되어 있습니다. 검색어로 사용하기 어려울 수 있습니다.';
+    }
+
+    return null;
+  };
+
+  const handleKeywordChange = (newValue: string) => {
+    onChange(newValue);
+    const warning = validateKeyword(newValue);
+    setKeywordWarning(warning);
+  };
 
   useEffect(() => {
     if (businessCategory) {
@@ -239,13 +270,22 @@ export default function StepKeyword({ value, onChange, businessCategory }: StepK
               <input
                 type="text"
                 value={value}
-                onChange={(e) => onChange(e.target.value)}
+                onChange={(e) => handleKeywordChange(e.target.value)}
                 placeholder="예: 천안눈썹문신, 강남피부관리"
-                className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-blue-500"
+                className={`w-full rounded-xl border px-4 py-3 text-sm outline-none focus:border-blue-500 ${
+                  keywordWarning ? 'border-amber-400 bg-amber-50' : 'border-slate-200'
+                }`}
               />
-              <p className="text-xs text-slate-400">
-                추천 키워드 대신 원하는 키워드를 직접 입력할 수 있습니다
-              </p>
+              {keywordWarning ? (
+                <div className="flex items-start gap-2 rounded-lg bg-amber-50 border border-amber-200 p-3">
+                  <span className="text-amber-500">⚠️</span>
+                  <p className="text-xs text-amber-700">{keywordWarning}</p>
+                </div>
+              ) : (
+                <p className="text-xs text-slate-400">
+                  추천 키워드 대신 원하는 키워드를 직접 입력할 수 있습니다
+                </p>
+              )}
             </div>
           )}
         </div>
@@ -253,10 +293,18 @@ export default function StepKeyword({ value, onChange, businessCategory }: StepK
         {/* 선택된 키워드 표시 */}
         {value && (
           <div className="text-center animate-fade-in">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-green-50 text-green-700 text-sm">
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-              </svg>
+            <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm ${
+              keywordWarning
+                ? 'bg-amber-50 text-amber-700 border border-amber-200'
+                : 'bg-green-50 text-green-700'
+            }`}>
+              {keywordWarning ? (
+                <span>⚠️</span>
+              ) : (
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+              )}
               <span>선택된 키워드: <strong>{value}</strong></span>
             </div>
           </div>
