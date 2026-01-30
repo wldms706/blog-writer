@@ -13,25 +13,25 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
       <header className="sticky top-0 z-50 border-b bg-white/80 backdrop-blur">
         <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4">
           <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-blue-600">
+            <div className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-lg bg-blue-600">
               <span className="text-sm font-bold text-white">찐</span>
             </div>
             <div className="leading-tight">
-              <div className="text-sm font-semibold">블로그 라이터</div>
-              <div className="text-[11px] text-slate-500">규칙은 시스템이 책임집니다</div>
+              <div className="text-sm font-semibold whitespace-nowrap">블로그 라이터</div>
+              <div className="hidden sm:block text-[11px] text-slate-500">규칙은 시스템이 책임집니다</div>
             </div>
           </Link>
 
-          <nav className="flex items-center gap-2">
-            <Link href="/history" className="rounded-lg px-3 py-1.5 text-sm text-slate-600 hover:bg-slate-100">
+          <nav className="flex items-center gap-1 sm:gap-2">
+            <Link href="/history" className="rounded-lg px-2 sm:px-3 py-1.5 text-xs sm:text-sm text-slate-600 hover:bg-slate-100">
               히스토리
             </Link>
-            <Link href="/settings" className="rounded-lg px-3 py-1.5 text-sm text-slate-600 hover:bg-slate-100">
+            <Link href="/settings" className="rounded-lg px-2 sm:px-3 py-1.5 text-xs sm:text-sm text-slate-600 hover:bg-slate-100">
               설정
             </Link>
-            <div className="h-8 w-px bg-slate-200" />
+            <div className="hidden sm:block h-8 w-px bg-slate-200" />
             {user && (
-              <span className="hidden text-xs text-slate-400 sm:block">{user.email}</span>
+              <span className="hidden text-xs text-slate-400 md:block">{user.email}</span>
             )}
             <LogoutButton />
           </nav>
@@ -39,9 +39,9 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
       </header>
 
       {/* Body */}
-      <div className="mx-auto grid max-w-6xl grid-cols-12 gap-4 px-4 py-6">
-        {/* Sidebar */}
-        <aside className="col-span-12 md:col-span-3">
+      <div className="mx-auto grid max-w-6xl grid-cols-12 gap-4 px-3 sm:px-4 py-4 sm:py-6">
+        {/* Sidebar - 모바일에서 숨김 */}
+        <aside className="hidden md:block md:col-span-3">
           <div className="sticky top-20 space-y-3">
             <div className="rounded-2xl border bg-white p-3">
               <div className="mb-2 text-xs font-medium text-slate-500">워크플로우</div>
@@ -64,11 +64,11 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
 
         {/* Main */}
         <main className="col-span-12 md:col-span-9">
-          <div className="rounded-2xl border bg-white p-5">
+          <div className="rounded-2xl border bg-white p-4 sm:p-5">
             {children}
           </div>
 
-          <div className="mt-4 text-[11px] text-slate-500">
+          <div className="mt-4 text-[11px] text-slate-500 text-center md:text-left">
             * 안내 문구는 중립 톤으로만 표시됩니다.
           </div>
         </main>

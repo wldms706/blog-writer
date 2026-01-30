@@ -1,6 +1,6 @@
 import { createClient as createServerSupabase } from '@/lib/supabase/server';
 
-const FREE_DAILY_LIMIT = 3;
+const FREE_DAILY_LIMIT = 999; // 임시로 제한 해제
 
 // 관리자 이메일 - 무제한 사용 가능
 const ADMIN_EMAILS = ['wldms706@naver.com'];

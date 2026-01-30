@@ -36,7 +36,7 @@ function getKeywordStrategy(blogIndexLevel: string): 'broad' | 'medium' | 'narro
 function getStrategyDescription(strategy: 'broad' | 'medium' | 'narrow' | 'niche'): string {
   switch (strategy) {
     case 'broad': return '시/구 단위의 넓은 지역 키워드로 경쟁 가능';
-    case 'medium': return '동 단위 키워드 추천';
+    case 'medium': return '동 + 시/구 단위 키워드 모두 경쟁 가능';
     case 'narrow': return '동 + 세부 키워드 조합 (예: 역삼동여자눈썹문신)';
     case 'niche': return '초세부 틈새 키워드 (예: 신사동망한눈썹문신)';
   }
@@ -110,22 +110,36 @@ export async function POST(request: NextRequest) {
     const strategy = getKeywordStrategy(blogIndexLevel);
     const strategyDesc = getStrategyDescription(strategy);
 
+    // 동 정보가 없을 때 구 내 실제 동네를 찾아달라는 안내
+    const neighborhoodGuide = locationNeighborhood
+      ? `사용자가 입력한 동: ${locationNeighborhood}`
+      : `동 정보가 없음. 반드시 ${locationDistrict}에 실제로 존재하는 동 이름을 사용하세요.`;
+
     // Gemini에게 키워드 추천 요청
     const prompt = `당신은 네이버 블로그 SEO 전문가입니다.
 
 사용자 정보:
 - 업종: ${businessCategory}
 - 업종 관련 키워드: ${businessKeywords.join(', ')}
-- 지역: ${locationCity} ${locationDistrict} ${locationNeighborhood}
+- 지역: ${locationCity} ${locationDistrict}
+- ${neighborhoodGuide}
 - 블로그 지수: ${blogIndexLevel} (블덱스 기준)
 
 현재 키워드 전략: ${strategyDesc}
 
 블로그 지수에 따른 키워드 전략:
-- 최적1~3: 시/구 단위의 넓은 지역 키워드로 경쟁 가능 (예: "${locationDistrict}피부관리", "${locationCity}눈썹문신")
-- 준최5~7: 동 단위 키워드 추천 (예: "${locationNeighborhood}피부관리", "${locationNeighborhood}눈썹문신")
-- 준최1~4: 동 + 세부 키워드 조합 (예: "${locationNeighborhood}여자눈썹문신", "${locationNeighborhood}자연눈썹", "${locationNeighborhood}남자눈썹문신")
-- 일반: 초세부 틈새 키워드 (예: "${locationNeighborhood}망한눈썹문신", "${locationNeighborhood}눈썹문신복구", "${locationNeighborhood}처진눈썹")
+- 최적1~3: 시/구 단위의 넓은 지역 키워드 (예: "${locationDistrict}피부관리", "${locationCity}눈썹문신")
+- 준최5~7: 동 단위 + 시/구 단위 섞어서 (예: "잠실동눈썹문신", "${locationDistrict}피부관리")
+- 준최1~4: 반드시 동 단위 + 세부 키워드만 (예: "잠실동여자눈썹문신", "방이동자연눈썹"). 시/구 단위 금지!
+- 일반: 초세부 틈새 키워드 (예: "잠실동망한눈썹문신", "방이동눈썹문신복구")
+
+★★★ 매우 중요 ★★★
+1. ${locationDistrict}에 실제로 존재하는 동 이름을 반드시 사용하세요.
+2. 예를 들어 송파구면 "잠실동, 방이동, 문정동, 가락동, 석촌동" 등 실제 동 이름을 사용.
+3. 서북구면 "불당동, 성정동, 두정동, 쌍용동" 등 실제 동 이름을 사용.
+4. 강남구면 "역삼동, 삼성동, 청담동, 논현동" 등 실제 동 이름을 사용.
+5. 키워드는 반드시 붙여쓰기 (공백 없음)
+6. 준최1~4, 일반에서는 절대 시/구 단위 키워드 사용 금지!
 
 위 전략에 맞춰 최적의 검색 키워드 5개를 추천해주세요.
 각 키워드는 실제 네이버에서 검색될 수 있는 형태여야 합니다.
@@ -215,11 +229,23 @@ function generateFallbackKeywords(
       reason: '구 단위 경쟁 키워드',
     }));
   } else if (strategy === 'medium') {
-    // 준최 5~7: 동 단위
-    return baseKeywords.slice(0, 5).map((kw) => ({
-      keyword: `${neighborhood}${kw}`,
-      reason: '동 단위 안정 키워드',
-    }));
+    // 준최 5~7: 동 + 시/구 혼합
+    const keywords = [];
+    // 동 단위 3개
+    for (let i = 0; i < 3 && i < baseKeywords.length; i++) {
+      keywords.push({
+        keyword: `${neighborhood}${baseKeywords[i]}`,
+        reason: '동 단위 안정 키워드',
+      });
+    }
+    // 구 단위 2개
+    for (let i = 0; i < 2 && i + 3 < baseKeywords.length; i++) {
+      keywords.push({
+        keyword: `${district}${baseKeywords[i + 3]}`,
+        reason: '구 단위 경쟁 키워드',
+      });
+    }
+    return keywords;
   } else if (strategy === 'narrow') {
     // 준최 1~4: 동 + 세부
     return baseKeywords.slice(0, 5).map((kw, idx) => ({

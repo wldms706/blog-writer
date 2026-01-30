@@ -31,7 +31,7 @@ export default function StepKeyword({ value, onChange, businessCategory }: StepK
 
     // 공백 포함 체크
     if (keyword.includes(' ')) {
-      return '키워드에 공백이 포함되어 있습니다. 네이버 검색 키워드는 붙여서 입력해주세요. (예: 천안눈썹문신)';
+      return '키워드에 공백이 포함되어 있습니다. 붙여서 입력해주세요.';
     }
 
     // 한글 자모 분리 체크 (ㄱ-ㅎ, ㅏ-ㅣ 단독 사용)
@@ -197,10 +197,10 @@ export default function StepKeyword({ value, onChange, businessCategory }: StepK
         {!loading && !needsLocation && !needsBlogIndex && recommendedKeywords.length > 0 && (
           <div className="space-y-4">
             {/* 지역/지수 정보 */}
-            <div className="flex items-center justify-between p-3 rounded-lg bg-slate-50">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 p-3 rounded-lg bg-slate-50">
               <div className="flex items-center gap-2 text-sm text-slate-600">
                 <span>📍</span>
-                <span>{location}</span>
+                <span className="break-keep">{location}</span>
               </div>
               <div className="flex items-center gap-2">
                 <span className="text-xs text-slate-500">블로그 지수:</span>
