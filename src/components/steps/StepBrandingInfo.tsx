@@ -1,6 +1,6 @@
 'use client';
 
-import { BrandingType, BrandingInfo, IntroInfo, PhilosophyInfo, StoryInfo } from '@/types';
+import { BrandingType, BrandingInfo, IntroInfo, PhilosophyInfo } from '@/types';
 
 interface StepBrandingInfoProps {
   value: BrandingInfo;
@@ -23,23 +23,14 @@ const PHILOSOPHY_QUESTIONS: { key: keyof PhilosophyInfo; label: string; placehol
   { key: 'message', label: '고객에게 전하고 싶은 메시지가 있나요?', placeholder: '예: 시술은 신중하게, 선택은 본인에게 맞게' },
 ];
 
-const STORY_QUESTIONS: { key: keyof StoryInfo; label: string; placeholder: string }[] = [
-  { key: 'character', label: '어떤 인물의 이야기로 쓸까요?', placeholder: '예: 30대 직장인, 결혼 앞둔 신부, 육아중인 주부' },
-  { key: 'situation', label: '이 인물의 고민/상황은?', placeholder: '예: 매일 눈썹 그리느라 아침이 바쁨, 눈썹이 비대칭' },
-  { key: 'season', label: '어떤 시기/계절인가요?', placeholder: '예: 여름, 결혼 준비 중, 취업 면접 앞두고' },
-  { key: 'insight', label: '글에서 전달할 정보는?', placeholder: '예: 요즘 눈썹문신은 자연스럽다, 엠보 vs 콤보 차이' },
-];
-
 const TITLE_BY_TYPE: Record<BrandingType, string> = {
   intro: '원장님에 대해 알려주세요',
   philosophy: '샵의 철학과 신념을 알려주세요',
-  story: '소설 속 인물을 설정해주세요',
 };
 
 const SUBTITLE_BY_TYPE: Record<BrandingType, string> = {
   intro: '간단히 답변해주시면 AI가 자연스러운 글로 만들어드립니다',
   philosophy: '어떤 가치를 중요하게 생각하시나요?',
-  story: '가상 인물의 이야기로 자연스럽게 정보를 전달합니다',
 };
 
 export default function StepBrandingInfo({ value, onChange, brandingType }: StepBrandingInfoProps) {
@@ -51,8 +42,6 @@ export default function StepBrandingInfo({ value, onChange, brandingType }: Step
       updatedInfo.intro = { ...updatedInfo.intro, [key]: newValue };
     } else if (brandingType === 'philosophy') {
       updatedInfo.philosophy = { ...updatedInfo.philosophy, [key]: newValue };
-    } else if (brandingType === 'story') {
-      updatedInfo.story = { ...updatedInfo.story, [key]: newValue };
     }
     onChange(updatedInfo);
   };
@@ -63,8 +52,6 @@ export default function StepBrandingInfo({ value, onChange, brandingType }: Step
         return INTRO_QUESTIONS;
       case 'philosophy':
         return PHILOSOPHY_QUESTIONS;
-      case 'story':
-        return STORY_QUESTIONS;
       default:
         return [];
     }
@@ -76,8 +63,6 @@ export default function StepBrandingInfo({ value, onChange, brandingType }: Step
         return value.intro;
       case 'philosophy':
         return value.philosophy;
-      case 'story':
-        return value.story;
       default:
         return {};
     }

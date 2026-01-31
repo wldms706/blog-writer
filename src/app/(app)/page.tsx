@@ -18,7 +18,6 @@ import { FormData, ContentType, BrandingType, BrandingInfo } from '@/types';
 const initialBrandingInfo: BrandingInfo = {
   intro: { experience: '', specialty: '', startReason: '', customerMind: '' },
   philosophy: { coreValue: '', difference: '', whyPhilosophy: '', message: '' },
-  story: { character: '', situation: '', season: '', insight: '' },
 };
 
 const initialFormData: FormData = {
@@ -206,7 +205,6 @@ export default function Home() {
           <StepBrandingType
             selected={formData.brandingType}
             onSelect={(type: BrandingType) => setFormData({ ...formData, brandingType: type })}
-            businessCategory={formData.businessCategory}
           />
         );
       case 'brandingInfo':

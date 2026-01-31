@@ -6,7 +6,6 @@ import SelectionCard from '../SelectionCard';
 interface StepBrandingTypeProps {
   selected: BrandingType | null;
   onSelect: (type: BrandingType) => void;
-  businessCategory: string | null;
 }
 
 type BrandingOption = {
@@ -14,7 +13,6 @@ type BrandingOption = {
   icon: string;
   name: string;
   description: string;
-  badge?: string;
 };
 
 const BRANDING_TYPES: BrandingOption[] = [
@@ -32,21 +30,7 @@ const BRANDING_TYPES: BrandingOption[] = [
   },
 ];
 
-const STORY_TYPE: BrandingOption = {
-  id: 'story',
-  icon: '📖',
-  name: '소설식',
-  description: '가상 인물의 시선으로 쓰는 공감 글',
-  badge: '반영구 전용',
-};
-
-export default function StepBrandingType({ selected, onSelect, businessCategory }: StepBrandingTypeProps) {
-  const isRegulatedBusiness = businessCategory === 'semi-permanent' || businessCategory === '반영구';
-
-  // 반영구인 경우 소설식 옵션 추가
-  const availableTypes = isRegulatedBusiness
-    ? [...BRANDING_TYPES, STORY_TYPE]
-    : BRANDING_TYPES;
+export default function StepBrandingType({ selected, onSelect }: StepBrandingTypeProps) {
   return (
     <div className="animate-fade-in">
       <div className="text-center mb-8">
@@ -58,8 +42,8 @@ export default function StepBrandingType({ selected, onSelect, businessCategory 
         </p>
       </div>
 
-      <div className={`grid grid-cols-1 gap-4 max-w-2xl mx-auto ${availableTypes.length === 3 ? 'sm:grid-cols-3' : 'sm:grid-cols-2'}`}>
-        {availableTypes.map((type) => (
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-2xl mx-auto">
+        {BRANDING_TYPES.map((type) => (
           <SelectionCard
             key={type.id}
             id={type.id}
@@ -68,7 +52,6 @@ export default function StepBrandingType({ selected, onSelect, businessCategory 
             description={type.description}
             selected={selected === type.id}
             onClick={() => onSelect(type.id)}
-            badge={type.badge}
           />
         ))}
       </div>
@@ -82,7 +65,6 @@ export default function StepBrandingType({ selected, onSelect, businessCategory 
             <span>
               {selected === 'intro' && '원장님의 경력, 가치관, 인사말을 담은 글을 작성합니다'}
               {selected === 'philosophy' && '샵이 추구하는 가치와 철학을 담은 글을 작성합니다'}
-              {selected === 'story' && '가상 인물의 고민과 여정을 담은 공감 글을 작성합니다'}
             </span>
           </div>
         </div>
