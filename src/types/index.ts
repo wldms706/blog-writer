@@ -52,10 +52,10 @@ export type PhilosophyInfo = {
 };
 
 export type StoryInfo = {
-  location: string;        // 샵 위치/동네
-  startTime: string;       // 시작 시기
-  spaceFeature: string;    // 공간 특징 (1인샵, 인테리어 등)
-  atmosphere: string;      // 분위기
+  character: string;       // 가상 인물 (예: 30대 직장인, 결혼 앞둔 신부)
+  situation: string;       // 상황/고민 (예: 매일 눈썹 그리기 힘들어서)
+  season: string;          // 계절/시기 (예: 여름, 결혼 준비 중)
+  insight: string;         // 깨달음/정보 (예: 요즘 눈썹문신은 자연스럽다는 걸 알게 됨)
 };
 
 export type BrandingInfo = {

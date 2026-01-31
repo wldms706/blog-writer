@@ -24,22 +24,22 @@ const PHILOSOPHY_QUESTIONS: { key: keyof PhilosophyInfo; label: string; placehol
 ];
 
 const STORY_QUESTIONS: { key: keyof StoryInfo; label: string; placeholder: string }[] = [
-  { key: 'location', label: '샵이 어디에 있나요?', placeholder: '예: 강남역 근처 조용한 골목, 신사동 가로수길 인근' },
-  { key: 'startTime', label: '언제 시작하셨나요?', placeholder: '예: 2020년, 3년 전' },
-  { key: 'spaceFeature', label: '공간의 특징이 있나요?', placeholder: '예: 1인샵, 프라이빗한 공간, 넓고 쾌적한 인테리어' },
-  { key: 'atmosphere', label: '어떤 분위기인가요?', placeholder: '예: 따뜻하고 아늑한, 깔끔하고 모던한, 편안하게 쉴 수 있는' },
+  { key: 'character', label: '어떤 인물의 이야기로 쓸까요?', placeholder: '예: 30대 직장인, 결혼 앞둔 신부, 육아중인 주부' },
+  { key: 'situation', label: '이 인물의 고민/상황은?', placeholder: '예: 매일 눈썹 그리느라 아침이 바쁨, 눈썹이 비대칭' },
+  { key: 'season', label: '어떤 시기/계절인가요?', placeholder: '예: 여름, 결혼 준비 중, 취업 면접 앞두고' },
+  { key: 'insight', label: '글에서 전달할 정보는?', placeholder: '예: 요즘 눈썹문신은 자연스럽다, 엠보 vs 콤보 차이' },
 ];
 
 const TITLE_BY_TYPE: Record<BrandingType, string> = {
   intro: '원장님에 대해 알려주세요',
   philosophy: '샵의 철학과 신념을 알려주세요',
-  story: '샵에 대해 알려주세요',
+  story: '소설 속 인물을 설정해주세요',
 };
 
 const SUBTITLE_BY_TYPE: Record<BrandingType, string> = {
   intro: '간단히 답변해주시면 AI가 자연스러운 글로 만들어드립니다',
   philosophy: '어떤 가치를 중요하게 생각하시나요?',
-  story: '샵의 위치, 공간, 분위기 등을 알려주세요',
+  story: '가상 인물의 이야기로 자연스럽게 정보를 전달합니다',
 };
 
 export default function StepBrandingInfo({ value, onChange, brandingType }: StepBrandingInfoProps) {

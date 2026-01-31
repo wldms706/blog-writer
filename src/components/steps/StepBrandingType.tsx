@@ -6,24 +6,47 @@ import SelectionCard from '../SelectionCard';
 interface StepBrandingTypeProps {
   selected: BrandingType | null;
   onSelect: (type: BrandingType) => void;
+  businessCategory: string | null;
 }
 
-const BRANDING_TYPES = [
+type BrandingOption = {
+  id: BrandingType;
+  icon: string;
+  name: string;
+  description: string;
+  badge?: string;
+};
+
+const BRANDING_TYPES: BrandingOption[] = [
   {
-    id: 'intro' as BrandingType,
+    id: 'intro',
     icon: '👋',
     name: '자기소개',
     description: '원장님을 소개하는 글',
   },
   {
-    id: 'philosophy' as BrandingType,
+    id: 'philosophy',
     icon: '💭',
     name: '철학/신념',
     description: '왜 이 일을 하는지, 어떤 가치를 추구하는지',
   },
 ];
 
-export default function StepBrandingType({ selected, onSelect }: StepBrandingTypeProps) {
+const STORY_TYPE: BrandingOption = {
+  id: 'story',
+  icon: '📖',
+  name: '소설식',
+  description: '가상 인물의 시선으로 쓰는 공감 글',
+  badge: '반영구 전용',
+};
+
+export default function StepBrandingType({ selected, onSelect, businessCategory }: StepBrandingTypeProps) {
+  const isRegulatedBusiness = businessCategory === 'semi-permanent' || businessCategory === '반영구';
+
+  // 반영구인 경우 소설식 옵션 추가
+  const availableTypes = isRegulatedBusiness
+    ? [...BRANDING_TYPES, STORY_TYPE]
+    : BRANDING_TYPES;
   return (
     <div className="animate-fade-in">
       <div className="text-center mb-8">
@@ -35,8 +58,8 @@ export default function StepBrandingType({ selected, onSelect }: StepBrandingTyp
         </p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-2xl mx-auto">
-        {BRANDING_TYPES.map((type) => (
+      <div className={`grid grid-cols-1 gap-4 max-w-2xl mx-auto ${availableTypes.length === 3 ? 'sm:grid-cols-3' : 'sm:grid-cols-2'}`}>
+        {availableTypes.map((type) => (
           <SelectionCard
             key={type.id}
             id={type.id}
@@ -45,6 +68,7 @@ export default function StepBrandingType({ selected, onSelect }: StepBrandingTyp
             description={type.description}
             selected={selected === type.id}
             onClick={() => onSelect(type.id)}
+            badge={type.badge}
           />
         ))}
       </div>
@@ -58,6 +82,7 @@ export default function StepBrandingType({ selected, onSelect }: StepBrandingTyp
             <span>
               {selected === 'intro' && '원장님의 경력, 가치관, 인사말을 담은 글을 작성합니다'}
               {selected === 'philosophy' && '샵이 추구하는 가치와 철학을 담은 글을 작성합니다'}
+              {selected === 'story' && '가상 인물의 고민과 여정을 담은 공감 글을 작성합니다'}
             </span>
           </div>
         </div>
