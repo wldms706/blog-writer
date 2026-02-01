@@ -398,14 +398,14 @@ export const RESTRICTED_RULES: RestrictedRule[] = [
   },
 ];
 
-// 정보형 글 구조
+// 정보형 글 구조 (경험-사례형)
 export const CONTENT_STRUCTURE = [
-  { step: 1, title: '사회적 인식 또는 질문 제시', description: '독자가 가진 일반적인 인식이나 궁금증으로 시작' },
-  { step: 2, title: '그 인식의 한계 설명', description: '왜 그 생각만으로는 부족한지 설명' },
-  { step: 3, title: '판단 기준 제시', description: '어떻게 선택/판단해야 하는지 기준을 알려줌' },
-  { step: 4, title: '선 긋기', description: '모두에게 필요한 것은 아니라는 점을 명확히' },
-  { step: 5, title: '변화 가능성 언급', description: '상황에 따라 달라질 수 있음을 인정' },
-  { step: 6, title: '질문으로 마무리', description: '독자에게 생각할 거리를 남기며 마무리' },
+  { step: 1, title: '상황 훅 (경험/사례)', description: '실제 상담 사례나 현장 에피소드로 시작' },
+  { step: 2, title: '검색자 의도 확정', description: '표면 질문 뒤 진짜 고민 짚어주기' },
+  { step: 3, title: '변수 맵', description: '케이스가 갈리는 이유 3~5개 (연관 키워드 분산)' },
+  { step: 4, title: '판단 체크리스트', description: '독자가 스스로 판단할 수 있는 기준 제시' },
+  { step: 5, title: '선 긋기 + 예외 인정', description: '무조건적 권유 X, 상황별 안내' },
+  { step: 6, title: '다음 행동 제시', description: '질문으로 끝내되 자연스러운 CTA 연결' },
 ];
 
 export const SAFETY_CONDITIONS: SafetyCondition[] = [
