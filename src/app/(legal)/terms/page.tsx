@@ -13,13 +13,14 @@ export default function TermsPage() {
           ← 홈으로 돌아가기
         </Link>
 
-        <h1 className="text-2xl font-bold text-slate-900 mb-8">이용약관</h1>
+        <h1 className="text-2xl font-bold text-slate-900 mb-2">이용약관</h1>
+        <p className="text-sm text-slate-500 mb-8">최종 수정일: 2026년 2월 1일</p>
 
         <div className="bg-white rounded-2xl border p-6 sm:p-8 space-y-8 text-sm text-slate-700 leading-relaxed">
           <section>
             <h2 className="text-lg font-semibold text-slate-900 mb-3">제1조 (목적)</h2>
             <p>
-              본 약관은 블로그라이터(이하 "회사")가 제공하는 블로그 글 생성 서비스(이하 "서비스")의
+              본 약관은 블로그라이터(이하 &quot;회사&quot;)가 제공하는 블로그 글 생성 서비스(이하 &quot;서비스&quot;)의
               이용조건 및 절차, 회사와 이용자의 권리·의무 및 책임사항을 규정함을 목적으로 합니다.
             </p>
           </section>
@@ -27,9 +28,9 @@ export default function TermsPage() {
           <section>
             <h2 className="text-lg font-semibold text-slate-900 mb-3">제2조 (정의)</h2>
             <ol className="list-decimal list-inside space-y-2">
-              <li>"서비스"란 회사가 제공하는 AI 기반 블로그 글 생성 서비스를 말합니다.</li>
-              <li>"이용자"란 본 약관에 동의하고 서비스를 이용하는 자를 말합니다.</li>
-              <li>"콘텐츠"란 서비스를 통해 생성된 모든 텍스트를 말합니다.</li>
+              <li>&quot;서비스&quot;란 회사가 제공하는 AI 기반 블로그 글 생성 서비스를 말합니다.</li>
+              <li>&quot;이용자&quot;란 본 약관에 동의하고 서비스를 이용하는 자를 말합니다.</li>
+              <li>&quot;콘텐츠&quot;란 서비스를 통해 생성된 모든 텍스트를 말합니다.</li>
             </ol>
           </section>
 
@@ -105,9 +106,9 @@ export default function TermsPage() {
           </section>
 
           <section className="pt-4 border-t">
-            <p className="text-slate-500">
-              시행일: 2026년 2월 1일
-            </p>
+            <Link href="/" className="text-blue-600 hover:underline text-sm">
+              홈으로 돌아가기
+            </Link>
           </section>
         </div>
       </div>

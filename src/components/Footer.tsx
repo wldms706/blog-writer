@@ -21,7 +21,6 @@ export default function Footer() {
           <div className="text-xs text-slate-500 space-y-1">
             <p className="font-semibold text-slate-700 mb-2">고객 지원</p>
             <p>평일 10:00 - 18:00 (주말 및 공휴일 휴무)</p>
-            <p>이메일: betterjung706@gmail.com</p>
             <p>카카오톡: 찐이지 뷰티샵 비즈니스 코치</p>
           </div>
         </div>
