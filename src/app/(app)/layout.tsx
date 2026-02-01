@@ -3,13 +3,14 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import LogoutButton from "./LogoutButton";
 import HeaderLogo from "./HeaderLogo";
+import Footer from "@/components/Footer";
 
 export default async function AppLayout({ children }: { children: ReactNode }) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
   return (
-    <div className="min-h-dvh bg-slate-50 text-slate-900">
+    <div className="flex min-h-dvh flex-col bg-slate-50 text-slate-900">
       {/* Topbar */}
       <header className="sticky top-0 z-50 border-b bg-white/80 backdrop-blur">
         <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4">
@@ -66,6 +67,9 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
           </div>
         </main>
       </div>
+
+      {/* Footer */}
+      <Footer />
     </div>
   );
 }
