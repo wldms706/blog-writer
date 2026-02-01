@@ -57,20 +57,6 @@ export const BUSINESS_CATEGORIES: BusinessCategory[] = [
     hasRegulation: false,
   },
   {
-    id: 'diet',
-    name: '다이어트',
-    icon: '🏃',
-    description: '다이어트, 체중 관리 프로그램',
-    hasRegulation: false,
-  },
-  {
-    id: 'body-shape',
-    name: '체형관리',
-    icon: '💪',
-    description: '체형 교정, 바디라인 관리',
-    hasRegulation: false,
-  },
-  {
     id: 'nail',
     name: '네일 아트',
     icon: '💅',
@@ -158,6 +144,8 @@ export const BUSINESS_SPECIFIC_TOPICS: Record<string, TopicCategory[]> = {
     { id: 'hydration', name: '보습/건조', description: '건조함 해결, 수분 공급', icon: '💧' },
     { id: 'sensitive', name: '민감성 피부', description: '예민한 피부 진정 케어', icon: '🌸' },
     { id: 'lifting', name: '탄력/리프팅', description: '처진 피부, 탄력 회복', icon: '⬆️' },
+    { id: 'diet', name: '다이어트', description: '체중 관리, 다이어트 프로그램', icon: '🏃' },
+    { id: 'body-shape', name: '체형관리', description: '체형 교정, 바디라인 관리', icon: '💪' },
   ],
   // 반영구
   'semi-permanent': [
@@ -217,22 +205,6 @@ export const BUSINESS_SPECIFIC_TOPICS: Record<string, TopicCategory[]> = {
     { id: 'perm', name: '속눈썹 펌', description: '펌 시술과 유지 관리', icon: '🌀' },
     { id: 'lifting', name: '래쉬리프팅', description: '리프팅 시술 정보', icon: '⬆️' },
     { id: 'care', name: '속눈썹 케어', description: '자연 속눈썹 관리법', icon: '🌱' },
-  ],
-  // 다이어트
-  'diet': [
-    { id: 'program', name: '프로그램 종류', description: '다이어트 프로그램 안내', icon: '📋' },
-    { id: 'weight-loss', name: '체중 감량', description: '체중 감량 방법과 관리', icon: '⚖️' },
-    { id: 'diet-food', name: '식단 관리', description: '다이어트 식단 정보', icon: '🥗' },
-    { id: 'metabolism', name: '신진대사', description: '기초대사량, 신진대사 활성화', icon: '🔥' },
-    { id: 'maintenance', name: '유지 관리', description: '요요 방지, 체중 유지', icon: '📊' },
-  ],
-  // 체형관리
-  'body-shape': [
-    { id: 'body-line', name: '바디라인', description: '바디라인 교정, 관리', icon: '📐' },
-    { id: 'posture', name: '자세 교정', description: '자세 교정, 체형 밸런스', icon: '🧘' },
-    { id: 'cellulite', name: '셀룰라이트', description: '셀룰라이트 관리', icon: '💆' },
-    { id: 'slimming', name: '슬리밍', description: '부분 슬리밍, 바디 케어', icon: '✨' },
-    { id: 'detox', name: '디톡스', description: '디톡스, 붓기 관리', icon: '💧' },
   ],
 };
 
