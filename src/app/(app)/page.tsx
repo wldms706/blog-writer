@@ -13,6 +13,7 @@ import StepTitleSelect from '@/components/steps/StepTitleSelect';
 import StepGenerate from '@/components/steps/StepGenerate';
 import StepBrandingType from '@/components/steps/StepBrandingType';
 import StepBrandingInfo from '@/components/steps/StepBrandingInfo';
+import StepTreatmentInfo from '@/components/steps/StepTreatmentInfo';
 import { FormData, ContentType, BrandingType, BrandingInfo } from '@/types';
 
 const initialBrandingInfo: BrandingInfo = {
@@ -48,7 +49,8 @@ type StepId =
   | 'title'
   | 'generate'
   | 'brandingType'
-  | 'brandingInfo';
+  | 'brandingInfo'
+  | 'treatmentInfo';
 
 export default function Home() {
   const [currentStep, setCurrentStep] = useState(1);
@@ -57,7 +59,7 @@ export default function Home() {
   // 현재 콘텐츠 타입에 따른 스텝 배열
   const steps: StepId[] = useMemo(() => {
     if (formData.contentType === 'seo') {
-      return ['contentType', 'business', 'topic', 'keyword', 'purpose', 'reader', 'rules', 'title', 'generate'];
+      return ['contentType', 'business', 'topic', 'keyword', 'treatmentInfo', 'purpose', 'reader', 'rules', 'title', 'generate'];
     } else {
       return ['contentType', 'business', 'brandingType', 'keyword', 'brandingInfo', 'title', 'generate'];
     }
@@ -93,6 +95,9 @@ export default function Home() {
         // 해당 타입의 모든 필드 중 하나 이상 입력되었는지 확인
         return Object.values(info).some((v) => v.trim().length > 0);
       }
+      case 'treatmentInfo':
+        // 선택사항이므로 항상 다음으로 넘어갈 수 있음
+        return true;
       default:
         return false;
     }
@@ -213,6 +218,13 @@ export default function Home() {
             value={formData.brandingInfo}
             onChange={(value) => setFormData({ ...formData, brandingInfo: value })}
             brandingType={formData.brandingType}
+          />
+        );
+      case 'treatmentInfo':
+        return (
+          <StepTreatmentInfo
+            value={formData.additionalContext}
+            onChange={(value) => setFormData({ ...formData, additionalContext: value })}
           />
         );
       default:

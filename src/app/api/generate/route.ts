@@ -372,6 +372,7 @@ export async function POST(request: NextRequest) {
       contentType = 'seo',
       brandingType,
       brandingInfo,
+      treatmentInfo,
     } = await request.json();
 
     // 규제 업종 여부 확인
@@ -501,6 +502,14 @@ ${randomStructure}`;
 글의 목적: ${purpose}
 독자 상태: ${readerState}
 ${selectedTitle ? `제목: ${selectedTitle}` : ''}
+${treatmentInfo ? `
+## 우리 샵만의 특별한 시술/프로그램 정보
+아래 시술/프로그램 정보를 블로그 글에 자연스럽게 녹여서 작성해주세요.
+단, 노골적인 홍보가 아닌, 정보 전달 형태로 언급해주세요.
+예를 들어 "이런 프로그램도 있다", "이런 방식으로 관리하는 곳도 있다" 형태로 작성.
+
+시술/프로그램 설명: ${treatmentInfo}
+` : ''}
 
 ${isRegulatedBusiness ? `
 ⚠️ 중요: 이 글은 "반영구" 업종입니다. 반드시 다음 규칙을 지켜주세요:

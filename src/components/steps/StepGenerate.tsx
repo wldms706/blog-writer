@@ -100,6 +100,7 @@ export default function StepGenerate({ onReset, formData }: StepGenerateProps) {
             contentType: formData.contentType,
             brandingType: formData.brandingType,
             brandingInfo: formData.brandingInfo,
+            treatmentInfo: formData.additionalContext,
           }),
         });
 
