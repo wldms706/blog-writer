@@ -1,4 +1,5 @@
 import { createClient as createServerSupabase } from '@/lib/supabase/server';
+import { syncUserToSheet } from '@/lib/google-sheets';
 
 const FREE_DAILY_LIMIT = 999; // 임시로 제한 해제
 
@@ -16,7 +17,7 @@ export async function checkAndIncrementUsage(userId: string): Promise<{
   // 프로필 조회
   const { data: profile } = await supabase
     .from('profiles')
-    .select('email, plan, daily_usage, last_usage_date')
+    .select('email, plan, daily_usage, total_usage, last_usage_date, created_at, coupon_used, coupon_code')
     .eq('id', userId)
     .single();
 
@@ -24,39 +25,74 @@ export async function checkAndIncrementUsage(userId: string): Promise<{
     return { allowed: false, remaining: 0, plan: 'free' };
   }
 
+  const currentDailyUsage = profile.last_usage_date === today ? (profile.daily_usage || 0) : 0;
+  const currentTotalUsage = profile.total_usage || 0;
+
   // 관리자 또는 유료 유저는 무제한
   const isAdmin = profile.email && ADMIN_EMAILS.includes(profile.email);
   if (isAdmin || profile.plan === 'paid') {
+    const newDailyUsage = currentDailyUsage + 1;
+    const newTotalUsage = currentTotalUsage + 1;
+
     await supabase
       .from('profiles')
       .update({
-        daily_usage: (profile.last_usage_date === today ? profile.daily_usage : 0) + 1,
+        daily_usage: newDailyUsage,
+        total_usage: newTotalUsage,
         last_usage_date: today,
       })
       .eq('id', userId);
+
+    // Google Sheets 동기화 (비동기, 실패해도 무시)
+    syncUserToSheet({
+      userId,
+      email: profile.email || '',
+      planType: profile.plan || 'paid',
+      dailyUsage: newDailyUsage,
+      totalUsage: newTotalUsage,
+      lastAccessDate: today,
+      signupDate: profile.created_at?.split('T')[0] || '',
+      couponUsed: profile.coupon_used || false,
+      couponCode: profile.coupon_code || '',
+    }).catch(() => {});
 
     return { allowed: true, remaining: -1, plan: 'paid' };
   }
 
   // 무료 유저: 날짜가 바뀌면 리셋
-  const currentUsage = profile.last_usage_date === today ? profile.daily_usage : 0;
-
-  if (currentUsage >= FREE_DAILY_LIMIT) {
+  if (currentDailyUsage >= FREE_DAILY_LIMIT) {
     return { allowed: false, remaining: 0, plan: 'free' };
   }
+
+  const newDailyUsage = currentDailyUsage + 1;
+  const newTotalUsage = currentTotalUsage + 1;
 
   // 사용량 증가
   await supabase
     .from('profiles')
     .update({
-      daily_usage: currentUsage + 1,
+      daily_usage: newDailyUsage,
+      total_usage: newTotalUsage,
       last_usage_date: today,
     })
     .eq('id', userId);
 
+  // Google Sheets 동기화 (비동기, 실패해도 무시)
+  syncUserToSheet({
+    userId,
+    email: profile.email || '',
+    planType: 'free',
+    dailyUsage: newDailyUsage,
+    totalUsage: newTotalUsage,
+    lastAccessDate: today,
+    signupDate: profile.created_at?.split('T')[0] || '',
+    couponUsed: profile.coupon_used || false,
+    couponCode: profile.coupon_code || '',
+  }).catch(() => {});
+
   return {
     allowed: true,
-    remaining: FREE_DAILY_LIMIT - currentUsage - 1,
+    remaining: FREE_DAILY_LIMIT - newDailyUsage,
     plan: 'free',
   };
 }
