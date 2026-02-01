@@ -27,6 +27,9 @@ export default function Footer() {
 
         {/* 링크 */}
         <div className="mt-6 pt-4 border-t border-slate-100 flex flex-wrap gap-4 text-xs">
+          <Link href="/pricing" className="text-slate-500 hover:text-slate-700 hover:underline">
+            요금안내
+          </Link>
           <Link href="/terms" className="text-slate-500 hover:text-slate-700 hover:underline">
             이용약관
           </Link>
