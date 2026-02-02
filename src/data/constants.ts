@@ -158,6 +158,7 @@ export const BUSINESS_SPECIFIC_TOPICS: Record<string, TopicCategory[]> = {
     { id: 'eyeliner', name: '아이라인', description: '아이라인 반영구 시술', icon: '👁️' },
     { id: 'hairline', name: '헤어라인', description: '헤어라인 교정 시술', icon: '💇' },
     { id: 'lips', name: '입술', description: '입술 반영구 시술 정보', icon: '💋' },
+    { id: 'smp', name: 'SMP(두피문신)', description: '두피 마이크로피그먼테이션, 탈모 커버', icon: '🔵' },
     { id: 'retouch', name: '리터치/수정', description: '리터치 주기, 수정 관리', icon: '🔄' },
   ],
   // 두피/탈모

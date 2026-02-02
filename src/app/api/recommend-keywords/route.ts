@@ -27,6 +27,7 @@ const TOPIC_KEYWORDS: Record<string, Record<string, string[]>> = {
     'eyeliner': ['아이라인', '아이라인문신', '눈매교정'],
     'hairline': ['헤어라인', '헤어라인문신', '이마라인'],
     'lips': ['입술반영구', '입술문신', '립블러셔'],
+    'smp': ['SMP', '두피문신', '두피반영구', '탈모커버', '스칼프마이크로피그먼테이션'],
     'retouch': ['눈썹리터치', '반영구수정', '눈썹보정'],
   },
   'skin': {
