@@ -12,9 +12,10 @@ interface StepKeywordProps {
   value: string;
   onChange: (value: string) => void;
   businessCategory: string | null;
+  topic: string | null;
 }
 
-export default function StepKeyword({ value, onChange, businessCategory }: StepKeywordProps) {
+export default function StepKeyword({ value, onChange, businessCategory, topic }: StepKeywordProps) {
   const [recommendedKeywords, setRecommendedKeywords] = useState<RecommendedKeyword[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -59,7 +60,7 @@ export default function StepKeyword({ value, onChange, businessCategory }: StepK
     if (businessCategory) {
       fetchRecommendations();
     }
-  }, [businessCategory]);
+  }, [businessCategory, topic]);
 
   const fetchRecommendations = async () => {
     if (!businessCategory) return;
@@ -73,7 +74,7 @@ export default function StepKeyword({ value, onChange, businessCategory }: StepK
       const res = await fetch('/api/recommend-keywords', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ businessCategory }),
+        body: JSON.stringify({ businessCategory, topic }),
       });
 
       const data = await res.json();

@@ -156,6 +156,7 @@ export default function Home() {
             value={formData.keyword}
             onChange={(value) => setFormData({ ...formData, keyword: value })}
             businessCategory={formData.businessCategory}
+            topic={formData.contentType === 'seo' ? formData.topic : formData.brandingType}
           />
         );
       case 'topic':
