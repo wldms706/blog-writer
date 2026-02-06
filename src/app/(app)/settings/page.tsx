@@ -2,9 +2,20 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { getSettings, saveSettings, clearAllHistory, getProfile, saveProfile, type AppSettings, type UserProfile, type BlogIndexLevel } from '@/lib/storage';
 import { BUSINESS_CATEGORIES } from '@/data/constants';
 import { createClient } from '@/lib/supabase/client';
+
+interface Subscription {
+  plan_id: string;
+  plan_name: string;
+  status: string;
+  price: number;
+  next_billing_at: string | null;
+  card_company: string | null;
+  card_number: string | null;
+}
 
 export default function SettingsPage() {
   const router = useRouter();
@@ -20,6 +31,8 @@ export default function SettingsPage() {
     blogIndexLevel: null,
     blogIndexCheckedAt: null,
   });
+  const [subscription, setSubscription] = useState<Subscription | null>(null);
+  const [showCancelConfirm, setShowCancelConfirm] = useState(false);
   const [showClearConfirm, setShowClearConfirm] = useState(false);
   const [toast, setToast] = useState('');
   const [loading, setLoading] = useState(true);
@@ -37,6 +50,17 @@ export default function SettingsPage() {
         ]);
         setSettings(s);
         setProfile(p);
+
+        // 구독 정보 가져오기
+        const { data: subData } = await supabase
+          .from('subscriptions')
+          .select('plan_id, plan_name, status, price, next_billing_at, card_company, card_number')
+          .eq('user_id', user.id)
+          .single();
+
+        if (subData) {
+          setSubscription(subData);
+        }
       }
       setLoading(false);
     }
@@ -330,6 +354,112 @@ export default function SettingsPage() {
               </option>
             ))}
           </select>
+        </div>
+
+        {/* 구독 관리 */}
+        <div className="rounded-xl border border-green-100 bg-white p-4">
+          <label className="mb-2 block text-sm font-medium text-slate-900">구독 관리</label>
+
+          {subscription && subscription.status === 'active' ? (
+            <div className="space-y-3">
+              <div className="rounded-lg bg-green-50 p-3">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <span className="text-xs text-green-600">현재 플랜</span>
+                    <p className="text-sm font-semibold text-green-800">{subscription.plan_name}</p>
+                  </div>
+                  <span className="inline-flex items-center rounded-full bg-green-100 px-2 py-1 text-xs font-medium text-green-700">
+                    구독 중
+                  </span>
+                </div>
+                <div className="mt-2 text-xs text-green-700">
+                  <p>결제 금액: {subscription.price.toLocaleString()}원/월</p>
+                  {subscription.next_billing_at && (
+                    <p>다음 결제일: {new Date(subscription.next_billing_at).toLocaleDateString('ko-KR')}</p>
+                  )}
+                  {subscription.card_company && subscription.card_number && (
+                    <p>결제 수단: {subscription.card_company} {subscription.card_number}</p>
+                  )}
+                </div>
+              </div>
+
+              {!showCancelConfirm ? (
+                <button
+                  onClick={() => setShowCancelConfirm(true)}
+                  className="text-xs text-slate-500 hover:text-red-600 underline"
+                >
+                  구독 취소하기
+                </button>
+              ) : (
+                <div className="rounded-lg bg-red-50 p-3">
+                  <p className="mb-2 text-xs text-red-700">
+                    구독을 취소하시겠습니까? 다음 결제일부터 서비스가 중단됩니다.
+                  </p>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={async () => {
+                        const supabase = createClient();
+                        await supabase
+                          .from('subscriptions')
+                          .update({ status: 'cancelled', cancelled_at: new Date().toISOString() })
+                          .eq('user_id', userId);
+                        setSubscription({ ...subscription, status: 'cancelled' });
+                        setShowCancelConfirm(false);
+                        showToast('구독이 취소되었습니다');
+                      }}
+                      className="rounded-lg bg-red-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-red-700"
+                    >
+                      취소 확인
+                    </button>
+                    <button
+                      onClick={() => setShowCancelConfirm(false)}
+                      className="rounded-lg bg-white px-3 py-1.5 text-xs text-slate-600 hover:bg-slate-50"
+                    >
+                      돌아가기
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          ) : subscription && subscription.status === 'cancelled' ? (
+            <div className="space-y-3">
+              <div className="rounded-lg bg-yellow-50 p-3">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <span className="text-xs text-yellow-600">이전 플랜</span>
+                    <p className="text-sm font-semibold text-yellow-800">{subscription.plan_name}</p>
+                  </div>
+                  <span className="inline-flex items-center rounded-full bg-yellow-100 px-2 py-1 text-xs font-medium text-yellow-700">
+                    취소됨
+                  </span>
+                </div>
+                {subscription.next_billing_at && (
+                  <p className="mt-2 text-xs text-yellow-700">
+                    {new Date(subscription.next_billing_at).toLocaleDateString('ko-KR')}까지 이용 가능
+                  </p>
+                )}
+              </div>
+              <Link
+                href="/subscribe"
+                className="block w-full rounded-lg bg-blue-600 py-2.5 text-center text-xs font-medium text-white hover:bg-blue-700"
+              >
+                다시 구독하기
+              </Link>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              <div className="rounded-lg bg-slate-50 p-3">
+                <p className="text-sm text-slate-600">현재 무료 플랜을 사용 중입니다.</p>
+                <p className="mt-1 text-xs text-slate-500">프로 플랜으로 업그레이드하면 무제한으로 글을 생성할 수 있습니다.</p>
+              </div>
+              <Link
+                href="/subscribe"
+                className="block w-full rounded-lg bg-blue-600 py-2.5 text-center text-xs font-medium text-white hover:bg-blue-700"
+              >
+                프로 플랜 시작하기
+              </Link>
+            </div>
+          )}
         </div>
 
         {/* 히스토리 삭제 */}

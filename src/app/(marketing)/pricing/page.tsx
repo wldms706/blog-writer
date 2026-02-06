@@ -48,7 +48,7 @@ const plans: Plan[] = [
       { text: '우선 고객 지원', included: true },
     ],
     cta: '프로 시작하기',
-    ctaLink: '/signup',
+    ctaLink: '/subscribe',
     highlighted: true,
   },
   {
@@ -66,7 +66,7 @@ const plans: Plan[] = [
       { text: '우선 고객 지원', included: true },
     ],
     cta: '프로 시작하기',
-    ctaLink: '/signup',
+    ctaLink: '/subscribe',
     highlighted: false,
   },
 ];
