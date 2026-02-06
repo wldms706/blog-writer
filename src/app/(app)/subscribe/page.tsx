@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { loadTossPayments, TossPaymentsWidgets } from '@tosspayments/tosspayments-sdk';
 import { createClient } from '@/lib/supabase/client';
 
@@ -50,7 +49,6 @@ const PLANS: Plan[] = [
 const clientKey = process.env.NEXT_PUBLIC_TOSS_CLIENT_KEY || '';
 
 export default function SubscribePage() {
-  const router = useRouter();
   const [selectedPlan, setSelectedPlan] = useState<Plan | null>(null);
   const [widgets, setWidgets] = useState<TossPaymentsWidgets | null>(null);
   const [isReady, setIsReady] = useState(false);
@@ -217,6 +215,14 @@ export default function SubscribePage() {
       {selectedPlan && (
         <div className="bg-white rounded-2xl border p-6 mb-6">
           <h2 className="text-lg font-semibold text-slate-900 mb-4">결제 정보</h2>
+
+          {/* 로딩 표시 */}
+          {!isReady && (
+            <div className="flex items-center justify-center py-8">
+              <div className="animate-spin w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full" />
+              <span className="ml-3 text-slate-600">결제 위젯 로딩 중...</span>
+            </div>
+          )}
 
           {/* 결제 수단 */}
           <div id="payment-method" ref={paymentMethodRef} className="mb-4" />
