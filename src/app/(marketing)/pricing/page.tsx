@@ -1,7 +1,6 @@
 'use client';
 
 import Link from 'next/link';
-import { useState } from 'react';
 import Footer from '@/components/Footer';
 
 interface Plan {
@@ -10,135 +9,69 @@ interface Plan {
   period: string;
   description: string;
   badge?: string;
-  originalPrice?: string;
-  yearlyTotal?: string;
   features: { text: string; included: boolean }[];
   cta: string;
   ctaLink: string;
   highlighted: boolean;
 }
 
-const plans: { monthly: Plan[]; yearly: Plan[] } = {
-  monthly: [
-    {
-      name: '무료',
-      price: '0',
-      period: '',
-      description: '서비스를 먼저 체험해보세요',
-      features: [
-        { text: '1일 3회 글 생성', included: true },
-        { text: '기본 글 구조 5종', included: true },
-        { text: '히스토리 저장 (최근 10개)', included: true },
-        { text: '무제한 글 생성', included: false },
-        { text: '모든 글 구조 사용', included: false },
-        { text: '무제한 히스토리', included: false },
-      ],
-      cta: '무료로 시작하기',
-      ctaLink: '/signup',
-      highlighted: false,
-    },
-    {
-      name: '프로 (반영구)',
-      price: '19,900',
-      period: '/월',
-      description: '반영구 업종 특화 블로그 글 생성',
-      badge: '반영구 업종',
-      features: [
-        { text: '무제한 글 생성', included: true },
-        { text: '반영구 특화 글 구조 10종+', included: true },
-        { text: '무제한 히스토리', included: true },
-        { text: 'SEO 최적화 글쓰기', included: true },
-        { text: '업종 맞춤 키워드 추천', included: true },
-        { text: '우선 고객 지원', included: true },
-      ],
-      cta: '프로 시작하기',
-      ctaLink: '/signup',
-      highlighted: true,
-    },
-    {
-      name: '프로 (일반)',
-      price: '14,900',
-      period: '/월',
-      description: '다양한 업종을 위한 블로그 글 생성',
-      badge: '일반 업종',
-      features: [
-        { text: '무제한 글 생성', included: true },
-        { text: '범용 글 구조 8종+', included: true },
-        { text: '무제한 히스토리', included: true },
-        { text: 'SEO 최적화 글쓰기', included: true },
-        { text: '업종 맞춤 키워드 추천', included: true },
-        { text: '우선 고객 지원', included: true },
-      ],
-      cta: '프로 시작하기',
-      ctaLink: '/signup',
-      highlighted: false,
-    },
-  ],
-  yearly: [
-    {
-      name: '무료',
-      price: '0',
-      period: '',
-      description: '서비스를 먼저 체험해보세요',
-      features: [
-        { text: '1일 3회 글 생성', included: true },
-        { text: '기본 글 구조 5종', included: true },
-        { text: '히스토리 저장 (최근 10개)', included: true },
-        { text: '무제한 글 생성', included: false },
-        { text: '모든 글 구조 사용', included: false },
-        { text: '무제한 히스토리', included: false },
-      ],
-      cta: '무료로 시작하기',
-      ctaLink: '/signup',
-      highlighted: false,
-    },
-    {
-      name: '프로 (반영구)',
-      price: '16,580',
-      originalPrice: '19,900',
-      yearlyTotal: '199,000',
-      period: '/월',
-      description: '반영구 업종 특화 블로그 글 생성',
-      badge: '2개월 무료',
-      features: [
-        { text: '무제한 글 생성', included: true },
-        { text: '반영구 특화 글 구조 10종+', included: true },
-        { text: '무제한 히스토리', included: true },
-        { text: 'SEO 최적화 글쓰기', included: true },
-        { text: '업종 맞춤 키워드 추천', included: true },
-        { text: '우선 고객 지원', included: true },
-      ],
-      cta: '연간 구독하기',
-      ctaLink: '/signup',
-      highlighted: true,
-    },
-    {
-      name: '프로 (일반)',
-      price: '12,420',
-      originalPrice: '14,900',
-      yearlyTotal: '149,000',
-      period: '/월',
-      description: '다양한 업종을 위한 블로그 글 생성',
-      badge: '2개월 무료',
-      features: [
-        { text: '무제한 글 생성', included: true },
-        { text: '범용 글 구조 8종+', included: true },
-        { text: '무제한 히스토리', included: true },
-        { text: 'SEO 최적화 글쓰기', included: true },
-        { text: '업종 맞춤 키워드 추천', included: true },
-        { text: '우선 고객 지원', included: true },
-      ],
-      cta: '연간 구독하기',
-      ctaLink: '/signup',
-      highlighted: false,
-    },
-  ],
-};
+const plans: Plan[] = [
+  {
+    name: '무료',
+    price: '0',
+    period: '',
+    description: '서비스를 먼저 체험해보세요',
+    features: [
+      { text: '1일 3회 글 생성', included: true },
+      { text: '기본 글 구조 5종', included: true },
+      { text: '히스토리 저장 (최근 10개)', included: true },
+      { text: '무제한 글 생성', included: false },
+      { text: '모든 글 구조 사용', included: false },
+      { text: '무제한 히스토리', included: false },
+    ],
+    cta: '무료로 시작하기',
+    ctaLink: '/signup',
+    highlighted: false,
+  },
+  {
+    name: '프로 (반영구)',
+    price: '19,900',
+    period: '/월',
+    description: '반영구 업종 특화 블로그 글 생성',
+    badge: '반영구 업종',
+    features: [
+      { text: '무제한 글 생성', included: true },
+      { text: '반영구 특화 글 구조 10종+', included: true },
+      { text: '무제한 히스토리', included: true },
+      { text: 'SEO 최적화 글쓰기', included: true },
+      { text: '업종 맞춤 키워드 추천', included: true },
+      { text: '우선 고객 지원', included: true },
+    ],
+    cta: '프로 시작하기',
+    ctaLink: '/signup',
+    highlighted: true,
+  },
+  {
+    name: '프로 (일반)',
+    price: '14,900',
+    period: '/월',
+    description: '다양한 업종을 위한 블로그 글 생성',
+    badge: '일반 업종',
+    features: [
+      { text: '무제한 글 생성', included: true },
+      { text: '범용 글 구조 8종+', included: true },
+      { text: '무제한 히스토리', included: true },
+      { text: 'SEO 최적화 글쓰기', included: true },
+      { text: '업종 맞춤 키워드 추천', included: true },
+      { text: '우선 고객 지원', included: true },
+    ],
+    cta: '프로 시작하기',
+    ctaLink: '/signup',
+    highlighted: false,
+  },
+];
 
 export default function PricingPage() {
-  const [billingPeriod, setBillingPeriod] = useState<'monthly' | 'yearly'>('yearly');
-  const currentPlans = plans[billingPeriod];
-
   return (
     <div className="min-h-dvh bg-slate-50 flex flex-col">
       {/* Header */}
@@ -171,7 +104,7 @@ export default function PricingPage() {
       <main className="flex-1">
         <div className="mx-auto max-w-6xl px-4 py-16">
           {/* Hero */}
-          <div className="text-center mb-8">
+          <div className="text-center mb-12">
             <h1 className="text-3xl font-bold text-slate-900 mb-4">
               요금 안내
             </h1>
@@ -180,40 +113,9 @@ export default function PricingPage() {
             </p>
           </div>
 
-          {/* Billing Toggle */}
-          <div className="flex justify-center mb-10">
-            <div className="inline-flex items-center gap-3 rounded-full bg-slate-100 p-1">
-              <button
-                onClick={() => setBillingPeriod('monthly')}
-                className={[
-                  'rounded-full px-4 py-2 text-sm font-medium transition',
-                  billingPeriod === 'monthly'
-                    ? 'bg-white text-slate-900 shadow-sm'
-                    : 'text-slate-600 hover:text-slate-900',
-                ].join(' ')}
-              >
-                월간 결제
-              </button>
-              <button
-                onClick={() => setBillingPeriod('yearly')}
-                className={[
-                  'rounded-full px-4 py-2 text-sm font-medium transition flex items-center gap-2',
-                  billingPeriod === 'yearly'
-                    ? 'bg-white text-slate-900 shadow-sm'
-                    : 'text-slate-600 hover:text-slate-900',
-                ].join(' ')}
-              >
-                연간 결제
-                <span className="rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-700">
-                  2개월 무료
-                </span>
-              </button>
-            </div>
-          </div>
-
           {/* Pricing Cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
-            {currentPlans.map((plan) => (
+            {plans.map((plan) => (
               <div
                 key={plan.name}
                 className={[
@@ -225,10 +127,7 @@ export default function PricingPage() {
               >
                 {plan.badge && (
                   <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                    <span className={[
-                      'inline-block rounded-full px-3 py-1 text-xs font-medium text-white',
-                      plan.badge === '2개월 무료' ? 'bg-green-600' : 'bg-blue-600',
-                    ].join(' ')}>
+                    <span className="inline-block rounded-full px-3 py-1 text-xs font-medium text-white bg-blue-600">
                       {plan.badge}
                     </span>
                   </div>
@@ -242,16 +141,6 @@ export default function PricingPage() {
                 </div>
 
                 <div className="mb-6">
-                  {plan.originalPrice && (
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="text-sm text-slate-400 line-through">
-                        ₩{plan.originalPrice}
-                      </span>
-                      <span className="text-xs font-medium text-green-600 bg-green-50 px-1.5 py-0.5 rounded">
-                        17% 할인
-                      </span>
-                    </div>
-                  )}
                   <div className="flex items-baseline gap-1">
                     <span className="text-4xl font-bold text-slate-900">
                       {plan.price === '0' ? '무료' : `₩${plan.price}`}
@@ -260,11 +149,6 @@ export default function PricingPage() {
                       <span className="text-slate-500">{plan.period}</span>
                     )}
                   </div>
-                  {plan.yearlyTotal && (
-                    <p className="text-xs text-slate-500 mt-1">
-                      연 {plan.yearlyTotal}원 (일시불)
-                    </p>
-                  )}
                 </div>
 
                 <ul className="space-y-3 mb-8 flex-1">
@@ -334,10 +218,6 @@ export default function PricingPage() {
               <FaqItem
                 question="반영구 업종과 일반 업종의 차이가 뭔가요?"
                 answer="반영구 업종 플랜은 눈썹문신, 반영구화장, 속눈썹 등 반영구 시술 관련 키워드와 글 구조가 특화되어 있습니다. 일반 업종 플랜은 카페, 식당, 헬스장 등 다양한 업종에 맞는 범용적인 글 구조를 제공합니다."
-              />
-              <FaqItem
-                question="연간 결제의 장점이 뭔가요?"
-                answer="연간 결제 시 2개월 무료 혜택을 받으실 수 있습니다. 월간 결제 대비 약 17% 할인된 가격으로 이용 가능합니다."
               />
               <FaqItem
                 question="환불 정책이 어떻게 되나요?"
