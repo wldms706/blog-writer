@@ -8,7 +8,7 @@ export default function Footer() {
           {/* 사업자 정보 */}
           <div className="text-xs text-slate-500 space-y-1">
             <p className="font-semibold text-slate-700 mb-2">사업자 정보</p>
-            <p>상호명: 블로그라이터</p>
+            <p>상호명: 찐이지 뷰티샵 비지니스 컨설팅</p>
             <p>대표자명: 정지은</p>
             <p>사업자등록번호: 542-02-03878</p>
             <p>통신판매업: 제 2025-서울종로-1362 호</p>

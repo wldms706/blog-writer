@@ -35,6 +35,7 @@ export type SafetyCondition = {
 
 export type ContentType = 'seo' | 'branding';
 export type BrandingType = 'intro' | 'philosophy';
+export type TonePreset = 'warm' | 'professional' | 'conversational';
 
 // 브랜딩 종류별 구조화된 정보
 export type IntroInfo = {
@@ -69,6 +70,8 @@ export type FormData = {
   // 브랜딩 글 전용
   brandingType: BrandingType | null;
   brandingInfo: BrandingInfo;
+  // 톤 프리셋 (반영구 제외)
+  tonePreset: TonePreset;
 };
 
 export type Step = {

@@ -1,4 +1,4 @@
-import { BusinessCategory, TopicCategory, Purpose, ReaderState, SafetyCondition, Step } from '@/types';
+import { BusinessCategory, TopicCategory, Purpose, ReaderState, SafetyCondition, Step, TonePreset } from '@/types';
 
 export const STEPS: Step[] = [
   { id: 1, title: '업종 선택', subtitle: '어떤 뷰티 업종인가요?' },
@@ -12,6 +12,20 @@ export const STEPS: Step[] = [
 
 // SEO 글 작성 단계
 export const SEO_STEPS: Step[] = [
+  { id: 1, title: '글 유형', subtitle: '어떤 글을 작성할까요?' },
+  { id: 2, title: '업종', subtitle: '어떤 뷰티 업종인가요?' },
+  { id: 3, title: '주제', subtitle: '어떤 주제로 글을 쓸까요?' },
+  { id: 4, title: '키워드', subtitle: '검색 키워드를 입력해주세요' },
+  { id: 5, title: '목적', subtitle: '이 글의 목적은 무엇인가요?' },
+  { id: 6, title: '독자 상태', subtitle: '독자는 어떤 상태인가요?' },
+  { id: 7, title: '글 톤', subtitle: '어떤 느낌으로 쓸까요?' },
+  { id: 8, title: '규칙 확인', subtitle: '적용되는 규칙을 확인해주세요' },
+  { id: 9, title: '제목 선택', subtitle: '블로그 제목을 선택해주세요' },
+  { id: 10, title: '글 생성', subtitle: '블로그 글이 생성됩니다' },
+];
+
+// SEO 글 작성 단계 (반영구 - 톤 선택 없음)
+export const SEO_STEPS_REGULATED: Step[] = [
   { id: 1, title: '글 유형', subtitle: '어떤 글을 작성할까요?' },
   { id: 2, title: '업종', subtitle: '어떤 뷰티 업종인가요?' },
   { id: 3, title: '주제', subtitle: '어떤 주제로 글을 쓸까요?' },
@@ -219,6 +233,39 @@ export function getTopicsForBusiness(businessId: string | null): TopicCategory[]
 
 // 하위 호환성을 위해 유지
 export const TOPIC_CATEGORIES: TopicCategory[] = COMMON_TOPICS;
+
+// 톤 프리셋 (반영구 제외 업종에만 적용)
+export type TonePresetOption = {
+  id: TonePreset;
+  name: string;
+  description: string;
+  icon: string;
+  example: string;
+};
+
+export const TONE_PRESETS: TonePresetOption[] = [
+  {
+    id: 'warm',
+    name: '따뜻한 운영자',
+    description: '샵을 운영하는 원장님이 편하게 이야기하는 느낌',
+    icon: '☕',
+    example: '"샵을 운영하다 보면 이런 분들이 꽤 오시거든요"',
+  },
+  {
+    id: 'professional',
+    name: '신뢰감 있는 전문가',
+    description: '경험에서 우러나오는 전문성이 느껴지는 톤',
+    icon: '💼',
+    example: '"오래 일하다 보니 확실히 느끼는 게 있는데요"',
+  },
+  {
+    id: 'conversational',
+    name: '친근한 대화체',
+    description: '친한 언니/오빠가 알려주는 것 같은 편안한 톤',
+    icon: '💬',
+    example: '"사실 이거 되게 많이들 헷갈려하시더라고요"',
+  },
+];
 
 export const PURPOSES: Purpose[] = [
   {

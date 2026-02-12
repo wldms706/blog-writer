@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
-import { loadTossPayments, TossPaymentsWidgets } from '@tosspayments/tosspayments-sdk';
+import { useEffect, useState } from 'react';
+import { loadTossPayments } from '@tosspayments/tosspayments-sdk';
 import { createClient } from '@/lib/supabase/client';
 
 interface Plan {
@@ -50,12 +50,9 @@ const clientKey = process.env.NEXT_PUBLIC_TOSS_CLIENT_KEY || '';
 
 export default function SubscribePage() {
   const [selectedPlan, setSelectedPlan] = useState<Plan | null>(null);
-  const [widgets, setWidgets] = useState<TossPaymentsWidgets | null>(null);
-  const [isReady, setIsReady] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [user, setUser] = useState<{ id: string; email: string } | null>(null);
-  const paymentMethodRef = useRef<HTMLDivElement>(null);
-  const agreementRef = useRef<HTMLDivElement>(null);
 
   // 유저 정보 가져오기
   useEffect(() => {
@@ -69,79 +66,50 @@ export default function SubscribePage() {
     getUser();
   }, []);
 
-  // 토스페이먼츠 위젯 초기화
-  useEffect(() => {
-    if (!user || !selectedPlan) return;
-
-    const initWidgets = async () => {
-      try {
-        const tossPayments = await loadTossPayments(clientKey);
-        const customerKey = `customer_${user.id}`;
-
-        const paymentWidgets = tossPayments.widgets({
-          customerKey,
-        });
-
-        // 결제 금액 설정
-        await paymentWidgets.setAmount({
-          currency: 'KRW',
-          value: selectedPlan.price,
-        });
-
-        setWidgets(paymentWidgets);
-      } catch (error) {
-        console.error('위젯 초기화 실패:', error);
-      }
-    };
-
-    initWidgets();
-  }, [user, selectedPlan]);
-
-  // 위젯 렌더링
-  useEffect(() => {
-    if (!widgets || !paymentMethodRef.current || !agreementRef.current) return;
-
-    const renderWidgets = async () => {
-      try {
-        // 결제 수단 위젯 렌더링
-        await widgets.renderPaymentMethods({
-          selector: '#payment-method',
-          variantKey: 'DEFAULT',
-        });
-
-        // 이용약관 위젯 렌더링
-        await widgets.renderAgreement({
-          selector: '#agreement',
-          variantKey: 'AGREEMENT',
-        });
-
-        setIsReady(true);
-      } catch (error) {
-        console.error('위젯 렌더링 실패:', error);
-      }
-    };
-
-    renderWidgets();
-  }, [widgets]);
-
-  // 결제 요청
+  // 결제 요청 (API 개별 연동 방식)
   const handlePayment = async () => {
-    if (!widgets || !selectedPlan || !user) return;
+    if (!selectedPlan || !user) return;
 
     setIsLoading(true);
+    setError(null);
 
     try {
-      // 빌링키 발급 요청 (정기결제용)
-      await widgets.requestPayment({
-        orderId: `order_${Date.now()}_${user.id}`,
+      if (!clientKey) {
+        setError('토스페이먼츠 클라이언트 키가 설정되지 않았습니다.');
+        setIsLoading(false);
+        return;
+      }
+
+      const tossPayments = await loadTossPayments(clientKey);
+
+      // API 개별 연동 - payment 객체 사용
+      const payment = tossPayments.payment({
+        customerKey: `customer_${user.id}`,
+      });
+
+      // 카드 결제 요청
+      await payment.requestPayment({
+        method: 'CARD',
+        amount: {
+          currency: 'KRW',
+          value: selectedPlan.price,
+        },
+        orderId: `order_${Date.now()}_${user.id.slice(0, 8)}`,
         orderName: `블로그라이터 ${selectedPlan.name} 월 구독`,
         successUrl: `${window.location.origin}/subscribe/success?planId=${selectedPlan.id}`,
         failUrl: `${window.location.origin}/subscribe/fail`,
         customerEmail: user.email,
         customerName: user.email.split('@')[0],
+        card: {
+          useEscrow: false,
+          flowMode: 'DEFAULT',
+          useCardPoint: false,
+          useAppCardOnly: false,
+        },
       });
-    } catch (error) {
-      console.error('결제 요청 실패:', error);
+    } catch (err) {
+      console.error('결제 요청 실패:', err);
+      setError(err instanceof Error ? err.message : '결제 요청에 실패했습니다.');
       setIsLoading(false);
     }
   };
@@ -158,10 +126,7 @@ export default function SubscribePage() {
         {PLANS.map((plan) => (
           <button
             key={plan.id}
-            onClick={() => {
-              setSelectedPlan(plan);
-              setIsReady(false);
-            }}
+            onClick={() => setSelectedPlan(plan)}
             className={[
               'relative text-left rounded-2xl border p-6 transition-all',
               selectedPlan?.id === plan.id
@@ -211,38 +176,51 @@ export default function SubscribePage() {
         ))}
       </div>
 
-      {/* 결제 위젯 영역 */}
+      {/* 결제 버튼 영역 */}
       {selectedPlan && (
         <div className="bg-white rounded-2xl border p-6 mb-6">
           <h2 className="text-lg font-semibold text-slate-900 mb-4">결제 정보</h2>
 
-          {/* 로딩 표시 */}
-          {!isReady && (
-            <div className="flex items-center justify-center py-8">
-              <div className="animate-spin w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full" />
-              <span className="ml-3 text-slate-600">결제 위젯 로딩 중...</span>
+          {/* 에러 표시 */}
+          {error && (
+            <div className="mb-4 rounded-lg bg-red-50 p-4 text-sm text-red-700">
+              <p className="font-medium">오류 발생</p>
+              <p>{error}</p>
             </div>
           )}
 
-          {/* 결제 수단 */}
-          <div id="payment-method" ref={paymentMethodRef} className="mb-4" />
-
-          {/* 이용 약관 */}
-          <div id="agreement" ref={agreementRef} className="mb-6" />
+          {/* 선택한 플랜 정보 */}
+          <div className="mb-4 rounded-lg bg-slate-50 p-4">
+            <div className="flex justify-between items-center">
+              <div>
+                <p className="font-medium text-slate-900">{selectedPlan.name}</p>
+                <p className="text-sm text-slate-500">월 정기 구독</p>
+              </div>
+              <p className="text-xl font-bold text-slate-900">
+                {selectedPlan.price.toLocaleString()}원
+              </p>
+            </div>
+          </div>
 
           {/* 결제 버튼 */}
           <button
             onClick={handlePayment}
-            disabled={!isReady || isLoading}
+            disabled={isLoading || !user}
             className={[
               'w-full py-3 rounded-xl font-medium transition-colors',
-              isReady && !isLoading
+              !isLoading && user
                 ? 'bg-blue-600 text-white hover:bg-blue-700'
                 : 'bg-slate-200 text-slate-400 cursor-not-allowed',
             ].join(' ')}
           >
-            {isLoading ? '결제 처리 중...' : `${selectedPlan.price.toLocaleString()}원 결제하기`}
+            {isLoading ? '결제 페이지로 이동 중...' : `${selectedPlan.price.toLocaleString()}원 결제하기`}
           </button>
+
+          {!user && (
+            <p className="mt-2 text-center text-sm text-slate-500">
+              로그인이 필요합니다
+            </p>
+          )}
         </div>
       )}
 

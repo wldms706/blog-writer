@@ -14,7 +14,9 @@ import StepGenerate from '@/components/steps/StepGenerate';
 import StepBrandingType from '@/components/steps/StepBrandingType';
 import StepBrandingInfo from '@/components/steps/StepBrandingInfo';
 import StepTreatmentInfo from '@/components/steps/StepTreatmentInfo';
-import { FormData, ContentType, BrandingType, BrandingInfo } from '@/types';
+import StepTone from '@/components/steps/StepTone';
+import { FormData, ContentType, BrandingType, BrandingInfo, TonePreset } from '@/types';
+import { BUSINESS_CATEGORIES } from '@/data/constants';
 
 const initialBrandingInfo: BrandingInfo = {
   intro: { experience: '', specialty: '', startReason: '', customerMind: '' },
@@ -33,6 +35,7 @@ const initialFormData: FormData = {
   additionalContext: '',
   brandingType: null,
   brandingInfo: initialBrandingInfo,
+  tonePreset: 'warm',
 };
 
 // SEO: 글유형 → 업종 → 키워드 → 주제 → 목적 → 독자상태 → 규칙 → 제목 → 생성
@@ -45,6 +48,7 @@ type StepId =
   | 'topic'
   | 'purpose'
   | 'reader'
+  | 'tone'
   | 'rules'
   | 'title'
   | 'generate'
@@ -56,14 +60,26 @@ export default function Home() {
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState<FormData>(initialFormData);
 
+  // 규제 업종 여부
+  const isRegulated = BUSINESS_CATEGORIES.find(b => b.id === formData.businessCategory)?.hasRegulation ?? false;
+
   // 현재 콘텐츠 타입에 따른 스텝 배열
   const steps: StepId[] = useMemo(() => {
     if (formData.contentType === 'seo') {
-      return ['contentType', 'business', 'topic', 'keyword', 'treatmentInfo', 'purpose', 'reader', 'rules', 'title', 'generate'];
+      if (isRegulated) {
+        // 반영구: 톤 선택 없음
+        return ['contentType', 'business', 'topic', 'keyword', 'treatmentInfo', 'purpose', 'reader', 'rules', 'title', 'generate'];
+      }
+      // 일반 업종: 독자상태 다음에 톤 선택 추가
+      return ['contentType', 'business', 'topic', 'keyword', 'treatmentInfo', 'purpose', 'reader', 'tone', 'rules', 'title', 'generate'];
     } else {
-      return ['contentType', 'business', 'brandingType', 'keyword', 'brandingInfo', 'title', 'generate'];
+      if (isRegulated) {
+        return ['contentType', 'business', 'brandingType', 'keyword', 'brandingInfo', 'title', 'generate'];
+      }
+      // 일반 업종 브랜딩: 브랜딩정보 다음에 톤 선택 추가
+      return ['contentType', 'business', 'brandingType', 'keyword', 'brandingInfo', 'tone', 'title', 'generate'];
     }
-  }, [formData.contentType]);
+  }, [formData.contentType, isRegulated]);
 
   const totalSteps = steps.length;
   const currentStepId = steps[currentStep - 1];
@@ -95,6 +111,8 @@ export default function Home() {
         // 해당 타입의 모든 필드 중 하나 이상 입력되었는지 확인
         return Object.values(info).some((v) => v.trim().length > 0);
       }
+      case 'tone':
+        return true; // 기본값이 있으므로 항상 진행 가능
       case 'treatmentInfo':
         // 선택사항이므로 항상 다음으로 넘어갈 수 있음
         return true;
@@ -226,6 +244,13 @@ export default function Home() {
           <StepTreatmentInfo
             value={formData.additionalContext}
             onChange={(value) => setFormData({ ...formData, additionalContext: value })}
+          />
+        );
+      case 'tone':
+        return (
+          <StepTone
+            selected={formData.tonePreset}
+            onSelect={(tone: TonePreset) => setFormData({ ...formData, tonePreset: tone })}
           />
         );
       default:

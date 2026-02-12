@@ -101,6 +101,7 @@ export default function StepGenerate({ onReset, formData }: StepGenerateProps) {
             brandingType: formData.brandingType,
             brandingInfo: formData.brandingInfo,
             treatmentInfo: formData.additionalContext,
+            tonePreset: formData.tonePreset,
           }),
         });
 
