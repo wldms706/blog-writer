@@ -1,7 +1,7 @@
 import { createClient as createServerSupabase } from '@/lib/supabase/server';
 import { syncUserToSheet } from '@/lib/google-sheets';
 
-const FREE_DAILY_LIMIT = 999; // 임시로 제한 해제
+const FREE_TOTAL_LIMIT = 5;
 
 // 관리자 이메일 - 무제한 사용 가능
 const ADMIN_EMAILS = ['wldms706@naver.com'];
@@ -59,8 +59,8 @@ export async function checkAndIncrementUsage(userId: string): Promise<{
     return { allowed: true, remaining: -1, plan: 'paid' };
   }
 
-  // 무료 유저: 날짜가 바뀌면 리셋
-  if (currentDailyUsage >= FREE_DAILY_LIMIT) {
+  // 무료 유저: 총 사용량으로 제한 (리셋 없음)
+  if (currentTotalUsage >= FREE_TOTAL_LIMIT) {
     return { allowed: false, remaining: 0, plan: 'free' };
   }
 
@@ -92,7 +92,7 @@ export async function checkAndIncrementUsage(userId: string): Promise<{
 
   return {
     allowed: true,
-    remaining: FREE_DAILY_LIMIT - newDailyUsage,
+    remaining: FREE_TOTAL_LIMIT - newTotalUsage,
     plan: 'free',
   };
 }
