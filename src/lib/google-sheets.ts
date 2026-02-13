@@ -6,6 +6,8 @@ const SHEET_NAME = '시트1';
 type UserTrackingData = {
   userId: string;
   email: string;
+  name?: string;
+  businessName?: string;
   planType: string;
   dailyUsage: number;
   totalUsage: number;
@@ -58,10 +60,12 @@ export async function syncUserToSheet(data: UserTrackingData): Promise<boolean> 
       }
     }
 
-    // 컬럼 순서: 가입일, 이메일, 플랜, 오늘사용, 총사용, 마지막접속, 쿠폰
+    // 컬럼 순서: 가입일, 이메일, 이름, 상호명, 플랜, 오늘사용, 총사용, 마지막접속, 쿠폰
     const rowData = [
       data.signupDate,
       data.email,
+      data.name || '',
+      data.businessName || '',
       data.planType,
       data.dailyUsage,
       data.totalUsage,
@@ -73,7 +77,7 @@ export async function syncUserToSheet(data: UserTrackingData): Promise<boolean> 
       // 기존 행 업데이트
       await sheets.spreadsheets.values.update({
         spreadsheetId: SPREADSHEET_ID,
-        range: `${SHEET_NAME}!A${rowIndex}:G${rowIndex}`,
+        range: `${SHEET_NAME}!A${rowIndex}:I${rowIndex}`,
         valueInputOption: 'USER_ENTERED',
         requestBody: {
           values: [rowData],
@@ -83,7 +87,7 @@ export async function syncUserToSheet(data: UserTrackingData): Promise<boolean> 
       // 새 행 추가
       await sheets.spreadsheets.values.append({
         spreadsheetId: SPREADSHEET_ID,
-        range: `${SHEET_NAME}!A:G`,
+        range: `${SHEET_NAME}!A:I`,
         valueInputOption: 'USER_ENTERED',
         requestBody: {
           values: [rowData],
@@ -106,7 +110,7 @@ export async function initializeSheetHeaders(): Promise<boolean> {
     // 첫 번째 행 확인
     const response = await sheets.spreadsheets.values.get({
       spreadsheetId: SPREADSHEET_ID,
-      range: `${SHEET_NAME}!A1:I1`,
+      range: `${SHEET_NAME}!A1:K1`,
     });
 
     const headers = response.data.values?.[0];
@@ -115,12 +119,14 @@ export async function initializeSheetHeaders(): Promise<boolean> {
     if (!headers || headers.length === 0) {
       await sheets.spreadsheets.values.update({
         spreadsheetId: SPREADSHEET_ID,
-        range: `${SHEET_NAME}!A1:I1`,
+        range: `${SHEET_NAME}!A1:K1`,
         valueInputOption: 'USER_ENTERED',
         requestBody: {
           values: [[
             'User ID',
             '이메일',
+            '이름',
+            '상호명',
             '가입일',
             '플랜',
             '오늘 사용횟수',

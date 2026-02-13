@@ -17,7 +17,7 @@ export async function checkAndIncrementUsage(userId: string): Promise<{
   // 프로필 조회
   const { data: profile } = await supabase
     .from('profiles')
-    .select('email, plan, daily_usage, total_usage, last_usage_date, created_at, coupon_used, coupon_code')
+    .select('email, name, business_name, plan, daily_usage, total_usage, last_usage_date, created_at, coupon_used, coupon_code')
     .eq('id', userId)
     .single();
 
@@ -47,6 +47,8 @@ export async function checkAndIncrementUsage(userId: string): Promise<{
     syncUserToSheet({
       userId,
       email: profile.email || '',
+      name: profile.name || '',
+      businessName: profile.business_name || '',
       planType: profile.plan || 'paid',
       dailyUsage: newDailyUsage,
       totalUsage: newTotalUsage,
@@ -81,6 +83,8 @@ export async function checkAndIncrementUsage(userId: string): Promise<{
   syncUserToSheet({
     userId,
     email: profile.email || '',
+    name: profile.name || '',
+    businessName: profile.business_name || '',
     planType: 'free',
     dailyUsage: newDailyUsage,
     totalUsage: newTotalUsage,

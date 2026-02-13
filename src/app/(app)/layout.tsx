@@ -3,14 +3,32 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import LogoutButton from "./LogoutButton";
 import HeaderLogo from "./HeaderLogo";
+import OnboardingGuard from "./OnboardingGuard";
 import Footer from "@/components/Footer";
 
 export default async function AppLayout({ children }: { children: ReactNode }) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
+  // 프로필에서 이름 조회
+  let displayName = user?.email || '';
+  if (user) {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('name')
+      .eq('id', user.id)
+      .single();
+
+    if (profile?.name) {
+      displayName = profile.name;
+    }
+  }
+
   return (
     <div className="flex min-h-dvh flex-col bg-slate-50 text-slate-900">
+      {/* 온보딩 가드 (이름 미입력 시 온보딩으로 리다이렉트) */}
+      <OnboardingGuard />
+
       {/* Topbar */}
       <header className="sticky top-0 z-50 border-b bg-white/80 backdrop-blur">
         <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4">
@@ -25,7 +43,7 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
             </Link>
             <div className="hidden sm:block h-8 w-px bg-slate-200" />
             {user && (
-              <span className="hidden text-xs text-slate-400 md:block">{user.email}</span>
+              <span className="hidden text-xs text-slate-400 md:block">{displayName}</span>
             )}
             <LogoutButton />
           </nav>

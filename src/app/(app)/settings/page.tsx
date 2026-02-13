@@ -24,6 +24,8 @@ export default function SettingsPage() {
     keywordPresets: [],
   });
   const [profile, setProfile] = useState<UserProfile>({
+    name: '',
+    businessName: '',
     locationCity: '',
     locationDistrict: '',
     locationNeighborhood: '',
@@ -161,6 +163,35 @@ export default function SettingsPage() {
       <h2 className="mb-4 text-lg font-semibold text-slate-900">설정</h2>
 
       <div className="space-y-4">
+        {/* 내 정보 */}
+        <div className="rounded-xl border border-slate-200 bg-white p-4">
+          <label className="mb-2 block text-sm font-medium text-slate-900">내 정보</label>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <div>
+              <p className="mb-1 text-xs text-slate-500">이름</p>
+              <input
+                type="text"
+                value={profile.name}
+                onChange={(e) => setProfile({ ...profile, name: e.target.value })}
+                onBlur={() => handleSaveProfile({ name: profile.name })}
+                placeholder="이름"
+                className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-blue-500"
+              />
+            </div>
+            <div>
+              <p className="mb-1 text-xs text-slate-500">상호명</p>
+              <input
+                type="text"
+                value={profile.businessName}
+                onChange={(e) => setProfile({ ...profile, businessName: e.target.value })}
+                onBlur={() => handleSaveProfile({ businessName: profile.businessName })}
+                placeholder="매장/업체명 (선택)"
+                className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-blue-500"
+              />
+            </div>
+          </div>
+        </div>
+
         {/* 샵 위치 */}
         <div className="rounded-xl border border-blue-100 bg-white p-4">
           <label className="mb-2 block text-sm font-medium text-slate-900">샵 위치</label>

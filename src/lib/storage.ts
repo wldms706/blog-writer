@@ -23,6 +23,8 @@ export type BlogIndexLevel =
   | null;
 
 export type UserProfile = {
+  name: string;
+  businessName: string;
   locationCity: string;
   locationDistrict: string;
   locationNeighborhood: string;
@@ -138,6 +140,8 @@ export async function saveSettings(userId: string, settings: AppSettings) {
 // --- Profile (지역 + 블로그 정보) ---
 
 const defaultProfile: UserProfile = {
+  name: '',
+  businessName: '',
   locationCity: '',
   locationDistrict: '',
   locationNeighborhood: '',
@@ -150,7 +154,7 @@ export async function getProfile(userId: string): Promise<UserProfile> {
   const supabase = createClient();
   const { data, error } = await supabase
     .from('profiles')
-    .select('location_city, location_district, location_neighborhood, blog_url, blog_index_level, blog_index_checked_at')
+    .select('name, business_name, location_city, location_district, location_neighborhood, blog_url, blog_index_level, blog_index_checked_at')
     .eq('id', userId)
     .single();
 
@@ -159,6 +163,8 @@ export async function getProfile(userId: string): Promise<UserProfile> {
   }
 
   return {
+    name: data.name || '',
+    businessName: data.business_name || '',
     locationCity: data.location_city || '',
     locationDistrict: data.location_district || '',
     locationNeighborhood: data.location_neighborhood || '',
@@ -193,6 +199,8 @@ export async function saveProfile(userId: string, profile: Partial<UserProfile>)
     };
 
     // 프로필 데이터 추가
+    if (profile.name !== undefined) insertData.name = profile.name;
+    if (profile.businessName !== undefined) insertData.business_name = profile.businessName;
     if (profile.locationCity !== undefined) insertData.location_city = profile.locationCity;
     if (profile.locationDistrict !== undefined) insertData.location_district = profile.locationDistrict;
     if (profile.locationNeighborhood !== undefined) insertData.location_neighborhood = profile.locationNeighborhood;
@@ -213,6 +221,8 @@ export async function saveProfile(userId: string, profile: Partial<UserProfile>)
 
   // 기존 프로필 업데이트
   const updateData: Record<string, unknown> = {};
+  if (profile.name !== undefined) updateData.name = profile.name;
+  if (profile.businessName !== undefined) updateData.business_name = profile.businessName;
   if (profile.locationCity !== undefined) updateData.location_city = profile.locationCity;
   if (profile.locationDistrict !== undefined) updateData.location_district = profile.locationDistrict;
   if (profile.locationNeighborhood !== undefined) updateData.location_neighborhood = profile.locationNeighborhood;
