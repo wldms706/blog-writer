@@ -30,11 +30,6 @@ export default function StepKeyword({ value, onChange, businessCategory, topic }
   const validateKeyword = (keyword: string): string | null => {
     if (!keyword) return null;
 
-    // 공백 포함 체크
-    if (keyword.includes(' ')) {
-      return '키워드에 공백이 포함되어 있습니다. 붙여서 입력해주세요.';
-    }
-
     // 한글 자모 분리 체크 (ㄱ-ㅎ, ㅏ-ㅣ 단독 사용)
     const incompleteHangul = /[ㄱ-ㅎㅏ-ㅣ]/;
     if (incompleteHangul.test(keyword)) {
