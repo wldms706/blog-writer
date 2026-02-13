@@ -4,7 +4,7 @@ import { syncUserToSheet } from '@/lib/google-sheets';
 const FREE_TOTAL_LIMIT = 5;
 
 // 관리자 이메일 - 무제한 사용 가능
-const ADMIN_EMAILS = ['wldms706@naver.com'];
+const ADMIN_EMAILS = ['wldms706@naver.com', 'mwm2020@nate.com', 'gkdisk9@nate.com', 'etang12330@gmail.com'];
 
 export async function checkAndIncrementUsage(userId: string): Promise<{
   allowed: boolean;
