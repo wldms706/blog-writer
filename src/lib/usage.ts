@@ -1,7 +1,7 @@
 import { createClient as createServerSupabase } from '@/lib/supabase/server';
 import { syncUserToSheet } from '@/lib/google-sheets';
 
-const FREE_TOTAL_LIMIT = 5;
+const FREE_DAILY_LIMIT = 3;
 
 // 관리자 이메일 - 무제한 사용 가능
 const ADMIN_EMAILS = ['wldms706@naver.com', 'mwm2020@nate.com', 'gkdisk9@nate.com', 'etang12330@gmail.com'];
@@ -25,6 +25,7 @@ export async function checkAndIncrementUsage(userId: string): Promise<{
     return { allowed: false, remaining: 0, plan: 'free' };
   }
 
+  // 날짜가 바뀌면 일일 사용량 리셋
   const currentDailyUsage = profile.last_usage_date === today ? (profile.daily_usage || 0) : 0;
   const currentTotalUsage = profile.total_usage || 0;
 
@@ -43,7 +44,6 @@ export async function checkAndIncrementUsage(userId: string): Promise<{
       })
       .eq('id', userId);
 
-    // Google Sheets 동기화 (비동기, 실패해도 무시)
     syncUserToSheet({
       userId,
       email: profile.email || '',
@@ -61,15 +61,14 @@ export async function checkAndIncrementUsage(userId: string): Promise<{
     return { allowed: true, remaining: -1, plan: 'paid' };
   }
 
-  // 무료 유저: 총 사용량으로 제한 (리셋 없음)
-  if (currentTotalUsage >= FREE_TOTAL_LIMIT) {
+  // 무료 유저: 하루 3회 제한, 날짜 바뀌면 리셋
+  if (currentDailyUsage >= FREE_DAILY_LIMIT) {
     return { allowed: false, remaining: 0, plan: 'free' };
   }
 
   const newDailyUsage = currentDailyUsage + 1;
   const newTotalUsage = currentTotalUsage + 1;
 
-  // 사용량 증가
   await supabase
     .from('profiles')
     .update({
@@ -79,7 +78,6 @@ export async function checkAndIncrementUsage(userId: string): Promise<{
     })
     .eq('id', userId);
 
-  // Google Sheets 동기화 (비동기, 실패해도 무시)
   syncUserToSheet({
     userId,
     email: profile.email || '',
@@ -96,7 +94,7 @@ export async function checkAndIncrementUsage(userId: string): Promise<{
 
   return {
     allowed: true,
-    remaining: FREE_TOTAL_LIMIT - newTotalUsage,
+    remaining: FREE_DAILY_LIMIT - newDailyUsage,
     plan: 'free',
   };
 }
