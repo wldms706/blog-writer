@@ -201,6 +201,49 @@ function filterForeignWords(text: string): string {
   return filtered;
 }
 
+
+// 업종 키워드 과다 반복 필터 (10회 초과 시 동의어로 치환)
+const KEYWORD_SYNONYMS: Record<string, string[]> = {
+  '눈썹': ['브로우', '눈썹선', '눈썹결', '눈매'],
+  '속눈썹': ['래쉬', '눈가', '눈매', '속눈썹선'],
+  '입술': ['립', '립라인', '입술선', '입술결'],
+  '피부': ['피부결', '결', '톤', '컨디션'],
+  '네일': ['손톱', '네일아트', '손끝'],
+  '헤어': ['모발', '머릿결', '두피'],
+  '왁싱': ['제모', '왁스 관리', '제모 관리'],
+  '반영구': ['아트메이크업', '반영구 메이크업', '아트'],
+  '문신': ['타투', '아트', '시술'],
+  '두피': ['스캘프', '모근', '두피 컨디션'],
+  '탈모': ['모발 관리', '헤어 케어', '모발 고민'],
+};
+
+const KEYWORD_LIMIT = 10;
+
+function filterExcessiveKeywords(text: string): string {
+  let filtered = text;
+
+  for (const [keyword, synonyms] of Object.entries(KEYWORD_SYNONYMS)) {
+    const regex = new RegExp(keyword, 'g');
+    const matches = filtered.match(regex);
+    if (!matches || matches.length <= KEYWORD_LIMIT) continue;
+
+    // 10회 초과분을 동의어로 순환 치환
+    let count = 0;
+    let synonymIdx = 0;
+    filtered = filtered.replace(regex, (match) => {
+      count++;
+      if (count > KEYWORD_LIMIT) {
+        const synonym = synonyms[synonymIdx % synonyms.length];
+        synonymIdx++;
+        return synonym;
+      }
+      return match;
+    });
+  }
+
+  return filtered;
+}
+
 const SEO_BASE_PROMPT = `이 글은 현장 경험이 풍부한 업계 전문가의 관점에서 쓴다.
 단, 1인칭은 절대 사용하지 않는다. "저는", "제가", "나는" 등 절대 금지.
 경험담은 "현장에서 보면", "실제로 ~한 경우가 있다", "업계에서는", "시술 현장에서 자주 보는 사례인데" 같은 3인칭 형태로 전달한다.
@@ -888,7 +931,7 @@ ${isLargeKeyword(keyword) ? `
     }
 
     // 의료 용어 자동 필터링 (2차 방어 - 프롬프트에서 놓친 의료 용어를 강제 치환)
-    const filteredText = filterForeignWords(filterMedicalTerms(generatedText));
+    const filteredText = filterExcessiveKeywords(filterForeignWords(filterMedicalTerms(generatedText)));
 
     return NextResponse.json({ content: filteredText });
   } catch (error) {
