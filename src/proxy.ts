@@ -41,7 +41,8 @@ export async function proxy(request: NextRequest) {
     pathname.startsWith('/pricing') ||
     pathname.startsWith('/terms') ||
     pathname.startsWith('/privacy') ||
-    pathname.startsWith('/api');
+    pathname.startsWith('/api') ||
+    pathname.startsWith('/auth');
 
   // 비로그인 + 루트 접속 → 랜딩 페이지로
   if (!user && pathname === '/') {
