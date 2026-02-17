@@ -98,7 +98,7 @@ export default function SubscribeSuccessPage() {
       </p>
       <div className="space-y-3">
         <Link
-          href="/"
+          href="/write"
           className="block w-full rounded-lg bg-blue-600 px-6 py-3 text-sm font-medium text-white hover:bg-blue-700"
         >
           글 작성하러 가기

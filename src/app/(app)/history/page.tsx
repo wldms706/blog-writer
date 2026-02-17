@@ -61,7 +61,7 @@ export default function HistoryPage() {
         <p className="text-sm font-medium text-slate-900">아직 생성된 글이 없습니다</p>
         <p className="mt-1 text-xs text-slate-500">글을 생성하면 자동으로 저장됩니다</p>
         <Link
-          href="/"
+          href="/write"
           className="mt-4 inline-flex items-center gap-1.5 rounded-xl bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
         >
           글 작성하기

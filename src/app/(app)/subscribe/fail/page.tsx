@@ -33,7 +33,7 @@ export default function SubscribeFailPage() {
           다시 시도하기
         </Link>
         <Link
-          href="/"
+          href="/write"
           className="block w-full rounded-lg bg-slate-100 px-6 py-3 text-sm font-medium text-slate-700 hover:bg-slate-200"
         >
           홈으로 돌아가기

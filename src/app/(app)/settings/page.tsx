@@ -526,7 +526,7 @@ export default function SettingsPage() {
 
         {/* 저장하고 글쓰기 버튼 */}
         <button
-          onClick={() => router.push('/')}
+          onClick={() => router.push('/write')}
           className="w-full rounded-xl bg-blue-600 py-3 text-sm font-medium text-white hover:bg-blue-700 transition-colors"
         >
           저장하고 글쓰기

@@ -30,7 +30,7 @@ export default function OnboardingPage() {
         .single();
 
       if (profile?.name) {
-        router.push('/');
+        router.push('/write');
       }
     }
     checkUser();
@@ -44,7 +44,7 @@ export default function OnboardingPage() {
       name: name.trim(),
       businessName: businessName.trim(),
     });
-    router.push('/');
+    router.push('/write');
   };
 
   return (

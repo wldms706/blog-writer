@@ -37,17 +37,24 @@ export async function proxy(request: NextRequest) {
 
   const isPublicPage =
     isAuthPage ||
-    pathname === '/landing' ||
+    pathname === '/' ||
     pathname.startsWith('/pricing') ||
     pathname.startsWith('/terms') ||
     pathname.startsWith('/privacy') ||
     pathname.startsWith('/api') ||
     pathname.startsWith('/auth');
 
-  // 비로그인 + 루트 접속 → 랜딩 페이지로
-  if (!user && pathname === '/') {
+  // 로그인 + 루트(랜딩) 접속 → 대시보드로
+  if (user && pathname === '/') {
     const url = request.nextUrl.clone();
-    url.pathname = '/landing';
+    url.pathname = '/write';
+    return NextResponse.redirect(url);
+  }
+
+  // 로그인 + 인증 페이지 → 대시보드로
+  if (user && isAuthPage) {
+    const url = request.nextUrl.clone();
+    url.pathname = '/write';
     return NextResponse.redirect(url);
   }
 
@@ -55,13 +62,6 @@ export async function proxy(request: NextRequest) {
   if (!user && !isPublicPage) {
     const url = request.nextUrl.clone();
     url.pathname = '/login';
-    return NextResponse.redirect(url);
-  }
-
-  // 로그인 + 랜딩/인증 페이지 → 홈으로
-  if (user && (isAuthPage || pathname === '/landing')) {
-    const url = request.nextUrl.clone();
-    url.pathname = '/';
     return NextResponse.redirect(url);
   }
 

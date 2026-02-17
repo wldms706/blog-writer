@@ -17,7 +17,7 @@ export default async function SubscribeLayout({ children }: { children: ReactNod
       {/* Header */}
       <header className="border-b bg-white">
         <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4">
-          <Link href="/" className="flex items-center gap-2">
+          <Link href="/write" className="flex items-center gap-2">
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600">
               <span className="text-sm font-bold text-white">B</span>
             </div>
