@@ -5,12 +5,7 @@ export const alt = '블로그 라이터 - 뷰티샵 원장님을 위한 AI 블�
 export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
 
-export default async function Image() {
-  // 한글 폰트 로드 (Noto Sans KR Bold)
-  const fontData = await fetch(
-    new URL('https://cdn.jsdelivr.net/fontsource/fonts/noto-sans-kr@latest/korean-700-normal.woff')
-  ).then((res) => res.arrayBuffer());
-
+export default function Image() {
   return new ImageResponse(
     (
       <div
@@ -22,7 +17,6 @@ export default async function Image() {
           flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
-          fontFamily: 'NotoSansKR',
         }}
       >
         <div
@@ -30,49 +24,51 @@ export default async function Image() {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            width: 120,
-            height: 120,
-            borderRadius: 28,
+            width: 140,
+            height: 140,
+            borderRadius: 32,
             background: 'white',
-            marginBottom: 40,
+            marginBottom: 48,
           }}
         >
-          <span style={{ fontSize: 64, fontWeight: 700, color: '#0047FF' }}>
+          <span style={{ fontSize: 80, fontWeight: 900, color: '#0047FF' }}>
             B
           </span>
         </div>
         <span
           style={{
-            fontSize: 72,
-            fontWeight: 700,
+            fontSize: 56,
+            fontWeight: 800,
             color: 'white',
-            letterSpacing: '-2px',
+            letterSpacing: '8px',
+            textTransform: 'uppercase' as const,
           }}
         >
-          블로그 라이터
+          BLOG WRITER
         </span>
+        <div
+          style={{
+            display: 'flex',
+            marginTop: 32,
+            width: 80,
+            height: 4,
+            background: 'rgba(255,255,255,0.3)',
+            borderRadius: 2,
+          }}
+        />
         <span
           style={{
-            fontSize: 28,
-            fontWeight: 700,
-            color: 'rgba(255,255,255,0.6)',
-            marginTop: 20,
+            fontSize: 22,
+            fontWeight: 400,
+            color: 'rgba(255,255,255,0.5)',
+            marginTop: 24,
+            letterSpacing: '2px',
           }}
         >
-          뷰티샵 원장님을 위한 AI 블로그 글쓰기
+          blogwriter.co.kr
         </span>
       </div>
     ),
-    {
-      ...size,
-      fonts: [
-        {
-          name: 'NotoSansKR',
-          data: fontData,
-          style: 'normal',
-          weight: 700,
-        },
-      ],
-    }
+    { ...size }
   );
 }
