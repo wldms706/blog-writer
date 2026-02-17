@@ -44,25 +44,30 @@ export async function proxy(request: NextRequest) {
     pathname.startsWith('/api') ||
     pathname.startsWith('/auth');
 
+  // 리다이렉트 시 세션 쿠키를 함께 전달하는 헬퍼
+  function redirectWithCookies(destination: string) {
+    const url = request.nextUrl.clone();
+    url.pathname = destination;
+    const redirectResponse = NextResponse.redirect(url);
+    supabaseResponse.cookies.getAll().forEach((cookie) => {
+      redirectResponse.cookies.set(cookie.name, cookie.value);
+    });
+    return redirectResponse;
+  }
+
   // 로그인 + 루트(랜딩) 접속 → 대시보드로
   if (user && pathname === '/') {
-    const url = request.nextUrl.clone();
-    url.pathname = '/write';
-    return NextResponse.redirect(url);
+    return redirectWithCookies('/write');
   }
 
   // 로그인 + 인증 페이지 → 대시보드로
   if (user && isAuthPage) {
-    const url = request.nextUrl.clone();
-    url.pathname = '/write';
-    return NextResponse.redirect(url);
+    return redirectWithCookies('/write');
   }
 
   // 비로그인 + 보호된 페이지 → 로그인으로
   if (!user && !isPublicPage) {
-    const url = request.nextUrl.clone();
-    url.pathname = '/login';
-    return NextResponse.redirect(url);
+    return redirectWithCookies('/login');
   }
 
   return supabaseResponse;
