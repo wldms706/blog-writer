@@ -3,10 +3,19 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "블로그 라이터 | 뷰티샵 블로그 글쓰기 도구",
-  description: "시술자 사고에서 벗어나 신고 없이 신뢰를 쌓는 블로그 글을 쓰도록 도와주는 도구입니다.",
+  description: "뷰티샵 원장님을 위한 AI 블로그 글쓰기. 규칙은 시스템이 책임집니다.",
   keywords: ["뷰티샵", "블로그", "글쓰기", "반영구", "두피", "눈썹", "마케팅"],
   icons: {
     icon: "/favicon.svg",
+  },
+  metadataBase: new URL("https://blogwriter.co.kr"),
+  openGraph: {
+    title: "블로그 라이터",
+    description: "뷰티샵 원장님을 위한 AI 블로그 글쓰기",
+    url: "https://blogwriter.co.kr",
+    siteName: "블로그라이터",
+    locale: "ko_KR",
+    type: "website",
   },
 };
 
