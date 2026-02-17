@@ -1,8 +1,10 @@
 import Link from 'next/link';
+import AuthRedirect from './AuthRedirect';
 
 export default function LandingPage() {
   return (
     <div className="min-h-dvh bg-[#0047FF] selection:bg-white selection:text-blue-600 flex flex-col">
+      <AuthRedirect />
       {/* Header */}
       <header className="flex items-center justify-between px-6 sm:px-10 py-6">
         <div className="text-white text-lg font-bold tracking-tight">
