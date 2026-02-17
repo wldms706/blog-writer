@@ -12,7 +12,7 @@ const CONTENT_TYPES = [
   {
     id: 'seo' as ContentType,
     icon: '🔍',
-    name: 'SEO 정보글',
+    name: '네이버 상위노출 글쓰기',
     description: '검색 노출을 위한 정보 전달 글',
   },
   {
