@@ -25,11 +25,16 @@ export async function proxy(request: NextRequest) {
     },
   );
 
+  const { pathname } = request.nextUrl;
+
+  // auth callback은 세션 교환이 필요하므로 proxy 간섭 없이 바로 통과
+  if (pathname.startsWith('/auth/callback')) {
+    return NextResponse.next({ request });
+  }
+
   const {
     data: { user },
   } = await supabase.auth.getUser();
-
-  const { pathname } = request.nextUrl;
 
   const isAuthPage =
     pathname.startsWith('/login') ||
