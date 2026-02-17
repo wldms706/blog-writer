@@ -16,6 +16,14 @@ export const metadata: Metadata = {
     siteName: "블로그라이터",
     locale: "ko_KR",
     type: "website",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "블로그 라이터",
+      },
+    ],
   },
 };
 
