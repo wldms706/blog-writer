@@ -29,19 +29,36 @@ export async function proxy(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  // 비로그인 상태에서 보호된 페이지 접근 시 로그인으로 리다이렉트
-  const isAuthPage =
-    request.nextUrl.pathname.startsWith('/login') ||
-    request.nextUrl.pathname.startsWith('/signup');
+  const { pathname } = request.nextUrl;
 
-  if (!user && !isAuthPage && !request.nextUrl.pathname.startsWith('/api')) {
+  const isAuthPage =
+    pathname.startsWith('/login') ||
+    pathname.startsWith('/signup');
+
+  const isPublicPage =
+    isAuthPage ||
+    pathname === '/landing' ||
+    pathname.startsWith('/pricing') ||
+    pathname.startsWith('/terms') ||
+    pathname.startsWith('/privacy') ||
+    pathname.startsWith('/api');
+
+  // 비로그인 + 루트 접속 → 랜딩 페이지로
+  if (!user && pathname === '/') {
+    const url = request.nextUrl.clone();
+    url.pathname = '/landing';
+    return NextResponse.redirect(url);
+  }
+
+  // 비로그인 + 보호된 페이지 → 로그인으로
+  if (!user && !isPublicPage) {
     const url = request.nextUrl.clone();
     url.pathname = '/login';
     return NextResponse.redirect(url);
   }
 
-  // 로그인 상태에서 인증 페이지 접근 시 홈으로 리다이렉트
-  if (user && isAuthPage) {
+  // 로그인 + 랜딩/인증 페이지 → 홈으로
+  if (user && (isAuthPage || pathname === '/landing')) {
     const url = request.nextUrl.clone();
     url.pathname = '/';
     return NextResponse.redirect(url);
