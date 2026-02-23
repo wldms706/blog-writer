@@ -47,7 +47,7 @@ export default function HistoryPage() {
     const success = await updateBlogUrl(id, blogUrlInput.trim());
     setBlogUrlSubmitting(false);
     if (success) {
-      setItems((prev) => prev.map((item) => item.id === id ? { ...item, blogUrl: blogUrlInput.trim() } : item));
+      setItems((prev) => prev.map((item) => item.id === id ? { ...item, blogUrl: blogUrlInput.trim(), blogUrlSubmittedAt: new Date().toISOString(), naverRank: null, rankCheckedAt: null } : item));
       setBlogUrlInput('');
     }
   };
@@ -122,7 +122,21 @@ export default function HistoryPage() {
                       <span>{dateStr}</span>
                       <span>{countCharsWithoutSpaces(item.content).toLocaleString()}자</span>
                       {item.blogUrl ? (
-                        <span className="rounded-full bg-green-50 px-2 py-0.5 text-[10px] font-medium text-green-600">링크 제출됨</span>
+                        item.naverRank !== null ? (
+                          item.naverRank > 0 ? (
+                            <span className="rounded-full bg-green-50 px-2 py-0.5 text-[10px] font-medium text-green-600">
+                              네이버 {item.naverRank}위
+                            </span>
+                          ) : (
+                            <span className="rounded-full bg-orange-50 px-2 py-0.5 text-[10px] font-medium text-orange-600">
+                              100위 밖
+                            </span>
+                          )
+                        ) : (
+                          <span className="rounded-full bg-yellow-50 px-2 py-0.5 text-[10px] font-medium text-yellow-600">
+                            순위 확인 중
+                          </span>
+                        )
                       ) : (
                         <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] text-slate-400">링크 미제출</span>
                       )}
@@ -217,6 +231,53 @@ export default function HistoryPage() {
               </>
             )}
           </div>
+
+          {/* 네이버 검색 순위 */}
+          {selected.blogUrl && (
+            <div className="mt-3 rounded-xl border border-slate-200 bg-white p-4">
+              <div className="mb-2 flex items-center gap-2">
+                <svg className="h-4 w-4 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                </svg>
+                <span className="text-xs font-medium text-slate-700">네이버 검색 순위</span>
+              </div>
+
+              {selected.naverRank !== null ? (
+                <div>
+                  {selected.naverRank > 0 ? (
+                    <div className="flex items-baseline gap-2">
+                      <span className="text-2xl font-bold text-green-600">{selected.naverRank}위</span>
+                      <span className="text-xs text-slate-500">
+                        &quot;{selected.keyword}&quot; 검색 결과
+                      </span>
+                    </div>
+                  ) : (
+                    <div>
+                      <span className="text-sm font-medium text-orange-600">100위 내에 없습니다</span>
+                      <p className="mt-1 text-xs text-slate-400">
+                        블로그 지수와 글 품질에 따라 순위가 변동될 수 있습니다
+                      </p>
+                    </div>
+                  )}
+                  {selected.rankCheckedAt && (
+                    <p className="mt-2 text-[11px] text-slate-400">
+                      확인: {new Date(selected.rankCheckedAt).toLocaleString('ko-KR')}
+                    </p>
+                  )}
+                </div>
+              ) : (
+                <div>
+                  <div className="flex items-center gap-2">
+                    <div className="h-3 w-3 animate-pulse rounded-full bg-yellow-400" />
+                    <span className="text-sm text-slate-600">순위 확인 대기 중</span>
+                  </div>
+                  <p className="mt-1 text-xs text-slate-400">
+                    블로그 링크 제출 후 약 7시간 뒤에 자동으로 확인됩니다
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       )}
     </div>

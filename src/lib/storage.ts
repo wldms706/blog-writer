@@ -9,6 +9,9 @@ export type HistoryItem = {
   purpose: string;
   content: string;
   blogUrl: string;
+  blogUrlSubmittedAt: string | null;
+  naverRank: number | null;    // null=미확인, 0=100위밖, 1~100=순위
+  rankCheckedAt: string | null;
 };
 
 export type AppSettings = {
@@ -68,6 +71,9 @@ export async function saveHistory(
     purpose: data.purpose || '',
     content: data.content,
     blogUrl: data.blog_url || '',
+    blogUrlSubmittedAt: data.blog_url_submitted_at || null,
+    naverRank: data.naver_rank ?? null,
+    rankCheckedAt: data.rank_checked_at || null,
   };
 }
 
@@ -93,6 +99,9 @@ export async function getAllHistory(userId: string): Promise<HistoryItem[]> {
     purpose: row.purpose || '',
     content: row.content,
     blogUrl: row.blog_url || '',
+    blogUrlSubmittedAt: row.blog_url_submitted_at || null,
+    naverRank: row.naver_rank ?? null,
+    rankCheckedAt: row.rank_checked_at || null,
   }));
 }
 
@@ -100,7 +109,12 @@ export async function updateBlogUrl(id: string, blogUrl: string): Promise<boolea
   const supabase = createClient();
   const { error } = await supabase
     .from('histories')
-    .update({ blog_url: blogUrl })
+    .update({
+      blog_url: blogUrl,
+      blog_url_submitted_at: new Date().toISOString(),
+      naver_rank: null,       // URL 변경 시 순위 리셋
+      rank_checked_at: null,  // 재확인 대기
+    })
     .eq('id', id);
 
   if (error) {

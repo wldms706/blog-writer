@@ -150,6 +150,9 @@ export default function StepGenerate({ onReset, formData }: StepGenerateProps) {
             purpose: formData.contentType === 'branding' ? 'branding' : (formData.purpose || ''),
             content: data.content,
             blogUrl: '',
+            blogUrlSubmittedAt: null,
+            naverRank: null,
+            rankCheckedAt: null,
           }, user.id);
           if (saved) setHistoryId(saved.id);
         }
@@ -375,6 +378,7 @@ export default function StepGenerate({ onReset, formData }: StepGenerateProps) {
                   <a href={blogUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-primary truncate block hover:underline">
                     {blogUrl}
                   </a>
+                  <p className="text-xs text-text-secondary mt-1">네이버 검색 순위가 자동으로 확인됩니다</p>
                 </div>
               </div>
             ) : (
