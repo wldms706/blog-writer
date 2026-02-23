@@ -17,6 +17,7 @@ create table histories (
   topic text,
   purpose text,
   content text not null,
+  blog_url text,
   created_at timestamptz default now()
 );
 
@@ -38,6 +39,7 @@ create policy "Users can update own profile" on profiles for update using (auth.
 
 create policy "Users can view own histories" on histories for select using (auth.uid() = user_id);
 create policy "Users can insert own histories" on histories for insert with check (auth.uid() = user_id);
+create policy "Users can update own histories" on histories for update using (auth.uid() = user_id);
 create policy "Users can delete own histories" on histories for delete using (auth.uid() = user_id);
 
 create policy "Users can view own settings" on settings for select using (auth.uid() = user_id);

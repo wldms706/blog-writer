@@ -8,6 +8,7 @@ export type HistoryItem = {
   topic: string;
   purpose: string;
   content: string;
+  blogUrl: string;
 };
 
 export type AppSettings = {
@@ -66,6 +67,7 @@ export async function saveHistory(
     topic: data.topic || '',
     purpose: data.purpose || '',
     content: data.content,
+    blogUrl: data.blog_url || '',
   };
 }
 
@@ -90,7 +92,22 @@ export async function getAllHistory(userId: string): Promise<HistoryItem[]> {
     topic: row.topic || '',
     purpose: row.purpose || '',
     content: row.content,
+    blogUrl: row.blog_url || '',
   }));
+}
+
+export async function updateBlogUrl(id: string, blogUrl: string): Promise<boolean> {
+  const supabase = createClient();
+  const { error } = await supabase
+    .from('histories')
+    .update({ blog_url: blogUrl })
+    .eq('id', id);
+
+  if (error) {
+    console.error('Update blog URL error:', error);
+    return false;
+  }
+  return true;
 }
 
 export async function deleteHistory(id: string) {

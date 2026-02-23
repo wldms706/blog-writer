@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { getAllHistory, deleteHistory, type HistoryItem } from '@/lib/storage';
+import { getAllHistory, deleteHistory, updateBlogUrl, type HistoryItem } from '@/lib/storage';
 import { BUSINESS_CATEGORIES } from '@/data/constants';
 import { createClient } from '@/lib/supabase/client';
 
@@ -13,6 +13,8 @@ export default function HistoryPage() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [blogUrlInput, setBlogUrlInput] = useState('');
+  const [blogUrlSubmitting, setBlogUrlSubmitting] = useState(false);
 
   useEffect(() => {
     async function load() {
@@ -37,6 +39,17 @@ export default function HistoryPage() {
     await navigator.clipboard.writeText(content);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleBlogUrlSubmit = async (id: string) => {
+    if (!blogUrlInput.trim()) return;
+    setBlogUrlSubmitting(true);
+    const success = await updateBlogUrl(id, blogUrlInput.trim());
+    setBlogUrlSubmitting(false);
+    if (success) {
+      setItems((prev) => prev.map((item) => item.id === id ? { ...item, blogUrl: blogUrlInput.trim() } : item));
+      setBlogUrlInput('');
+    }
   };
 
   const selected = items.find((i) => i.id === selectedId);
@@ -108,6 +121,11 @@ export default function HistoryPage() {
                     <div className="mt-2 flex items-center gap-3 text-[11px] text-slate-400">
                       <span>{dateStr}</span>
                       <span>{countCharsWithoutSpaces(item.content).toLocaleString()}자</span>
+                      {item.blogUrl ? (
+                        <span className="rounded-full bg-green-50 px-2 py-0.5 text-[10px] font-medium text-green-600">링크 제출됨</span>
+                      ) : (
+                        <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] text-slate-400">링크 미제출</span>
+                      )}
                     </div>
                   </div>
                   <button
@@ -163,6 +181,41 @@ export default function HistoryPage() {
             <div className="whitespace-pre-wrap text-sm leading-relaxed text-slate-700">
               {selected.content}
             </div>
+          </div>
+
+          {/* 블로그 링크 */}
+          <div className="mt-4 rounded-xl border border-slate-200 bg-white p-4">
+            {selected.blogUrl ? (
+              <div className="flex items-center gap-2">
+                <svg className="h-4 w-4 text-green-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+                <span className="text-xs text-slate-500">블로그 링크:</span>
+                <a href={selected.blogUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-blue-600 truncate hover:underline">
+                  {selected.blogUrl}
+                </a>
+              </div>
+            ) : (
+              <>
+                <p className="text-xs text-slate-500 mb-2">블로그에 올렸나요? 링크를 남겨주세요</p>
+                <div className="flex gap-2">
+                  <input
+                    type="url"
+                    value={blogUrlInput}
+                    onChange={(e) => setBlogUrlInput(e.target.value)}
+                    placeholder="https://blog.naver.com/..."
+                    className="flex-1 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500"
+                  />
+                  <button
+                    onClick={() => handleBlogUrlSubmit(selected.id)}
+                    disabled={!blogUrlInput.trim() || blogUrlSubmitting}
+                    className="rounded-lg bg-blue-600 px-3 py-2 text-xs font-medium text-white hover:bg-blue-700 disabled:opacity-40 disabled:cursor-not-allowed whitespace-nowrap"
+                  >
+                    {blogUrlSubmitting ? '제출 중...' : '제출'}
+                  </button>
+                </div>
+              </>
+            )}
           </div>
         </div>
       )}

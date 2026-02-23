@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { BUSINESS_CATEGORIES, TOPIC_CATEGORIES, PURPOSES, READER_STATES } from '@/data/constants';
 import { FormData } from '@/types';
-import { saveHistory } from '@/lib/storage';
+import { saveHistory, updateBlogUrl } from '@/lib/storage';
 import { createClient } from '@/lib/supabase/client';
 
 interface StepGenerateProps {
@@ -54,6 +54,10 @@ export default function StepGenerate({ onReset, formData }: StepGenerateProps) {
   const [content, setContent] = useState('');
   const [copied, setCopied] = useState(false);
   const [retryCount, setRetryCount] = useState(0);
+  const [historyId, setHistoryId] = useState<string | null>(null);
+  const [blogUrl, setBlogUrl] = useState('');
+  const [blogUrlSubmitted, setBlogUrlSubmitted] = useState(false);
+  const [blogUrlSubmitting, setBlogUrlSubmitting] = useState(false);
 
   const business = BUSINESS_CATEGORIES.find((b) => b.id === formData.businessCategory);
   const topic = TOPIC_CATEGORIES.find((t) => t.id === formData.topic);
@@ -139,13 +143,15 @@ export default function StepGenerate({ onReset, formData }: StepGenerateProps) {
         const supabase = createClient();
         const { data: { user } } = await supabase.auth.getUser();
         if (user) {
-          saveHistory({
+          const saved = await saveHistory({
             keyword: formData.keyword || '',
             businessCategory: formData.businessCategory || '',
             topic: formData.contentType === 'branding' ? (formData.brandingType || '') : (formData.topic || ''),
             purpose: formData.contentType === 'branding' ? 'branding' : (formData.purpose || ''),
             content: data.content,
+            blogUrl: '',
           }, user.id);
+          if (saved) setHistoryId(saved.id);
         }
       } catch (err) {
         if (cancelled) return;
@@ -167,6 +173,14 @@ export default function StepGenerate({ onReset, formData }: StepGenerateProps) {
     await navigator.clipboard.writeText(content);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleBlogUrlSubmit = async () => {
+    if (!historyId || !blogUrl.trim()) return;
+    setBlogUrlSubmitting(true);
+    const success = await updateBlogUrl(historyId, blogUrl.trim());
+    setBlogUrlSubmitting(false);
+    if (success) setBlogUrlSubmitted(true);
   };
 
   const handleRetry = () => {
@@ -345,6 +359,53 @@ export default function StepGenerate({ onReset, formData }: StepGenerateProps) {
             </div>
           </div>
         </div>
+
+        {/* 블로그 링크 제출 */}
+        {historyId && (
+          <div className="card p-5">
+            {blogUrlSubmitted ? (
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-success/10 flex items-center justify-center flex-shrink-0">
+                  <svg className="w-5 h-5 text-success" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h4 className="font-semibold text-text-primary text-sm">블로그 링크 제출 완료</h4>
+                  <a href={blogUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-primary truncate block hover:underline">
+                    {blogUrl}
+                  </a>
+                </div>
+              </div>
+            ) : (
+              <>
+                <div className="flex items-center gap-2 mb-3">
+                  <svg className="w-5 h-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                  </svg>
+                  <h4 className="font-semibold text-text-primary text-sm">블로그에 올렸나요?</h4>
+                </div>
+                <p className="text-xs text-text-secondary mb-3">글을 블로그에 발행한 후 링크를 남겨주세요</p>
+                <div className="flex gap-2">
+                  <input
+                    type="url"
+                    value={blogUrl}
+                    onChange={(e) => setBlogUrl(e.target.value)}
+                    placeholder="https://blog.naver.com/..."
+                    className="flex-1 px-3 py-2.5 rounded-xl border border-border-light bg-background-subtle text-sm text-text-primary placeholder:text-text-secondary/50 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
+                  />
+                  <button
+                    onClick={handleBlogUrlSubmit}
+                    disabled={!blogUrl.trim() || blogUrlSubmitting}
+                    className="px-4 py-2.5 rounded-xl bg-primary text-white text-sm font-medium hover:bg-primary/90 disabled:opacity-40 disabled:cursor-not-allowed transition-all whitespace-nowrap"
+                  >
+                    {blogUrlSubmitting ? '제출 중...' : '제출'}
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        )}
 
         {/* 버튼 */}
         <div className="flex flex-col sm:flex-row gap-3 justify-center pt-4">
