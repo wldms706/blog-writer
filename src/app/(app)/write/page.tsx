@@ -272,6 +272,7 @@ export default function Home() {
             shopPhone={formData.shopPhone}
             shopParking={formData.shopParking}
             onShopInfoChange={(field, value) => setFormData((prev) => ({ ...prev, [field]: value }))}
+            isRegulated={isRegulated}
           />
         );
       case 'tone':

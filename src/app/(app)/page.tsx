@@ -251,6 +251,7 @@ export default function Home() {
             onChange={(value) => setFormData((prev) => ({ ...prev, additionalContext: value }))}
             customPurpose={formData.customPurpose}
             onCustomPurposeChange={(text) => setFormData((prev) => ({ ...prev, customPurpose: text }))}
+            isRegulated={isRegulated}
           />
         );
       case 'tone':

@@ -12,6 +12,7 @@ interface StepTreatmentInfoProps {
   shopPhone?: string;
   shopParking?: string;
   onShopInfoChange?: (field: 'shopAddress' | 'shopHours' | 'shopPhone' | 'shopParking', value: string) => void;
+  isRegulated?: boolean;
 }
 
 interface ShopInfo {
@@ -94,7 +95,7 @@ const EXAMPLES = [
   },
 ];
 
-export default function StepTreatmentInfo({ value, onChange, customPurpose = '', onCustomPurposeChange, shopAddress, shopHours, shopPhone, shopParking, onShopInfoChange }: StepTreatmentInfoProps) {
+export default function StepTreatmentInfo({ value, onChange, customPurpose = '', onCustomPurposeChange, shopAddress, shopHours, shopPhone, shopParking, onShopInfoChange, isRegulated = false }: StepTreatmentInfoProps) {
   const [shopInfo, setShopInfo] = useState<ShopInfo>(() => parseFields(value));
   const [showExamples, setShowExamples] = useState(false);
 
@@ -130,15 +131,17 @@ export default function StepTreatmentInfo({ value, onChange, customPurpose = '',
       </div>
 
       <div className="max-w-2xl mx-auto space-y-4">
-        {/* 상호명 경고 */}
-        <div className="flex items-start gap-3 rounded-2xl bg-orange-50 border border-orange-200 px-4 py-3">
-          <svg className="w-4 h-4 text-orange-500 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
-          </svg>
-          <p className="text-xs text-orange-700 leading-relaxed">
-            <span className="font-bold">상호명은 넣지 마세요.</span> 글 안에 샵 이름이 들어가면 네이버에서 광고성 글로 판단해 비공개 처리될 수 있어요.
-          </p>
-        </div>
+        {/* 상호명 경고 - 반영구(규제 업종)에만 표시 */}
+        {isRegulated && (
+          <div className="flex items-start gap-3 rounded-2xl bg-orange-50 border border-orange-200 px-4 py-3">
+            <svg className="w-4 h-4 text-orange-500 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
+            </svg>
+            <p className="text-xs text-orange-700 leading-relaxed">
+              <span className="font-bold">상호명은 넣지 마세요.</span> 글 안에 샵 이름이 들어가면 네이버에서 광고성 글로 판단해 비공개 처리될 수 있어요.
+            </p>
+          </div>
+        )}
 
         {/* 구조화된 입력 필드 */}
         <div className="card p-6 space-y-5">
