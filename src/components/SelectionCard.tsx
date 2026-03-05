@@ -23,12 +23,12 @@ export default function SelectionCard({
   return (
     <button
       onClick={onClick}
-      className={`w-full text-left rounded-2xl border-2 transition-all duration-300 group relative overflow-hidden
+      className={`w-full text-left rounded-2xl transition-all duration-300 group relative overflow-hidden
         ${compact ? 'p-3' : 'p-5'}
         ${
           selected
-            ? 'border-primary bg-gradient-to-br from-primary/5 to-accent/5 shadow-lg'
-            : 'border-border-light bg-background-card hover:border-secondary-dark hover:shadow-md'
+            ? 'bg-[#3B5CFF] text-white shadow-lg'
+            : 'bg-[#F5F5F5] hover:bg-[#EBEBEB] hover:shadow-md'
         }
       `}
     >
@@ -39,14 +39,14 @@ export default function SelectionCard({
           rounded-full border-2
           ${
             selected
-              ? 'border-primary bg-primary'
-              : 'border-border bg-transparent'
+              ? 'border-white bg-white'
+              : 'border-gray-300 bg-transparent'
           }
         `}
       >
         {selected && (
           <svg
-            className={compact ? 'w-2.5 h-2.5 text-white' : 'w-3 h-3 text-white'}
+            className={`${compact ? 'w-2.5 h-2.5' : 'w-3 h-3'} text-[#3B5CFF]`}
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -64,7 +64,7 @@ export default function SelectionCard({
       {/* Badge */}
       {badge && (
         <div className="mb-2">
-          <span className="px-2 py-0.5 text-xs font-medium rounded-full bg-warning/20 text-warning">
+          <span className="px-3 py-1 text-xs font-bold rounded-full bg-orange-500 text-white">
             {badge}
           </span>
         </div>
@@ -78,25 +78,19 @@ export default function SelectionCard({
         )}
         <div className="flex-1 min-w-0">
           <h3
-            className={`font-semibold transition-colors ${compact ? 'text-sm mb-0.5' : 'text-lg mb-1'} ${
-              selected ? 'text-primary' : 'text-text-primary'
+            className={`font-bold transition-colors ${compact ? 'text-sm mb-0.5' : 'text-lg mb-1'} ${
+              selected ? 'text-white' : 'text-black'
             }`}
           >
             {title}
           </h3>
-          <p className={`text-text-secondary leading-relaxed ${compact ? 'text-xs' : 'text-sm'}`}>
+          <p className={`leading-relaxed ${compact ? 'text-xs' : 'text-sm'} ${
+            selected ? 'text-white/70' : 'text-gray-500'
+          }`}>
             {description}
           </p>
         </div>
       </div>
-
-      {/* Hover/Selected Background Effect */}
-      <div
-        className={`absolute inset-0 bg-gradient-to-br from-primary/10 to-accent/10 transition-opacity duration-300
-          ${selected ? 'opacity-100' : 'opacity-0 group-hover:opacity-50'}
-        `}
-        style={{ zIndex: -1 }}
-      />
     </button>
   );
 }

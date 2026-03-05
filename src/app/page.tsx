@@ -1,55 +1,132 @@
 import Link from 'next/link';
 import AuthRedirect from './AuthRedirect';
 
+const FEATURE_TAGS = [
+  'SEO 최적화', '키워드 분석', '네이버 상위노출',
+  '반영구 특화', 'AI 글쓰기', '규칙 자동 적용',
+  '수강생 모집', '브랜딩 글', '키워드 추천',
+];
+
 export default function LandingPage() {
   return (
-    <div className="min-h-dvh bg-[#0047FF] selection:bg-white selection:text-blue-600 flex flex-col">
+    <div className="min-h-dvh selection:bg-[#3B5CFF] selection:text-white flex flex-col">
       <AuthRedirect />
-      {/* Header */}
-      <header className="flex items-center justify-between px-6 sm:px-10 py-6">
-        <div className="text-white text-lg font-bold tracking-tight">
-          블로그라이터
+
+      {/* === Section 1: Hero (Black) === */}
+      <section className="bg-black text-white">
+        {/* Header */}
+        <header className="flex items-center justify-between px-6 sm:px-10 py-6">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-lg bg-[#3B5CFF] flex items-center justify-center">
+              <span className="text-white text-sm font-black">B</span>
+            </div>
+            <span className="text-white text-lg font-black tracking-tight">
+              블로그라이터
+            </span>
+          </div>
+          <Link
+            href="/login"
+            className="text-white border-2 border-white rounded-full px-6 py-2 text-sm font-bold hover:bg-white hover:text-black transition-all uppercase tracking-widest"
+          >
+            LOGIN
+          </Link>
+        </header>
+
+        {/* Hero Content */}
+        <div className="flex flex-col items-center justify-center px-6 py-20 sm:py-32">
+          <div className="text-center max-w-4xl">
+            <h1 className="text-5xl sm:text-7xl md:text-[120px] font-black text-white leading-none tracking-tight">
+              블로그
+              <br />
+              <span className="font-display-italic text-[#3B5CFF]">라이터</span>
+            </h1>
+            <p className="mt-8 sm:mt-12 text-lg sm:text-2xl text-white/60 font-light">
+              뷰티샵 원장님을 위한 AI 블로그 글쓰기
+            </p>
+            <p className="mt-3 text-sm sm:text-base text-white/30">
+              규칙은 시스템이 책임집니다
+            </p>
+
+            <div className="mt-12 sm:mt-16">
+              <Link
+                href="/signup"
+                className="inline-block text-black bg-white rounded-full px-10 py-4 text-base sm:text-lg font-bold hover:bg-white/90 transition-all tracking-wide"
+              >
+                무료로 시작하기
+              </Link>
+            </div>
+
+            <p className="mt-6 text-xs text-white/30">
+              가입 즉시 하루 3회 무료 생성
+            </p>
+          </div>
         </div>
-        <Link
-          href="/login"
-          className="text-white border-2 border-white px-6 py-2 text-sm font-bold hover:bg-white hover:text-[#0047FF] transition-all uppercase tracking-widest"
-        >
-          LOGIN
-        </Link>
-      </header>
+      </section>
 
-      {/* Hero */}
-      <main className="flex-grow flex items-center justify-center px-6">
-        <div className="text-center max-w-4xl">
-          <h1 className="text-5xl sm:text-7xl md:text-[120px] font-black text-white leading-none tracking-tight">
-            블로그
-            <br />
-            라이터
-          </h1>
-          <p className="mt-8 sm:mt-12 text-lg sm:text-2xl text-white/70 font-light">
-            뷰티샵 원장님을 위한 AI 블로그 글쓰기
-          </p>
-          <p className="mt-3 text-sm sm:text-base text-white/40">
-            규칙은 시스템이 책임집니다
+      {/* === Section 2: Features (Blue) === */}
+      <section className="bg-[#3B5CFF] text-white py-20 sm:py-28 px-6">
+        <div className="max-w-4xl mx-auto text-center">
+          <h2 className="text-3xl sm:text-5xl font-black uppercase tracking-tight">
+            ALL YOUR
+          </h2>
+          <h2 className="text-3xl sm:text-5xl font-display-italic mt-1">
+            blog needs
+          </h2>
+          <p className="mt-6 text-white/70 max-w-xl mx-auto">
+            뷰티샵 블로그에 필요한 모든 기능을 한 곳에서.
+            최고의 품질과 사용성을 보장합니다.
           </p>
 
-          <div className="mt-12 sm:mt-16">
-            <Link
-              href="/signup"
-              className="inline-block text-[#0047FF] bg-white px-10 py-4 text-base sm:text-lg font-bold hover:bg-white/90 transition-all tracking-wide"
-            >
-              무료로 시작하기
-            </Link>
+          {/* Floating Pill Tags */}
+          <div className="mt-12 flex flex-wrap justify-center gap-3">
+            {FEATURE_TAGS.map((tag) => (
+              <span
+                key={tag}
+                className="pill-tag text-sm"
+              >
+                {tag}
+              </span>
+            ))}
           </div>
 
-          <p className="mt-6 text-xs text-white/30">
-            가입 즉시 하루 3회 무료 생성
-          </p>
+          <div className="mt-12">
+            <Link
+              href="/signup"
+              className="inline-block border-2 border-white rounded-full px-8 py-3 text-sm font-bold hover:bg-white hover:text-[#3B5CFF] transition-all uppercase tracking-widest"
+            >
+              시작하기
+            </Link>
+          </div>
         </div>
-      </main>
+      </section>
 
-      {/* Footer */}
-      <footer className="px-6 sm:px-10 py-6 flex items-center justify-between text-white/30 text-xs">
+      {/* === Section 3: How it works (White) === */}
+      <section className="bg-white text-black py-20 sm:py-28 px-6">
+        <div className="max-w-4xl mx-auto">
+          <h2 className="text-3xl sm:text-4xl font-black text-center mb-16">
+            이렇게 작동합니다
+          </h2>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-8">
+            {[
+              { num: '01', title: '정보 입력', desc: '업종, 키워드, 주제를 선택하면 AI가 최적의 구성을 설계합니다' },
+              { num: '02', title: '자동 생성', desc: 'SEO 규칙과 네이버 로직을 반영한 고품질 블로그 글을 생성합니다' },
+              { num: '03', title: '복사 & 발행', desc: '완성된 글을 복사해서 네이버 블로그에 바로 올리세요' },
+            ].map((step) => (
+              <div key={step.num} className="text-center sm:text-left">
+                <div className="text-5xl font-black text-[#3B5CFF] mb-4 font-display">
+                  {step.num}
+                </div>
+                <h3 className="text-xl font-black mb-2">{step.title}</h3>
+                <p className="text-gray-500 text-sm leading-relaxed">{step.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* === Footer (Black) === */}
+      <footer className="bg-black px-6 sm:px-10 py-8 flex items-center justify-between text-white/30 text-xs">
         <span>© 2026 블로그라이터</span>
         <div className="flex gap-4">
           <Link href="/pricing" className="hover:text-white/60 transition-colors">요금</Link>

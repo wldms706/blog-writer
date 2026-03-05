@@ -18,16 +18,16 @@ export default function StepProgress({ currentStep, totalSteps, contentType = 's
       {/* Mobile: Simple Progress Bar */}
       <div className="md:hidden">
         <div className="flex items-center justify-between mb-2">
-          <span className="text-sm font-medium text-text-secondary">
+          <span className="text-sm font-bold text-black">
             {steps[currentStep - 1]?.title}
           </span>
-          <span className="text-sm text-text-muted">
+          <span className="text-sm font-bold text-[#3B5CFF]">
             {currentStep} / {total}
           </span>
         </div>
-        <div className="h-1.5 bg-background-subtle rounded-full overflow-hidden">
+        <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
           <div
-            className="h-full bg-gradient-to-r from-primary to-accent rounded-full transition-all duration-500 ease-out"
+            className="h-full bg-[#3B5CFF] rounded-full transition-all duration-500 ease-out"
             style={{ width: `${(currentStep / total) * 100}%` }}
           />
         </div>
@@ -37,11 +37,11 @@ export default function StepProgress({ currentStep, totalSteps, contentType = 's
       <div className="hidden md:block">
         <div className="flex items-center justify-between relative">
           {/* Connection Line Background */}
-          <div className="absolute top-4 left-0 right-0 h-0.5 bg-border-light" />
+          <div className="absolute top-[18px] left-0 right-0 h-0.5 bg-gray-200" />
 
           {/* Progress Line */}
           <div
-            className="absolute top-4 left-0 h-0.5 bg-gradient-to-r from-primary to-accent transition-all duration-500 ease-out"
+            className="absolute top-[18px] left-0 h-0.5 bg-black transition-all duration-500 ease-out"
             style={{ width: `${((currentStep - 1) / (total - 1)) * 100}%` }}
           />
 
@@ -78,12 +78,12 @@ export default function StepProgress({ currentStep, totalSteps, contentType = 's
                 )}
               </div>
               <span
-                className={`mt-2 text-xs font-medium text-center whitespace-nowrap transition-colors ${
+                className={`mt-2 text-xs font-bold text-center whitespace-nowrap transition-colors ${
                   step.id === currentStep
-                    ? 'text-primary'
+                    ? 'text-[#3B5CFF]'
                     : step.id < currentStep
-                    ? 'text-success'
-                    : 'text-text-muted'
+                    ? 'text-black'
+                    : 'text-gray-400'
                 }`}
               >
                 {step.title}

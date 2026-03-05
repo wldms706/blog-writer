@@ -34,15 +34,15 @@ export type SafetyCondition = {
 };
 
 export type ContentType = 'seo' | 'branding';
-export type BrandingType = 'intro' | 'philosophy';
+export type BrandingType = 'recruit' | 'philosophy';
 export type TonePreset = 'warm' | 'professional' | 'conversational';
 
 // 브랜딩 종류별 구조화된 정보
-export type IntroInfo = {
-  experience: string;      // 경력 (예: 10년차)
-  specialty: string;       // 전문 분야
-  startReason: string;     // 이 일을 시작한 계기
-  customerMind: string;    // 고객을 대하는 마음
+export type RecruitInfo = {
+  courseName: string;       // 교육 과정명 (예: 반영구 눈썹 1:1 클래스)
+  targetStudent: string;    // 대상 (예: 입문자, 전직 희망자, 기존 시술자 스킬업)
+  curriculum: string;       // 커리큘럼/수업 내용 (예: 이론+실습 8회, 모델 실습 포함)
+  benefit: string;          // 수강 혜택/강점 (예: 소수정예, 수료 후 취업연계, 재료 제공)
 };
 
 export type PhilosophyInfo = {
@@ -53,7 +53,7 @@ export type PhilosophyInfo = {
 };
 
 export type BrandingInfo = {
-  intro: IntroInfo;
+  recruit: RecruitInfo;
   philosophy: PhilosophyInfo;
 };
 
@@ -63,6 +63,7 @@ export type FormData = {
   keyword: string;
   topic: string | null;
   purpose: string | null;
+  customPurpose: string;    // 목적 자유 입력 텍스트
   readerState: string | null;
   rulesConfirmed: boolean;
   selectedTitle: string;
@@ -72,6 +73,11 @@ export type FormData = {
   brandingInfo: BrandingInfo;
   // 톤 프리셋 (반영구 제외)
   tonePreset: TonePreset;
+  // 샵 정보 (반영구 제외 - 글에 자연스럽게 포함)
+  shopAddress: string;
+  shopHours: string;
+  shopPhone: string;
+  shopParking: string;
 };
 
 export type Step = {

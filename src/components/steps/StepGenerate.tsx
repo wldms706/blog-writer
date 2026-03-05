@@ -99,6 +99,7 @@ export default function StepGenerate({ onReset, formData }: StepGenerateProps) {
             businessCategory: business?.name || formData.businessCategory,
             topic: topic?.name || formData.topic,
             purpose: purpose?.name || formData.purpose,
+            customPurpose: formData.customPurpose?.trim() || '',
             readerState: reader?.name || formData.readerState,
             selectedTitle: formData.selectedTitle,
             contentType: formData.contentType,
@@ -106,6 +107,10 @@ export default function StepGenerate({ onReset, formData }: StepGenerateProps) {
             brandingInfo: formData.brandingInfo,
             treatmentInfo: formData.additionalContext,
             tonePreset: formData.tonePreset,
+            shopAddress: formData.shopAddress,
+            shopHours: formData.shopHours,
+            shopPhone: formData.shopPhone,
+            shopParking: formData.shopParking,
           }),
         });
 
@@ -152,6 +157,7 @@ export default function StepGenerate({ onReset, formData }: StepGenerateProps) {
             blogUrl: '',
             blogUrlSubmittedAt: null,
             naverRank: null,
+            naverBlogRank: null,
             rankCheckedAt: null,
           }, user.id);
           if (saved) setHistoryId(saved.id);
@@ -207,8 +213,8 @@ export default function StepGenerate({ onReset, formData }: StepGenerateProps) {
                 </svg>
               </div>
             </div>
-            <p className="text-lg font-medium text-text-primary mb-2">글 생성에 실패했습니다</p>
-            <p className="text-sm text-text-secondary mb-6">{errorMessage}</p>
+            <p className="text-lg font-medium text-black mb-2">글 생성에 실패했습니다</p>
+            <p className="text-sm text-gray-500 mb-6">{errorMessage}</p>
             <div className="flex gap-3 justify-center">
               <button onClick={onReset} className="btn-secondary">처음으로</button>
               <button onClick={handleRetry} className="btn-primary">다시 시도</button>
@@ -227,8 +233,8 @@ export default function StepGenerate({ onReset, formData }: StepGenerateProps) {
           <div className="card p-10 text-center">
             {/* 로딩 애니메이션 */}
             <div className="mb-8">
-              <div className="w-24 h-24 mx-auto rounded-full bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center animate-pulse-soft">
-                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center">
+              <div className="w-24 h-24 mx-auto rounded-full bg-[#3B5CFF]/10 flex items-center justify-center animate-pulse-soft">
+                <div className="w-16 h-16 rounded-full bg-[#3B5CFF] flex items-center justify-center">
                   <svg className="w-8 h-8 text-white animate-spin" fill="none" viewBox="0 0 24 24">
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
@@ -238,7 +244,7 @@ export default function StepGenerate({ onReset, formData }: StepGenerateProps) {
             </div>
 
             {/* 메시지 - 규칙/숫자 없이 친절한 문구만 */}
-            <p className="text-lg text-text-primary font-medium mb-2 animate-fade-in" key={currentMessage}>
+            <p className="text-lg text-black font-medium mb-2 animate-fade-in" key={currentMessage}>
               {currentMessage}
             </p>
 
@@ -258,13 +264,13 @@ export default function StepGenerate({ onReset, formData }: StepGenerateProps) {
   return (
     <div className="animate-fade-in">
       <div className="text-center mb-8">
-        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-success/10 text-success text-sm font-medium mb-4">
+        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#3B5CFF] text-white font-bold text-sm mb-4">
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
           완료
         </div>
-        <h2 className="text-2xl sm:text-3xl font-bold text-text-primary mb-2">
+        <h2 className="text-2xl sm:text-3xl font-black text-black mb-2">
           {UX_MESSAGES.complete}
         </h2>
       </div>
@@ -273,25 +279,25 @@ export default function StepGenerate({ onReset, formData }: StepGenerateProps) {
         {/* 설정 요약 - 간결하게 */}
         <div className="card p-4">
           <div className="flex flex-wrap gap-2">
-            <span className="px-3 py-1.5 rounded-full bg-purple-100 text-purple-700 text-sm font-medium">
+            <span className="px-3 py-1.5 rounded-full bg-[#3B5CFF] text-white font-bold text-sm">
               {isBranding ? '브랜딩' : 'SEO'}
             </span>
-            <span className="px-3 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-medium">
+            <span className="px-3 py-1.5 rounded-full bg-black text-white font-bold text-sm">
               {business?.icon} {business?.name}
             </span>
-            <span className="px-3 py-1.5 rounded-full bg-accent/10 text-accent-dark text-sm font-medium">
+            <span className="px-3 py-1.5 rounded-full bg-gray-800 text-white font-bold text-sm">
               {formData.keyword}
             </span>
             {isBranding ? (
-              <span className="px-3 py-1.5 rounded-full bg-background-subtle text-text-secondary text-sm">
+              <span className="px-3 py-1.5 rounded-full bg-gray-200 text-black text-sm font-medium">
                 {formData.brandingType ? BRANDING_TYPE_NAMES[formData.brandingType] : ''}
               </span>
             ) : (
               <>
-                <span className="px-3 py-1.5 rounded-full bg-background-subtle text-text-secondary text-sm">
+                <span className="px-3 py-1.5 rounded-full bg-gray-200 text-black text-sm font-medium">
                   {topic?.name}
                 </span>
-                <span className="px-3 py-1.5 rounded-full bg-background-subtle text-text-secondary text-sm">
+                <span className="px-3 py-1.5 rounded-full bg-gray-200 text-black text-sm font-medium">
                   {purpose?.name}
                 </span>
               </>
@@ -303,8 +309,8 @@ export default function StepGenerate({ onReset, formData }: StepGenerateProps) {
         <div className="card p-6 sm:p-8">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
-              <h3 className="font-semibold text-text-primary">생성된 글</h3>
-              <span className="px-2.5 py-1 rounded-lg bg-primary/10 text-primary text-sm font-medium">
+              <h3 className="font-semibold text-black">생성된 글</h3>
+              <span className="px-2.5 py-1 rounded-lg bg-[#3B5CFF]/10 text-[#3B5CFF] text-sm font-medium">
                 {countCharsWithoutSpaces(content).toLocaleString()}자
               </span>
             </div>
@@ -312,8 +318,8 @@ export default function StepGenerate({ onReset, formData }: StepGenerateProps) {
               onClick={handleCopy}
               className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300 ${
                 copied
-                  ? 'bg-success text-white'
-                  : 'bg-background-subtle text-text-secondary hover:bg-secondary-light'
+                  ? 'bg-[#3B5CFF] text-white'
+                  : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
               }`}
             >
               {copied ? (
@@ -334,30 +340,45 @@ export default function StepGenerate({ onReset, formData }: StepGenerateProps) {
             </button>
           </div>
 
-          <div className="p-4 sm:p-6 rounded-xl bg-background-subtle border border-border-light">
-            <div className="whitespace-pre-wrap text-text-primary leading-relaxed text-sm sm:text-[15px]">
+          <div className="p-4 sm:p-6 rounded-xl bg-gray-50 border border-gray-200">
+            <div className="whitespace-pre-wrap text-black leading-relaxed text-sm sm:text-[15px]">
               {highlightKeyword(content, formData.keyword)}
             </div>
           </div>
 
           {/* 키워드 하이라이트 안내 */}
-          <p className="text-xs text-slate-400 text-center">
+          <p className="text-xs text-gray-400 text-center">
             <mark className="bg-yellow-200 text-yellow-900 px-1 rounded text-[10px]">노란색</mark> 표시는 핵심 키워드입니다
           </p>
         </div>
 
         {/* 안전 뱃지 - 간결하게 */}
-        <div className="card p-4 bg-gradient-to-r from-success/5 to-primary/5 border-success/20">
+        <div className="card p-4 bg-black text-white border-none">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-success/10 flex items-center justify-center flex-shrink-0">
-              <svg className="w-5 h-5 text-success" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center flex-shrink-0">
+              <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
               </svg>
             </div>
             <div>
-              <h4 className="font-semibold text-success text-sm">안전한 글</h4>
-              <p className="text-text-secondary text-xs">
+              <h4 className="font-semibold text-white text-sm">안전한 글</h4>
+              <p className="text-white/70 text-xs">
                 내부 기준을 충족한 블로그 글입니다
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* 사진 업로드 안내 */}
+        <div className="card p-4 bg-orange-50 border border-orange-200">
+          <div className="flex items-start gap-3">
+            <svg className="w-5 h-5 text-orange-500 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
+            </svg>
+            <div>
+              <p className="text-sm font-bold text-orange-800">사진에 글씨를 넣지 마세요</p>
+              <p className="text-xs text-orange-700 mt-0.5">
+                이미지에 텍스트·로고·상호명이 포함된 사진은 네이버에서 광고성 글로 판단해 저품질 또는 비공개 처리될 수 있습니다.
               </p>
             </div>
           </div>
@@ -368,40 +389,40 @@ export default function StepGenerate({ onReset, formData }: StepGenerateProps) {
           <div className="card p-5">
             {blogUrlSubmitted ? (
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-success/10 flex items-center justify-center flex-shrink-0">
-                  <svg className="w-5 h-5 text-success" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <div className="w-10 h-10 rounded-xl bg-[#3B5CFF]/10 flex items-center justify-center flex-shrink-0">
+                  <svg className="w-5 h-5 text-[#3B5CFF]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
                 </div>
                 <div className="flex-1 min-w-0">
-                  <h4 className="font-semibold text-text-primary text-sm">블로그 링크 제출 완료</h4>
-                  <a href={blogUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-primary truncate block hover:underline">
+                  <h4 className="font-semibold text-black text-sm">블로그 링크 제출 완료</h4>
+                  <a href={blogUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-[#3B5CFF] truncate block hover:underline">
                     {blogUrl}
                   </a>
-                  <p className="text-xs text-text-secondary mt-1">네이버 검색 순위가 자동으로 확인됩니다</p>
+                  <p className="text-xs text-gray-500 mt-1">네이버 검색 순위가 자동으로 확인됩니다</p>
                 </div>
               </div>
             ) : (
               <>
                 <div className="flex items-center gap-2 mb-3">
-                  <svg className="w-5 h-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg className="w-5 h-5 text-[#3B5CFF]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
                   </svg>
-                  <h4 className="font-semibold text-text-primary text-sm">블로그에 올렸나요?</h4>
+                  <h4 className="font-semibold text-black text-sm">블로그에 올렸나요?</h4>
                 </div>
-                <p className="text-xs text-text-secondary mb-3">글을 블로그에 발행한 후 링크를 남겨주세요</p>
+                <p className="text-xs text-gray-500 mb-3">글을 블로그에 발행한 후 링크를 남겨주세요</p>
                 <div className="flex gap-2">
                   <input
                     type="url"
                     value={blogUrl}
                     onChange={(e) => setBlogUrl(e.target.value)}
                     placeholder="https://blog.naver.com/..."
-                    className="flex-1 px-3 py-2.5 rounded-xl border border-border-light bg-background-subtle text-sm text-text-primary placeholder:text-text-secondary/50 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
+                    className="flex-1 px-3 py-2.5 rounded-xl border border-gray-200 bg-white text-sm text-black placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#3B5CFF]/20 focus:border-[#3B5CFF]"
                   />
                   <button
                     onClick={handleBlogUrlSubmit}
                     disabled={!blogUrl.trim() || blogUrlSubmitting}
-                    className="px-4 py-2.5 rounded-xl bg-primary text-white text-sm font-medium hover:bg-primary/90 disabled:opacity-40 disabled:cursor-not-allowed transition-all whitespace-nowrap"
+                    className="px-4 py-2.5 rounded-xl bg-[#3B5CFF] text-white text-sm font-medium hover:bg-[#3B5CFF]/90 disabled:opacity-40 disabled:cursor-not-allowed transition-all whitespace-nowrap"
                   >
                     {blogUrlSubmitting ? '제출 중...' : '제출'}
                   </button>

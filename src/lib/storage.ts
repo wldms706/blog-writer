@@ -10,7 +10,8 @@ export type HistoryItem = {
   content: string;
   blogUrl: string;
   blogUrlSubmittedAt: string | null;
-  naverRank: number | null;    // null=미확인, 0=100위밖, 1~100=순위
+  naverRank: number | null;       // VIEW 탭: null=미확인, 0=30위밖, 1~30=순위
+  naverBlogRank: number | null;   // 블로그 탭: null=미확인, 0=30위밖, 1~30=순위
   rankCheckedAt: string | null;
 };
 
@@ -73,6 +74,7 @@ export async function saveHistory(
     blogUrl: data.blog_url || '',
     blogUrlSubmittedAt: data.blog_url_submitted_at || null,
     naverRank: data.naver_rank ?? null,
+    naverBlogRank: data.naver_blog_rank ?? null,
     rankCheckedAt: data.rank_checked_at || null,
   };
 }
@@ -101,6 +103,7 @@ export async function getAllHistory(userId: string): Promise<HistoryItem[]> {
     blogUrl: row.blog_url || '',
     blogUrlSubmittedAt: row.blog_url_submitted_at || null,
     naverRank: row.naver_rank ?? null,
+    naverBlogRank: row.naver_blog_rank ?? null,
     rankCheckedAt: row.rank_checked_at || null,
   }));
 }
@@ -112,8 +115,9 @@ export async function updateBlogUrl(id: string, blogUrl: string): Promise<boolea
     .update({
       blog_url: blogUrl,
       blog_url_submitted_at: new Date().toISOString(),
-      naver_rank: null,       // URL 변경 시 순위 리셋
-      rank_checked_at: null,  // 재확인 대기
+      naver_rank: null,        // URL 변경 시 순위 리셋
+      naver_blog_rank: null,   // 블로그 탭 순위도 리셋
+      rank_checked_at: null,   // 재확인 대기
     })
     .eq('id', id);
 

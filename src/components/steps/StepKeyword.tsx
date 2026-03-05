@@ -23,7 +23,6 @@ export default function StepKeyword({ value, onChange, businessCategory, topic }
   const [needsBlogIndex, setNeedsBlogIndex] = useState(false);
   const [blogIndexLevel, setBlogIndexLevel] = useState<string | null>(null);
   const [location, setLocation] = useState<string>('');
-  const [showManualInput, setShowManualInput] = useState(false);
   const [keywordWarning, setKeywordWarning] = useState<string | null>(null);
 
   // 키워드 유효성 검사
@@ -120,10 +119,10 @@ export default function StepKeyword({ value, onChange, businessCategory, topic }
     const colorClass = group === 'optimal'
       ? 'bg-green-100 text-green-700'
       : group === 'sub-high'
-      ? 'bg-blue-100 text-blue-700'
+      ? 'bg-[#3B5CFF]/10 text-[#3B5CFF]'
       : group === 'sub-low'
       ? 'bg-yellow-100 text-yellow-700'
-      : 'bg-slate-100 text-slate-700';
+      : 'bg-gray-100 text-gray-700';
 
     return <span className={`px-2 py-0.5 rounded-full text-xs ${colorClass}`}>{label}</span>;
   };
@@ -147,20 +146,71 @@ export default function StepKeyword({ value, onChange, businessCategory, topic }
   return (
     <div className="animate-fade-in">
       <div className="text-center mb-8">
-        <h2 className="text-2xl sm:text-3xl font-bold text-text-primary mb-2">
+        <h2 className="text-2xl sm:text-3xl font-black text-black mb-2">
           검색 키워드를 선택해주세요
         </h2>
-        <p className="text-text-secondary">
+        <p className="text-gray-500">
           블로그 지수와 지역에 맞는 키워드를 추천해드립니다
         </p>
       </div>
 
       <div className="max-w-xl mx-auto space-y-6">
+        {/* 직접 입력 (항상 최상단에 노출) */}
+        <div className="space-y-2">
+          <label className="block text-sm font-bold text-black">키워드 직접 입력</label>
+          <input
+            type="text"
+            value={value}
+            onChange={(e) => handleKeywordChange(e.target.value)}
+            placeholder="예: 남자 헤어컷, 천안눈썹문신, 강남피부관리"
+            className={`w-full rounded-xl border-2 px-4 py-3 text-sm outline-none focus:border-[#3B5CFF] ${
+              keywordWarning ? 'border-amber-400 bg-amber-50' : 'border-gray-200 focus:bg-white'
+            }`}
+          />
+          {keywordWarning ? (
+            <div className="flex items-start gap-2 rounded-lg bg-amber-50 border border-amber-200 p-3">
+              <span className="text-amber-500">⚠️</span>
+              <p className="text-xs text-amber-700">{keywordWarning}</p>
+            </div>
+          ) : (
+            <p className="text-xs text-gray-400">
+              원하는 주제를 직접 입력하세요. 아래 AI 추천 키워드를 선택해도 됩니다.
+            </p>
+          )}
+        </div>
+
+        {/* 선택된 키워드 표시 */}
+        {value && (
+          <div className="text-center animate-fade-in">
+            <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm ${
+              keywordWarning
+                ? 'bg-amber-50 text-amber-700 border border-amber-200'
+                : 'bg-[#3B5CFF] text-white font-bold'
+            }`}>
+              {keywordWarning ? (
+                <span>⚠️</span>
+              ) : (
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+              )}
+              <span>선택된 키워드: <strong>{value}</strong></span>
+            </div>
+          </div>
+        )}
+
+        {/* 구분선 */}
+        <div className="flex items-center gap-3">
+          <div className="flex-1 border-t border-gray-200" />
+          <span className="text-xs text-gray-400">또는 AI 추천 키워드에서 선택</span>
+          <div className="flex-1 border-t border-gray-200" />
+        </div>
+
         {/* 로딩 상태 */}
         {loading && (
           <div className="text-center py-8">
-            <div className="mx-auto h-8 w-8 animate-spin rounded-full border-2 border-slate-200 border-t-blue-600 mb-3" />
-            <p className="text-sm text-slate-500">AI가 최적의 키워드를 분석 중입니다...</p>
+            <div className="mx-auto h-8 w-8 animate-spin rounded-full border-2 border-gray-200 border-t-[#3B5CFF] mb-3" />
+            <p className="text-sm text-gray-500">AI가 최적의 키워드를 분석 중입니다...</p>
           </div>
         )}
 
@@ -193,49 +243,48 @@ export default function StepKeyword({ value, onChange, businessCategory, topic }
         {!loading && !needsLocation && !needsBlogIndex && recommendedKeywords.length > 0 && (
           <div className="space-y-4">
             {/* 지역/지수 정보 */}
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 p-3 rounded-lg bg-slate-50">
-              <div className="flex items-center gap-2 text-sm text-slate-600">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 p-3 rounded-lg bg-gray-50">
+              <div className="flex items-center gap-2 text-sm text-gray-600">
                 <span>📍</span>
                 <span className="break-keep">{location}</span>
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-xs text-slate-500">블로그 지수:</span>
+                <span className="text-xs text-gray-500">블로그 지수:</span>
                 {getBlogLevelBadge()}
               </div>
             </div>
 
             {/* 전략 안내 */}
-            <div className="p-3 rounded-lg bg-blue-50 border border-blue-100">
-              <p className="text-sm text-blue-700">
+            <div className="p-3 rounded-lg bg-[#3B5CFF]/5 border border-[#3B5CFF]/20">
+              <p className="text-sm text-gray-600">
                 💡 {getBlogLevelStrategy()}
               </p>
             </div>
 
             {/* 추천 키워드 목록 */}
             <div className="space-y-2">
-              <label className="block text-sm font-medium text-slate-700">AI 추천 키워드</label>
               <div className="space-y-2">
                 {recommendedKeywords.map((item, idx) => (
                   <button
                     key={idx}
-                    onClick={() => onChange(item.keyword)}
+                    onClick={() => { onChange(item.keyword); setKeywordWarning(null); }}
                     className={`w-full text-left p-4 rounded-xl border-2 transition-all ${
                       value === item.keyword
-                        ? 'border-blue-500 bg-blue-50'
-                        : 'border-slate-200 bg-white hover:border-blue-300'
+                        ? 'border-[#3B5CFF] bg-[#3B5CFF]/5'
+                        : 'border-gray-200 bg-white hover:border-[#3B5CFF]/50'
                     }`}
                   >
                     <div className="flex items-center justify-between">
-                      <span className={`font-medium ${value === item.keyword ? 'text-blue-700' : 'text-slate-800'}`}>
+                      <span className={`font-medium ${value === item.keyword ? 'text-[#3B5CFF]' : 'text-black'}`}>
                         {item.keyword}
                       </span>
                       {value === item.keyword && (
-                        <svg className="w-5 h-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg className="w-5 h-5 text-[#3B5CFF]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                         </svg>
                       )}
                     </div>
-                    <p className="text-xs text-slate-500 mt-1">{item.reason}</p>
+                    <p className="text-xs text-gray-500 mt-1">{item.reason}</p>
                   </button>
                 ))}
               </div>
@@ -244,65 +293,10 @@ export default function StepKeyword({ value, onChange, businessCategory, topic }
             {/* 다시 추천받기 */}
             <button
               onClick={fetchRecommendations}
-              className="w-full py-2 text-sm text-slate-500 hover:text-slate-700"
+              className="w-full py-2 text-sm text-gray-500 hover:text-gray-700"
             >
               🔄 다른 키워드 추천받기
             </button>
-          </div>
-        )}
-
-        {/* 직접 입력 토글 */}
-        <div className="border-t border-slate-100 pt-4">
-          <button
-            onClick={() => setShowManualInput(!showManualInput)}
-            className="flex items-center gap-2 text-sm text-slate-500 hover:text-slate-700"
-          >
-            <span>{showManualInput ? '▼' : '▶'}</span>
-            <span>직접 키워드 입력하기</span>
-          </button>
-
-          {showManualInput && (
-            <div className="mt-3 space-y-2 animate-fade-in">
-              <input
-                type="text"
-                value={value}
-                onChange={(e) => handleKeywordChange(e.target.value)}
-                placeholder="예: 천안눈썹문신, 강남피부관리"
-                className={`w-full rounded-xl border px-4 py-3 text-sm outline-none focus:border-blue-500 ${
-                  keywordWarning ? 'border-amber-400 bg-amber-50' : 'border-slate-200'
-                }`}
-              />
-              {keywordWarning ? (
-                <div className="flex items-start gap-2 rounded-lg bg-amber-50 border border-amber-200 p-3">
-                  <span className="text-amber-500">⚠️</span>
-                  <p className="text-xs text-amber-700">{keywordWarning}</p>
-                </div>
-              ) : (
-                <p className="text-xs text-slate-400">
-                  추천 키워드 대신 원하는 키워드를 직접 입력할 수 있습니다
-                </p>
-              )}
-            </div>
-          )}
-        </div>
-
-        {/* 선택된 키워드 표시 */}
-        {value && (
-          <div className="text-center animate-fade-in">
-            <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm ${
-              keywordWarning
-                ? 'bg-amber-50 text-amber-700 border border-amber-200'
-                : 'bg-green-50 text-green-700'
-            }`}>
-              {keywordWarning ? (
-                <span>⚠️</span>
-              ) : (
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
-              )}
-              <span>선택된 키워드: <strong>{value}</strong></span>
-            </div>
           </div>
         )}
 

@@ -13,17 +13,17 @@ export default async function SubscribeLayout({ children }: { children: ReactNod
   }
 
   return (
-    <div className="flex min-h-dvh flex-col bg-slate-50">
+    <div className="flex min-h-dvh flex-col bg-white">
       {/* Header */}
-      <header className="border-b bg-white">
+      <header className="bg-black">
         <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4">
           <Link href="/write" className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#3B5CFF]">
               <span className="text-sm font-bold text-white">B</span>
             </div>
-            <span className="font-semibold text-slate-900">블로그라이터</span>
+            <span className="font-black text-white">블로그라이터</span>
           </Link>
-          <div className="flex items-center gap-2 text-sm text-slate-500">
+          <div className="flex items-center gap-2 text-sm text-white/70">
             <span>{user.email}</span>
           </div>
         </div>

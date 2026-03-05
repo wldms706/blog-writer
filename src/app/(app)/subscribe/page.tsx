@@ -117,8 +117,8 @@ export default function SubscribePage() {
   return (
     <div className="mx-auto max-w-4xl px-4 py-12">
       <div className="text-center mb-10">
-        <h1 className="text-2xl font-bold text-slate-900 mb-2">구독 플랜 선택</h1>
-        <p className="text-slate-600">업종에 맞는 플랜을 선택하고 결제를 진행하세요</p>
+        <h1 className="text-2xl font-bold text-gray-900 mb-2">구독 플랜 선택</h1>
+        <p className="text-gray-600">업종에 맞는 플랜을 선택하고 결제를 진행하세요</p>
       </div>
 
       {/* 플랜 선택 */}
@@ -128,34 +128,34 @@ export default function SubscribePage() {
             key={plan.id}
             onClick={() => setSelectedPlan(plan)}
             className={[
-              'relative text-left rounded-2xl border p-6 transition-all',
+              'relative text-left rounded-2xl border-none p-6 transition-all',
               selectedPlan?.id === plan.id
-                ? 'border-blue-500 ring-2 ring-blue-500 bg-blue-50/30'
-                : 'border-slate-200 bg-white hover:border-slate-300',
+                ? 'bg-[#3B5CFF] text-white shadow-xl'
+                : 'bg-[#F5F5F5] hover:bg-gray-200',
             ].join(' ')}
           >
             {plan.badge && (
-              <span className="absolute -top-3 left-4 inline-block rounded-full px-3 py-1 text-xs font-medium text-white bg-blue-600">
+              <span className="absolute -top-3 left-4 inline-block rounded-full px-3 py-1 text-xs font-black text-black bg-white shadow-md">
                 {plan.badge}
               </span>
             )}
 
             <div className="mb-4">
-              <h3 className="text-lg font-semibold text-slate-900">{plan.name}</h3>
-              <p className="text-sm text-slate-500 mt-1">{plan.description}</p>
+              <h3 className="text-lg font-semibold">{plan.name}</h3>
+              <p className="text-sm opacity-60 mt-1">{plan.description}</p>
             </div>
 
             <div className="mb-4">
-              <span className="text-3xl font-bold text-slate-900">
+              <span className="text-3xl font-black">
                 {plan.price.toLocaleString()}원
               </span>
-              <span className="text-slate-500">/월</span>
+              <span className="opacity-60">/월</span>
             </div>
 
             <ul className="space-y-2">
               {plan.features.map((feature, idx) => (
-                <li key={idx} className="flex items-center gap-2 text-sm text-slate-600">
-                  <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <li key={idx} className="flex items-center gap-2 text-sm">
+                  <svg className="w-4 h-4 text-[#3B5CFF]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
                   {feature}
@@ -165,8 +165,8 @@ export default function SubscribePage() {
 
             {selectedPlan?.id === plan.id && (
               <div className="absolute top-4 right-4">
-                <div className="w-6 h-6 rounded-full bg-blue-600 flex items-center justify-center">
-                  <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="w-6 h-6 rounded-full bg-white flex items-center justify-center">
+                  <svg className="w-4 h-4 text-[#3B5CFF]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
                 </div>
@@ -178,8 +178,8 @@ export default function SubscribePage() {
 
       {/* 결제 버튼 영역 */}
       {selectedPlan && (
-        <div className="bg-white rounded-2xl border p-6 mb-6">
-          <h2 className="text-lg font-semibold text-slate-900 mb-4">결제 정보</h2>
+        <div className="bg-white rounded-2xl border border-gray-200 p-6 mb-6">
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">결제 정보</h2>
 
           {/* 에러 표시 */}
           {error && (
@@ -190,13 +190,13 @@ export default function SubscribePage() {
           )}
 
           {/* 선택한 플랜 정보 */}
-          <div className="mb-4 rounded-lg bg-slate-50 p-4">
+          <div className="mb-4 rounded-lg bg-gray-50 p-4">
             <div className="flex justify-between items-center">
               <div>
-                <p className="font-medium text-slate-900">{selectedPlan.name}</p>
-                <p className="text-sm text-slate-500">월 정기 구독</p>
+                <p className="font-medium text-gray-900">{selectedPlan.name}</p>
+                <p className="text-sm text-gray-500">월 정기 구독</p>
               </div>
-              <p className="text-xl font-bold text-slate-900">
+              <p className="text-xl font-bold text-gray-900">
                 {selectedPlan.price.toLocaleString()}원
               </p>
             </div>
@@ -207,17 +207,17 @@ export default function SubscribePage() {
             onClick={handlePayment}
             disabled={isLoading || !user}
             className={[
-              'w-full py-3 rounded-xl font-medium transition-colors',
+              'w-full py-3 font-bold transition-colors',
               !isLoading && user
-                ? 'bg-blue-600 text-white hover:bg-blue-700'
-                : 'bg-slate-200 text-slate-400 cursor-not-allowed',
+                ? 'bg-[#3B5CFF] text-white hover:bg-[#2A45E0] rounded-full'
+                : 'bg-gray-200 text-gray-400 cursor-not-allowed rounded-full',
             ].join(' ')}
           >
             {isLoading ? '결제 페이지로 이동 중...' : `${selectedPlan.price.toLocaleString()}원 결제하기`}
           </button>
 
           {!user && (
-            <p className="mt-2 text-center text-sm text-slate-500">
+            <p className="mt-2 text-center text-sm text-gray-500">
               로그인이 필요합니다
             </p>
           )}
@@ -225,8 +225,8 @@ export default function SubscribePage() {
       )}
 
       {/* 안내 사항 */}
-      <div className="bg-slate-100 rounded-xl p-4 text-sm text-slate-600">
-        <h3 className="font-medium text-slate-900 mb-2">결제 안내</h3>
+      <div className="bg-black rounded-2xl p-4 text-sm text-white">
+        <h3 className="font-medium text-white mb-2">결제 안내</h3>
         <ul className="space-y-1">
           <li>• 월 정기결제로 진행되며, 매월 결제일에 자동 결제됩니다.</li>
           <li>• 결제일로부터 7일 이내 서비스 미사용 시 전액 환불 가능합니다.</li>

@@ -73,26 +73,26 @@ const plans: Plan[] = [
 
 export default function PricingPage() {
   return (
-    <div className="min-h-dvh bg-slate-50 flex flex-col">
+    <div className="min-h-dvh bg-white flex flex-col">
       {/* Header */}
-      <header className="border-b bg-white">
+      <header className="bg-black">
         <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4">
           <Link href="/" className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#3B5CFF]">
               <span className="text-sm font-bold text-white">B</span>
             </div>
-            <span className="font-semibold text-slate-900">블로그라이터</span>
+            <span className="font-black text-white">블로그라이터</span>
           </Link>
           <nav className="flex items-center gap-2">
             <Link
               href="/login"
-              className="rounded-lg px-3 py-1.5 text-sm text-slate-600 hover:bg-slate-100"
+              className="rounded-full px-3 py-1.5 text-sm text-white/70 hover:text-white"
             >
               로그인
             </Link>
             <Link
               href="/signup"
-              className="rounded-lg bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700"
+              className="rounded-full bg-[#3B5CFF] px-3 py-1.5 text-sm font-bold text-white hover:bg-[#2A45E0]"
             >
               시작하기
             </Link>
@@ -102,16 +102,19 @@ export default function PricingPage() {
 
       {/* Main Content */}
       <main className="flex-1">
-        <div className="mx-auto max-w-6xl px-4 py-16">
-          {/* Hero */}
-          <div className="text-center mb-12">
-            <h1 className="text-3xl font-bold text-slate-900 mb-4">
+        {/* Hero */}
+        <div className="bg-[#3B5CFF] py-20 text-center text-white">
+          <div className="mx-auto max-w-6xl px-4">
+            <h1 className="text-3xl font-black text-white mb-4">
               요금 안내
             </h1>
-            <p className="text-slate-600 max-w-xl mx-auto">
+            <p className="text-white/70 max-w-xl mx-auto">
               업종에 맞는 플랜을 선택하세요. 7일 이내 미사용 시 전액 환불됩니다.
             </p>
           </div>
+        </div>
+
+        <div className="mx-auto max-w-6xl px-4 py-16">
 
           {/* Pricing Cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
@@ -119,34 +122,34 @@ export default function PricingPage() {
               <div
                 key={plan.name}
                 className={[
-                  'relative rounded-2xl border bg-white p-6 flex flex-col',
+                  'relative rounded-2xl p-6 flex flex-col',
                   plan.highlighted
-                    ? 'border-blue-500 ring-2 ring-blue-500'
-                    : 'border-slate-200',
+                    ? 'bg-black text-white shadow-xl'
+                    : 'bg-[#F5F5F5]',
                 ].join(' ')}
               >
                 {plan.badge && (
                   <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                    <span className="inline-block rounded-full px-3 py-1 text-xs font-medium text-white bg-blue-600">
+                    <span className="inline-block rounded-full px-3 py-1 text-xs font-black text-white bg-[#3B5CFF]">
                       {plan.badge}
                     </span>
                   </div>
                 )}
 
                 <div className="mb-6">
-                  <h2 className="text-lg font-semibold text-slate-900 mb-1">
+                  <h2 className="text-lg font-semibold mb-1">
                     {plan.name}
                   </h2>
-                  <p className="text-sm text-slate-500">{plan.description}</p>
+                  <p className="text-sm opacity-60">{plan.description}</p>
                 </div>
 
                 <div className="mb-6">
                   <div className="flex items-baseline gap-1">
-                    <span className="text-4xl font-bold text-slate-900">
+                    <span className="text-4xl font-black">
                       {plan.price === '0' ? '무료' : `₩${plan.price}`}
                     </span>
                     {plan.period && (
-                      <span className="text-slate-500">{plan.period}</span>
+                      <span className="opacity-60">{plan.period}</span>
                     )}
                   </div>
                 </div>
@@ -156,7 +159,7 @@ export default function PricingPage() {
                     <li key={idx} className="flex items-start gap-2">
                       {feature.included ? (
                         <svg
-                          className="w-5 h-5 text-blue-600 shrink-0 mt-0.5"
+                          className="w-5 h-5 text-[#3B5CFF] shrink-0 mt-0.5"
                           fill="none"
                           stroke="currentColor"
                           viewBox="0 0 24 24"
@@ -170,7 +173,7 @@ export default function PricingPage() {
                         </svg>
                       ) : (
                         <svg
-                          className="w-5 h-5 text-slate-300 shrink-0 mt-0.5"
+                          className="w-5 h-5 text-gray-300 shrink-0 mt-0.5"
                           fill="none"
                           stroke="currentColor"
                           viewBox="0 0 24 24"
@@ -185,7 +188,7 @@ export default function PricingPage() {
                       )}
                       <span
                         className={
-                          feature.included ? 'text-slate-700' : 'text-slate-400'
+                          feature.included ? 'text-gray-700' : 'text-gray-400'
                         }
                       >
                         {feature.text}
@@ -197,10 +200,10 @@ export default function PricingPage() {
                 <Link
                   href={plan.ctaLink}
                   className={[
-                    'block w-full rounded-lg py-2.5 text-center text-sm font-medium transition',
+                    'block w-full rounded-full py-2.5 text-center text-sm font-bold transition',
                     plan.highlighted
-                      ? 'bg-blue-600 text-white hover:bg-blue-700'
-                      : 'bg-slate-100 text-slate-700 hover:bg-slate-200',
+                      ? 'bg-[#3B5CFF] text-white hover:bg-[#2A45E0]'
+                      : 'bg-black text-white hover:bg-gray-800',
                   ].join(' ')}
                 >
                   {plan.cta}
@@ -211,7 +214,7 @@ export default function PricingPage() {
 
           {/* FAQ Section */}
           <div className="mt-20 max-w-3xl mx-auto">
-            <h2 className="text-2xl font-bold text-slate-900 text-center mb-8">
+            <h2 className="text-2xl font-bold text-gray-900 text-center mb-8">
               자주 묻는 질문
             </h2>
             <div className="space-y-4">
@@ -236,16 +239,16 @@ export default function PricingPage() {
 
           {/* CTA Section */}
           <div className="mt-20 text-center">
-            <div className="inline-block rounded-2xl bg-gradient-to-r from-blue-600 to-blue-700 p-8 text-white">
+            <div className="inline-block rounded-2xl bg-black p-8 text-white">
               <h2 className="text-2xl font-bold mb-2">
                 지금 바로 시작하세요
               </h2>
-              <p className="text-blue-100 mb-6">
+              <p className="text-white/70 mb-6">
                 무료로 시작하고, 필요하면 업그레이드하세요
               </p>
               <Link
                 href="/signup"
-                className="inline-block rounded-lg bg-white px-6 py-2.5 text-sm font-medium text-blue-600 hover:bg-blue-50 transition"
+                className="inline-block rounded-full bg-[#3B5CFF] px-6 py-2.5 text-sm font-bold text-white hover:bg-[#2A45E0] transition"
               >
                 무료로 시작하기
               </Link>
@@ -262,11 +265,11 @@ export default function PricingPage() {
 
 function FaqItem({ question, answer }: { question: string; answer: string }) {
   return (
-    <details className="group rounded-xl border bg-white p-4">
-      <summary className="flex cursor-pointer items-center justify-between font-medium text-slate-900">
+    <details className="group rounded-2xl border-none bg-[#F5F5F5] p-4">
+      <summary className="flex cursor-pointer items-center justify-between font-medium text-gray-900">
         {question}
         <svg
-          className="w-5 h-5 text-slate-400 group-open:rotate-180 transition-transform"
+          className="w-5 h-5 text-gray-400 group-open:rotate-180 transition-transform"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -279,7 +282,7 @@ function FaqItem({ question, answer }: { question: string; answer: string }) {
           />
         </svg>
       </summary>
-      <p className="mt-3 text-sm text-slate-600 leading-relaxed">{answer}</p>
+      <p className="mt-3 text-sm text-gray-600 leading-relaxed">{answer}</p>
     </details>
   );
 }

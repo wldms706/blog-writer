@@ -17,10 +17,10 @@ export default function StepTopic({ selected, onSelect, businessCategory }: Step
   return (
     <div className="animate-fade-in">
       <div className="text-center mb-8">
-        <h2 className="text-2xl sm:text-3xl font-bold text-text-primary mb-2">
+        <h2 className="text-2xl sm:text-3xl font-black text-black mb-2">
           어떤 주제로 글을 쓸까요?
         </h2>
-        <p className="text-text-secondary">
+        <p className="text-gray-500">
           주제에 따라 글의 구조와 방향이 결정됩니다
         </p>
       </div>
@@ -29,7 +29,7 @@ export default function StepTopic({ selected, onSelect, businessCategory }: Step
       {hasSpecificTopics && (
         <>
           <div className="mb-4">
-            <h3 className="text-sm font-medium text-slate-500 mb-3 text-center">시술/고민별 주제</h3>
+            <h3 className="text-sm font-medium text-gray-500 mb-3 text-center">시술/고민별 주제</h3>
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 max-w-4xl mx-auto">
               {specificTopics.map((topic) => (
                 <SelectionCard
@@ -47,13 +47,13 @@ export default function StepTopic({ selected, onSelect, businessCategory }: Step
           </div>
 
           <div className="my-6 flex items-center gap-4 max-w-4xl mx-auto">
-            <div className="flex-1 h-px bg-slate-200"></div>
-            <span className="text-xs text-slate-400">또는</span>
-            <div className="flex-1 h-px bg-slate-200"></div>
+            <div className="flex-1 h-px bg-gray-200"></div>
+            <span className="text-xs text-gray-400">또는</span>
+            <div className="flex-1 h-px bg-gray-200"></div>
           </div>
 
           <div className="mb-4">
-            <h3 className="text-sm font-medium text-slate-500 mb-3 text-center">일반 주제</h3>
+            <h3 className="text-sm font-medium text-gray-500 mb-3 text-center">일반 주제</h3>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 max-w-3xl mx-auto">
               {COMMON_TOPICS.map((topic) => (
                 <SelectionCard

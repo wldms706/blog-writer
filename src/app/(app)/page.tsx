@@ -14,7 +14,6 @@ import StepGenerate from '@/components/steps/StepGenerate';
 import StepBrandingType from '@/components/steps/StepBrandingType';
 import StepBrandingInfo from '@/components/steps/StepBrandingInfo';
 import StepTreatmentInfo from '@/components/steps/StepTreatmentInfo';
-import StepRecruitTopic from '@/components/steps/StepRecruitTopic';
 import StepTone from '@/components/steps/StepTone';
 import { FormData, ContentType, BrandingType, BrandingInfo, TonePreset } from '@/types';
 import { BUSINESS_CATEGORIES } from '@/data/constants';
@@ -59,7 +58,6 @@ type StepId =
   | 'title'
   | 'generate'
   | 'brandingType'
-  | 'recruitTopic'
   | 'brandingInfo'
   | 'treatmentInfo';
 
@@ -80,13 +78,13 @@ export default function Home() {
       // 일반 업종: 독자상태 다음에 톤 선택 추가
       return ['contentType', 'business', 'topic', 'keyword', 'treatmentInfo', 'purpose', 'reader', 'tone', 'rules', 'title', 'generate'];
     } else {
-      const isRecruit = formData.brandingType === 'recruit';
       if (isRegulated) {
-        return ['contentType', 'business', 'brandingType', ...(isRecruit ? ['recruitTopic'] : ['keyword']), 'brandingInfo', 'title', 'generate'] as StepId[];
+        return ['contentType', 'business', 'brandingType', 'keyword', 'brandingInfo', 'title', 'generate'];
       }
-      return ['contentType', 'business', 'brandingType', ...(isRecruit ? ['recruitTopic'] : ['keyword']), 'brandingInfo', 'tone', 'title', 'generate'] as StepId[];
+      // 일반 업종 브랜딩: 브랜딩정보 다음에 톤 선택 추가
+      return ['contentType', 'business', 'brandingType', 'keyword', 'brandingInfo', 'tone', 'title', 'generate'];
     }
-  }, [formData.contentType, formData.brandingType, isRegulated]);
+  }, [formData.contentType, isRegulated]);
 
   const totalSteps = steps.length;
   const currentStepId = steps[currentStep - 1];
@@ -112,8 +110,6 @@ export default function Home() {
         return formData.selectedTitle.trim().length > 0;
       case 'brandingType':
         return formData.brandingType !== null;
-      case 'recruitTopic':
-        return formData.keyword.trim().length > 0;
       case 'brandingInfo': {
         if (!formData.brandingType) return false;
         const info = formData.brandingInfo[formData.brandingType];
@@ -240,24 +236,12 @@ export default function Home() {
             onSelect={(type: BrandingType) => setFormData({ ...formData, brandingType: type })}
           />
         );
-      case 'recruitTopic':
-        return (
-          <StepRecruitTopic
-            value={formData.keyword}
-            onChange={(value) => setFormData({ ...formData, keyword: value })}
-          />
-        );
       case 'brandingInfo':
         return (
           <StepBrandingInfo
             value={formData.brandingInfo}
             onChange={(value) => setFormData({ ...formData, brandingInfo: value })}
             brandingType={formData.brandingType}
-            shopAddress={formData.shopAddress}
-            shopHours={formData.shopHours}
-            shopPhone={formData.shopPhone}
-            shopParking={formData.shopParking}
-            onShopInfoChange={(field, value) => setFormData({ ...formData, [field]: value })}
           />
         );
       case 'treatmentInfo':
@@ -267,11 +251,6 @@ export default function Home() {
             onChange={(value) => setFormData((prev) => ({ ...prev, additionalContext: value }))}
             customPurpose={formData.customPurpose}
             onCustomPurposeChange={(text) => setFormData((prev) => ({ ...prev, customPurpose: text }))}
-            shopAddress={formData.shopAddress}
-            shopHours={formData.shopHours}
-            shopPhone={formData.shopPhone}
-            shopParking={formData.shopParking}
-            onShopInfoChange={(field, value) => setFormData((prev) => ({ ...prev, [field]: value }))}
           />
         );
       case 'tone':

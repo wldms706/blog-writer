@@ -51,15 +51,15 @@ export default function OnboardingPage() {
     <div className="flex flex-col items-center justify-center py-8">
       <div className="w-full max-w-sm space-y-6">
         <div className="text-center">
-          <h1 className="text-xl font-bold text-slate-900">환영합니다!</h1>
-          <p className="mt-2 text-sm text-slate-500">
+          <h1 className="text-2xl font-black text-black">환영합니다!</h1>
+          <p className="mt-2 text-sm text-gray-500">
             시작하기 전에 간단한 정보를 입력해주세요
           </p>
         </div>
 
         <div className="space-y-4">
           <div>
-            <label className="mb-1.5 block text-sm font-medium text-slate-700">
+            <label className="mb-1.5 block text-sm font-medium text-gray-700">
               이름 <span className="text-red-500">*</span>
             </label>
             <input
@@ -67,13 +67,13 @@ export default function OnboardingPage() {
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="이름을 입력해주세요"
-              className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+              className="w-full rounded-xl border-2 border-gray-200 px-4 py-3 text-sm outline-none focus:border-[#3B5CFF] focus:ring-1 focus:ring-[#3B5CFF]/20"
               autoFocus
             />
           </div>
 
           <div>
-            <label className="mb-1.5 block text-sm font-medium text-slate-700">
+            <label className="mb-1.5 block text-sm font-medium text-gray-700">
               상호명
             </label>
             <input
@@ -81,7 +81,7 @@ export default function OnboardingPage() {
               value={businessName}
               onChange={(e) => setBusinessName(e.target.value)}
               placeholder="매장/업체명을 입력해주세요 (선택)"
-              className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+              className="w-full rounded-xl border-2 border-gray-200 px-4 py-3 text-sm outline-none focus:border-[#3B5CFF] focus:ring-1 focus:ring-[#3B5CFF]/20"
             />
           </div>
         </div>
@@ -89,7 +89,7 @@ export default function OnboardingPage() {
         <button
           onClick={handleSubmit}
           disabled={!name.trim() || saving}
-          className="w-full rounded-xl bg-blue-600 py-3 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50 transition-colors"
+          className="w-full rounded-full bg-[#3B5CFF] py-3 text-sm font-bold text-white hover:bg-[#2A45E0] disabled:opacity-50 transition-colors"
         >
           {saving ? '저장 중...' : '시작하기'}
         </button>

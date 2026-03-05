@@ -32,10 +32,10 @@ export default function StepSafety({ confirmed, onConfirm }: StepSafetyProps) {
   return (
     <div className="animate-fade-in">
       <div className="text-center mb-8">
-        <h2 className="text-2xl sm:text-3xl font-bold text-text-primary mb-2">
+        <h2 className="text-2xl sm:text-3xl font-black text-black mb-2">
           안전 조건을 확인해주세요
         </h2>
-        <p className="text-text-secondary">
+        <p className="text-gray-500">
           모든 조건을 확인해야 글 생성이 가능합니다
         </p>
       </div>
@@ -51,8 +51,8 @@ export default function StepSafety({ confirmed, onConfirm }: StepSafetyProps) {
               className={`w-full text-left p-5 rounded-2xl border-2 transition-all duration-300
                 ${
                   isChecked
-                    ? 'border-success bg-success/5'
-                    : 'border-border-light bg-background-card hover:border-secondary-dark'
+                    ? 'border-[#3B5CFF] bg-[#3B5CFF]/5'
+                    : 'border-gray-200 bg-white hover:border-gray-300'
                 }
               `}
             >
@@ -61,8 +61,8 @@ export default function StepSafety({ confirmed, onConfirm }: StepSafetyProps) {
                   className={`w-6 h-6 rounded-lg border-2 flex items-center justify-center flex-shrink-0 mt-0.5 transition-all duration-300
                     ${
                       isChecked
-                        ? 'border-success bg-success'
-                        : 'border-border bg-transparent'
+                        ? 'border-[#3B5CFF] bg-[#3B5CFF]'
+                        : 'border-gray-300 bg-transparent'
                     }
                   `}
                 >
@@ -86,12 +86,12 @@ export default function StepSafety({ confirmed, onConfirm }: StepSafetyProps) {
                 <div className="flex-1">
                   <h3
                     className={`font-semibold mb-1 transition-colors ${
-                      isChecked ? 'text-success' : 'text-text-primary'
+                      isChecked ? 'text-[#3B5CFF]' : 'text-black'
                     }`}
                   >
                     {condition.text}
                   </h3>
-                  <p className="text-sm text-text-secondary">
+                  <p className="text-sm text-gray-500">
                     {condition.description}
                   </p>
                 </div>
@@ -104,17 +104,17 @@ export default function StepSafety({ confirmed, onConfirm }: StepSafetyProps) {
       {/* Progress Indicator */}
       <div className="mt-8 max-w-2xl mx-auto">
         <div className="flex items-center justify-between mb-2">
-          <span className="text-sm text-text-secondary">확인 진행률</span>
-          <span className="text-sm font-medium text-primary">
+          <span className="text-sm text-gray-500">확인 진행률</span>
+          <span className="text-sm font-medium text-[#3B5CFF]">
             {checkedItems.size} / {SAFETY_CONDITIONS.length}
           </span>
         </div>
-        <div className="h-2 bg-background-subtle rounded-full overflow-hidden">
+        <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
           <div
             className={`h-full rounded-full transition-all duration-500 ${
               allChecked
-                ? 'bg-success'
-                : 'bg-gradient-to-r from-primary to-accent'
+                ? 'bg-[#3B5CFF]'
+                : 'bg-[#3B5CFF]'
             }`}
             style={{
               width: `${(checkedItems.size / SAFETY_CONDITIONS.length) * 100}%`,
@@ -125,7 +125,7 @@ export default function StepSafety({ confirmed, onConfirm }: StepSafetyProps) {
 
       {allChecked && (
         <div className="mt-6 text-center animate-fade-in">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-success/10 text-success text-sm font-medium">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#3B5CFF] text-white font-bold text-sm">
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>

@@ -27,10 +27,10 @@ export default function StepContentType({ selected, onSelect }: StepContentTypeP
   return (
     <div className="animate-fade-in">
       <div className="text-center mb-8">
-        <h2 className="text-2xl sm:text-3xl font-bold text-text-primary mb-2">
+        <h2 className="text-2xl sm:text-3xl font-black text-black mb-2">
           어떤 글을 작성할까요?
         </h2>
-        <p className="text-text-secondary">
+        <p className="text-gray-500">
           목적에 따라 글의 구조와 톤이 달라집니다
         </p>
       </div>
@@ -51,7 +51,7 @@ export default function StepContentType({ selected, onSelect }: StepContentTypeP
 
       {selected && (
         <div className="mt-6 text-center animate-fade-in">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-primary/10 text-primary text-sm">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#3B5CFF] text-white font-bold text-sm">
             {selected === 'seo' ? (
               <>
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">

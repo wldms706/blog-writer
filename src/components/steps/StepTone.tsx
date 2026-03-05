@@ -13,10 +13,10 @@ export default function StepTone({ selected, onSelect }: StepToneProps) {
   return (
     <div className="animate-fade-in">
       <div className="text-center mb-8">
-        <h2 className="text-2xl sm:text-3xl font-bold text-text-primary mb-2">
+        <h2 className="text-2xl sm:text-3xl font-black text-black mb-2">
           글의 톤을 선택해주세요
         </h2>
-        <p className="text-text-secondary">
+        <p className="text-gray-500">
           원장님의 블로그 스타일에 맞는 문체를 골라주세요
         </p>
       </div>
@@ -33,8 +33,8 @@ export default function StepTone({ selected, onSelect }: StepToneProps) {
               onClick={() => onSelect(tone.id)}
             />
             {selected === tone.id && (
-              <div className="mt-2 ml-14 px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-100">
-                <p className="text-sm text-slate-500 italic">{tone.example}</p>
+              <div className="mt-2 ml-14 px-4 py-2.5 rounded-xl bg-black/5 border-none">
+                <p className="text-sm text-gray-500 italic">{tone.example}</p>
               </div>
             )}
           </div>

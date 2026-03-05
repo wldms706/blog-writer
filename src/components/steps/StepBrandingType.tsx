@@ -17,10 +17,10 @@ type BrandingOption = {
 
 const BRANDING_TYPES: BrandingOption[] = [
   {
-    id: 'intro',
-    icon: '👋',
-    name: '자기소개',
-    description: '원장님을 소개하는 글',
+    id: 'recruit',
+    icon: '🎓',
+    name: '수강생 모집',
+    description: '교육 과정 안내 및 수강생 모집 글',
   },
   {
     id: 'philosophy',
@@ -34,10 +34,10 @@ export default function StepBrandingType({ selected, onSelect }: StepBrandingTyp
   return (
     <div className="animate-fade-in">
       <div className="text-center mb-8">
-        <h2 className="text-2xl sm:text-3xl font-bold text-text-primary mb-2">
+        <h2 className="text-2xl sm:text-3xl font-black text-black mb-2">
           어떤 브랜딩 글인가요?
         </h2>
-        <p className="text-text-secondary">
+        <p className="text-gray-500">
           글의 종류에 따라 구성이 달라집니다
         </p>
       </div>
@@ -58,12 +58,12 @@ export default function StepBrandingType({ selected, onSelect }: StepBrandingTyp
 
       {selected && (
         <div className="mt-6 text-center animate-fade-in">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-purple-50 text-purple-700 text-sm">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#3B5CFF] text-white font-bold text-sm">
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
             <span>
-              {selected === 'intro' && '원장님의 경력, 가치관, 인사말을 담은 글을 작성합니다'}
+              {selected === 'recruit' && '교육 과정 소개와 수강생 모집을 위한 글을 작성합니다'}
               {selected === 'philosophy' && '샵이 추구하는 가치와 철학을 담은 글을 작성합니다'}
             </span>
           </div>

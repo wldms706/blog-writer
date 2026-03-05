@@ -129,14 +129,14 @@ export default function SettingsPage() {
 
   const getBlogLevelColor = (level: string | null) => {
     const option = BLOG_INDEX_OPTIONS.find(o => o.value === level);
-    if (!option) return 'text-slate-500 bg-slate-50';
+    if (!option) return 'text-gray-500 bg-gray-100';
 
     switch (option.color) {
-      case 'green': return 'text-green-600 bg-green-50';
-      case 'blue': return 'text-blue-600 bg-blue-50';
-      case 'yellow': return 'text-yellow-600 bg-yellow-50';
-      case 'gray': return 'text-slate-600 bg-slate-50';
-      default: return 'text-slate-500 bg-slate-50';
+      case 'green': return 'text-[#3B5CFF] bg-[#3B5CFF]/10';
+      case 'blue': return 'text-[#3B5CFF] bg-[#3B5CFF]/10';
+      case 'yellow': return 'text-[#3B5CFF] bg-[#3B5CFF]/10';
+      case 'gray': return 'text-gray-600 bg-gray-100';
+      default: return 'text-gray-500 bg-gray-100';
     }
   };
 
@@ -153,49 +153,49 @@ export default function SettingsPage() {
   if (loading) {
     return (
       <div className="py-16 text-center">
-        <div className="mx-auto h-8 w-8 animate-spin rounded-full border-2 border-slate-200 border-t-blue-600" />
+        <div className="mx-auto h-8 w-8 animate-spin rounded-full border-2 border-gray-200 border-t-[#3B5CFF]" />
       </div>
     );
   }
 
   return (
     <div>
-      <h2 className="mb-4 text-lg font-semibold text-slate-900">설정</h2>
+      <h2 className="mb-4 text-xl font-black text-black">설정</h2>
 
       <div className="space-y-4">
         {/* 내 정보 */}
-        <div className="rounded-xl border border-slate-200 bg-white p-4">
-          <label className="mb-2 block text-sm font-medium text-slate-900">내 정보</label>
+        <div className="rounded-2xl bg-[#F5F5F5] p-5">
+          <label className="mb-2 block text-sm font-medium text-black">내 정보</label>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
             <div>
-              <p className="mb-1 text-xs text-slate-500">이름</p>
+              <p className="mb-1 text-xs text-gray-500">이름</p>
               <input
                 type="text"
                 value={profile.name}
                 onChange={(e) => setProfile({ ...profile, name: e.target.value })}
                 onBlur={() => handleSaveProfile({ name: profile.name })}
                 placeholder="이름"
-                className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-blue-500"
+                className="w-full rounded-xl border-2 border-gray-200 px-3 py-2.5 text-sm outline-none focus:border-[#3B5CFF]"
               />
             </div>
             <div>
-              <p className="mb-1 text-xs text-slate-500">상호명</p>
+              <p className="mb-1 text-xs text-gray-500">상호명</p>
               <input
                 type="text"
                 value={profile.businessName}
                 onChange={(e) => setProfile({ ...profile, businessName: e.target.value })}
                 onBlur={() => handleSaveProfile({ businessName: profile.businessName })}
                 placeholder="매장/업체명 (선택)"
-                className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-blue-500"
+                className="w-full rounded-xl border-2 border-gray-200 px-3 py-2.5 text-sm outline-none focus:border-[#3B5CFF]"
               />
             </div>
           </div>
         </div>
 
         {/* 샵 위치 */}
-        <div className="rounded-xl border border-blue-100 bg-white p-4">
-          <label className="mb-2 block text-sm font-medium text-slate-900">샵 위치</label>
-          <p className="mb-3 text-xs text-slate-500">키워드 추천에 사용됩니다 (예: 서울시 강남구 신사동)</p>
+        <div className="rounded-2xl bg-[#3B5CFF]/5 p-5">
+          <label className="mb-2 block text-sm font-medium text-black">샵 위치</label>
+          <p className="mb-3 text-xs text-gray-500">키워드 추천에 사용됩니다 (예: 서울시 강남구 신사동)</p>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
             <input
               type="text"
@@ -203,7 +203,7 @@ export default function SettingsPage() {
               onChange={(e) => setProfile({ ...profile, locationCity: e.target.value })}
               onBlur={() => handleSaveProfile({ locationCity: profile.locationCity })}
               placeholder="시/도 (예: 서울시)"
-              className="rounded-lg border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-blue-500"
+              className="rounded-xl border-2 border-gray-200 px-3 py-2.5 text-sm outline-none focus:border-[#3B5CFF]"
             />
             <input
               type="text"
@@ -211,7 +211,7 @@ export default function SettingsPage() {
               onChange={(e) => setProfile({ ...profile, locationDistrict: e.target.value })}
               onBlur={() => handleSaveProfile({ locationDistrict: profile.locationDistrict })}
               placeholder="구 (예: 강남구)"
-              className="rounded-lg border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-blue-500"
+              className="rounded-xl border-2 border-gray-200 px-3 py-2.5 text-sm outline-none focus:border-[#3B5CFF]"
             />
             <input
               type="text"
@@ -219,20 +219,20 @@ export default function SettingsPage() {
               onChange={(e) => setProfile({ ...profile, locationNeighborhood: e.target.value })}
               onBlur={() => handleSaveProfile({ locationNeighborhood: profile.locationNeighborhood })}
               placeholder="동 (선택)"
-              className="rounded-lg border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-blue-500"
+              className="rounded-xl border-2 border-gray-200 px-3 py-2.5 text-sm outline-none focus:border-[#3B5CFF]"
             />
           </div>
           {profile.locationCity && profile.locationNeighborhood && (
-            <p className="mt-2 text-xs text-blue-600">
+            <p className="mt-2 text-xs text-[#3B5CFF]">
               설정된 위치: {profile.locationCity} {profile.locationDistrict} {profile.locationNeighborhood}
             </p>
           )}
         </div>
 
         {/* 블로그 정보 */}
-        <div className="rounded-xl border border-purple-100 bg-white p-4">
-          <label className="mb-2 block text-sm font-medium text-slate-900">내 블로그</label>
-          <p className="mb-3 text-xs text-slate-500">블로그 지수에 따라 최적의 키워드를 추천해드립니다</p>
+        <div className="rounded-2xl bg-black/5 p-5">
+          <label className="mb-2 block text-sm font-medium text-black">내 블로그</label>
+          <p className="mb-3 text-xs text-gray-500">블로그 지수에 따라 최적의 키워드를 추천해드립니다</p>
 
           <div className="mb-3">
             <input
@@ -241,18 +241,18 @@ export default function SettingsPage() {
               onChange={(e) => setProfile({ ...profile, blogUrl: e.target.value })}
               onBlur={() => handleSaveProfile({ blogUrl: profile.blogUrl })}
               placeholder="https://blog.naver.com/your-blog-id"
-              className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-blue-500"
+              className="w-full rounded-xl border-2 border-gray-200 px-3 py-2 text-sm outline-none focus:border-[#3B5CFF]"
             />
           </div>
 
           {/* 블덱스 링크 */}
-          <div className="mb-3 rounded-lg bg-purple-50 p-3">
-            <p className="mb-2 text-xs text-purple-700">블로그 지수를 모르시나요?</p>
+          <div className="mb-3 rounded-lg bg-[#3B5CFF]/5 p-3">
+            <p className="mb-2 text-xs text-[#3B5CFF]">블로그 지수를 모르시나요?</p>
             <a
               href="https://blogdex.space"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1 rounded-lg bg-purple-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-purple-700"
+              className="inline-flex items-center gap-1 rounded-full bg-[#3B5CFF] px-3 py-1.5 text-xs font-bold text-white hover:bg-[#2A45E0]"
             >
               블덱스에서 내 블로그 지수 확인하기
               <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -263,11 +263,11 @@ export default function SettingsPage() {
 
           {/* 블로그 지수 수동 선택 */}
           <div className="mb-3">
-            <label className="mb-2 block text-xs font-medium text-slate-700">블로그 지수 선택 (블덱스 기준)</label>
+            <label className="mb-2 block text-xs font-medium text-black">블로그 지수 선택 (블덱스 기준)</label>
 
             {/* 최적 그룹 */}
             <div className="mb-2">
-              <p className="mb-1 text-[10px] text-green-600 font-medium">최적화</p>
+              <p className="mb-1 text-[10px] text-[#3B5CFF] font-medium">최적화</p>
               <div className="grid grid-cols-3 gap-1.5">
                 {BLOG_INDEX_OPTIONS.filter(o => o.group === 'optimal').map((option) => (
                   <button
@@ -275,8 +275,8 @@ export default function SettingsPage() {
                     onClick={() => handleSaveProfile({ blogIndexLevel: option.value, blogIndexCheckedAt: new Date().toISOString() })}
                     className={`rounded-lg border-2 px-2 py-1.5 text-xs font-medium transition-all ${
                       profile.blogIndexLevel === option.value
-                        ? 'border-green-500 bg-green-50 text-green-700'
-                        : 'border-slate-200 bg-white text-slate-600 hover:border-green-300'
+                        ? 'border-[#3B5CFF] bg-[#3B5CFF] text-white'
+                        : 'border-gray-200 bg-white text-gray-600 hover:border-[#3B5CFF]'
                     }`}
                   >
                     {option.label}
@@ -287,7 +287,7 @@ export default function SettingsPage() {
 
             {/* 준최 상위 그룹 (5~7) */}
             <div className="mb-2">
-              <p className="mb-1 text-[10px] text-blue-600 font-medium">준최적화 5~7 (동 단위 키워드)</p>
+              <p className="mb-1 text-[10px] text-[#3B5CFF] font-medium">준최적화 5~7 (동 단위 키워드)</p>
               <div className="grid grid-cols-3 gap-1.5">
                 {BLOG_INDEX_OPTIONS.filter(o => o.group === 'sub-high').map((option) => (
                   <button
@@ -295,8 +295,8 @@ export default function SettingsPage() {
                     onClick={() => handleSaveProfile({ blogIndexLevel: option.value, blogIndexCheckedAt: new Date().toISOString() })}
                     className={`rounded-lg border-2 px-2 py-1.5 text-xs font-medium transition-all ${
                       profile.blogIndexLevel === option.value
-                        ? 'border-blue-500 bg-blue-50 text-blue-700'
-                        : 'border-slate-200 bg-white text-slate-600 hover:border-blue-300'
+                        ? 'border-[#3B5CFF] bg-[#3B5CFF] text-white'
+                        : 'border-gray-200 bg-white text-gray-600 hover:border-[#3B5CFF]'
                     }`}
                   >
                     {option.label}
@@ -307,7 +307,7 @@ export default function SettingsPage() {
 
             {/* 준최 하위 그룹 (1~4) */}
             <div className="mb-2">
-              <p className="mb-1 text-[10px] text-yellow-600 font-medium">준최적화 1~4 (동+세부 조합)</p>
+              <p className="mb-1 text-[10px] text-[#3B5CFF] font-medium">준최적화 1~4 (동+세부 조합)</p>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
                 {BLOG_INDEX_OPTIONS.filter(o => o.group === 'sub-low').map((option) => (
                   <button
@@ -315,8 +315,8 @@ export default function SettingsPage() {
                     onClick={() => handleSaveProfile({ blogIndexLevel: option.value, blogIndexCheckedAt: new Date().toISOString() })}
                     className={`rounded-lg border-2 px-2 py-1.5 text-xs font-medium transition-all ${
                       profile.blogIndexLevel === option.value
-                        ? 'border-yellow-500 bg-yellow-50 text-yellow-700'
-                        : 'border-slate-200 bg-white text-slate-600 hover:border-yellow-300'
+                        ? 'border-[#3B5CFF] bg-[#3B5CFF] text-white'
+                        : 'border-gray-200 bg-white text-gray-600 hover:border-[#3B5CFF]'
                     }`}
                   >
                     {option.label}
@@ -327,7 +327,7 @@ export default function SettingsPage() {
 
             {/* 일반 (구 준최0) */}
             <div>
-              <p className="mb-1 text-[10px] text-slate-600 font-medium">일반 (틈새 키워드)</p>
+              <p className="mb-1 text-[10px] text-gray-600 font-medium">일반 (틈새 키워드)</p>
               <div className="grid grid-cols-1 gap-1.5">
                 {BLOG_INDEX_OPTIONS.filter(o => o.group === 'general').map((option) => (
                   <button
@@ -335,8 +335,8 @@ export default function SettingsPage() {
                     onClick={() => handleSaveProfile({ blogIndexLevel: option.value, blogIndexCheckedAt: new Date().toISOString() })}
                     className={`rounded-lg border-2 px-2 py-1.5 text-xs font-medium transition-all ${
                       profile.blogIndexLevel === option.value
-                        ? 'border-slate-500 bg-slate-100 text-slate-700'
-                        : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300'
+                        ? 'border-[#3B5CFF] bg-[#3B5CFF] text-white'
+                        : 'border-gray-200 bg-white text-gray-600 hover:border-[#3B5CFF]'
                     }`}
                   >
                     {option.label}
@@ -368,15 +368,15 @@ export default function SettingsPage() {
         </div>
 
         {/* 기본 업종 */}
-        <div className="rounded-xl border border-slate-200 bg-white p-4">
-          <label className="mb-2 block text-sm font-medium text-slate-900">기본 업종</label>
-          <p className="mb-3 text-xs text-slate-500">글 작성 시 자동으로 선택됩니다</p>
+        <div className="rounded-2xl bg-[#F5F5F5] p-5">
+          <label className="mb-2 block text-sm font-medium text-black">기본 업종</label>
+          <p className="mb-3 text-xs text-gray-500">글 작성 시 자동으로 선택됩니다</p>
           <select
             value={settings.defaultBusinessCategory || ''}
             onChange={(e) =>
               handleSaveSettings({ ...settings, defaultBusinessCategory: e.target.value || null })
             }
-            className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-blue-500"
+            className="w-full rounded-xl border-2 border-gray-200 px-3 py-2 text-sm outline-none focus:border-[#3B5CFF]"
           >
             <option value="">선택 안 함</option>
             {BUSINESS_CATEGORIES.map((b) => (
@@ -388,8 +388,8 @@ export default function SettingsPage() {
         </div>
 
         {/* 구독 관리 */}
-        <div className="rounded-xl border border-green-100 bg-white p-4">
-          <label className="mb-2 block text-sm font-medium text-slate-900">구독 관리</label>
+        <div className="rounded-2xl bg-[#F5F5F5] p-5">
+          <label className="mb-2 block text-sm font-medium text-black">구독 관리</label>
 
           {subscription && subscription.status === 'active' ? (
             <div className="space-y-3">
@@ -417,7 +417,7 @@ export default function SettingsPage() {
               {!showCancelConfirm ? (
                 <button
                   onClick={() => setShowCancelConfirm(true)}
-                  className="text-xs text-slate-500 hover:text-red-600 underline"
+                  className="text-xs text-gray-500 hover:text-red-600 underline"
                 >
                   구독 취소하기
                 </button>
@@ -444,7 +444,7 @@ export default function SettingsPage() {
                     </button>
                     <button
                       onClick={() => setShowCancelConfirm(false)}
-                      className="rounded-lg bg-white px-3 py-1.5 text-xs text-slate-600 hover:bg-slate-50"
+                      className="rounded-lg bg-white px-3 py-1.5 text-xs text-gray-600 hover:bg-gray-50"
                     >
                       돌아가기
                     </button>
@@ -472,20 +472,20 @@ export default function SettingsPage() {
               </div>
               <Link
                 href="/subscribe"
-                className="block w-full rounded-lg bg-blue-600 py-2.5 text-center text-xs font-medium text-white hover:bg-blue-700"
+                className="block w-full rounded-full bg-[#3B5CFF] py-2.5 text-center text-xs font-bold text-white hover:bg-[#2A45E0]"
               >
                 다시 구독하기
               </Link>
             </div>
           ) : (
             <div className="space-y-3">
-              <div className="rounded-lg bg-slate-50 p-3">
-                <p className="text-sm text-slate-600">현재 무료 플랜을 사용 중입니다.</p>
-                <p className="mt-1 text-xs text-slate-500">프로 플랜으로 업그레이드하면 무제한으로 글을 생성할 수 있습니다.</p>
+              <div className="rounded-lg bg-[#F5F5F5] p-3">
+                <p className="text-sm text-gray-600">현재 무료 플랜을 사용 중입니다.</p>
+                <p className="mt-1 text-xs text-gray-500">프로 플랜으로 업그레이드하면 무제한으로 글을 생성할 수 있습니다.</p>
               </div>
               <Link
                 href="/subscribe"
-                className="block w-full rounded-lg bg-blue-600 py-2.5 text-center text-xs font-medium text-white hover:bg-blue-700"
+                className="block w-full rounded-full bg-[#3B5CFF] py-2.5 text-center text-xs font-bold text-white hover:bg-[#2A45E0]"
               >
                 프로 플랜 시작하기
               </Link>
@@ -494,8 +494,8 @@ export default function SettingsPage() {
         </div>
 
         {/* 히스토리 삭제 */}
-        <div className="rounded-xl border border-red-100 bg-white p-4">
-          <label className="mb-2 block text-sm font-medium text-slate-900">데이터 관리</label>
+        <div className="rounded-2xl bg-[#F5F5F5] p-5">
+          <label className="mb-2 block text-sm font-medium text-black">데이터 관리</label>
           {!showClearConfirm ? (
             <button
               onClick={() => setShowClearConfirm(true)}
@@ -515,7 +515,7 @@ export default function SettingsPage() {
                 </button>
                 <button
                   onClick={() => setShowClearConfirm(false)}
-                  className="rounded-lg bg-white px-3 py-1.5 text-xs text-slate-600 hover:bg-slate-50"
+                  className="rounded-lg bg-white px-3 py-1.5 text-xs text-gray-600 hover:bg-gray-50"
                 >
                   취소
                 </button>
@@ -527,7 +527,7 @@ export default function SettingsPage() {
         {/* 저장하고 글쓰기 버튼 */}
         <button
           onClick={() => router.push('/write')}
-          className="w-full rounded-xl bg-blue-600 py-3 text-sm font-medium text-white hover:bg-blue-700 transition-colors"
+          className="w-full rounded-full bg-[#3B5CFF] py-3 text-sm font-bold text-white hover:bg-[#2A45E0] transition-colors"
         >
           저장하고 글쓰기
         </button>
@@ -535,7 +535,7 @@ export default function SettingsPage() {
 
       {/* 토스트 */}
       {toast && (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 rounded-xl bg-slate-900 px-4 py-2.5 text-sm text-white shadow-lg">
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 rounded-full bg-black px-4 py-2.5 text-sm font-bold text-white shadow-lg">
           {toast}
         </div>
       )}
