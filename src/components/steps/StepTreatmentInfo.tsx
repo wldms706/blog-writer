@@ -265,8 +265,8 @@ export default function StepTreatmentInfo({ value, onChange, customPurpose = '',
           </div>
         )}
 
-        {/* 샵 정보 */}
-        {onShopInfoChange && (
+        {/* 샵 정보 - 반영구(규제 업종)에서는 비공개 위험으로 숨김 */}
+        {onShopInfoChange && !isRegulated && (
           <div className="card p-6 space-y-4">
             <div>
               <div className="flex items-center gap-2 mb-1">
