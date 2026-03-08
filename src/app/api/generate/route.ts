@@ -985,24 +985,28 @@ export async function POST(request: NextRequest) {
     // 규제 업종 여부 확인 (businessCategory + 키워드 기반 자동 감지)
     const isRegulatedBusiness = businessCategory === 'semi-permanent' || businessCategory === '반영구' || REGULATED_KEYWORDS.some(k => keyword.includes(k));
 
-    // 샵 정보 텍스트 (모든 업종 허용 — 규제 업종은 3인칭/수동태로 표현)
+    // 샵 정보 텍스트 — 반영구(규제 업종)에서는 비공개 위험으로 완전 제외
     const shopInfoParts: string[] = [];
-    if (shopAddress?.trim()) shopInfoParts.push(`주소: ${shopAddress.trim()}`);
-    if (shopHours?.trim()) shopInfoParts.push(`영업시간: ${shopHours.trim()}`);
-    if (shopPhone?.trim()) shopInfoParts.push(`연락처: ${shopPhone.trim()}`);
-    if (shopParking?.trim()) shopInfoParts.push(`주차: ${shopParking.trim()}`);
+    if (!isRegulatedBusiness) {
+      if (shopAddress?.trim()) shopInfoParts.push(`주소: ${shopAddress.trim()}`);
+      if (shopHours?.trim()) shopInfoParts.push(`영업시간: ${shopHours.trim()}`);
+      if (shopPhone?.trim()) shopInfoParts.push(`연락처: ${shopPhone.trim()}`);
+      if (shopParking?.trim()) shopInfoParts.push(`주차: ${shopParking.trim()}`);
+    }
     const shopInfoText = shopInfoParts.length > 0 ? shopInfoParts.join(' / ') : '';
 
     // 매장 정보에 맞는 동적 사진 가이드 생성
     const shopPhotoGuides: string[] = [];
-    if (shopAddress?.trim()) {
-      shopPhotoGuides.push('- 매장 위치/주소 안내 문장 바로 위에 [편집가이드: 매장 외관/간판 사진을 넣어주세요] 삽입');
-    }
-    if (shopParking?.trim()) {
-      shopPhotoGuides.push('- 주차 안내 문장 바로 위에 [편집가이드: 주차 공간 사진이 있으면 넣어주세요] 삽입');
-    }
-    if (shopHours?.trim()) {
-      shopPhotoGuides.push('- 영업시간 안내 근처에 [편집가이드: 매장 내부 인테리어 사진을 넣어주세요] 삽입');
+    if (!isRegulatedBusiness) {
+      if (shopAddress?.trim()) {
+        shopPhotoGuides.push('- 매장 위치/주소 안내 문장 바로 위에 [편집가이드: 매장 외관/간판 사진을 넣어주세요] 삽입');
+      }
+      if (shopParking?.trim()) {
+        shopPhotoGuides.push('- 주차 안내 문장 바로 위에 [편집가이드: 주차 공간 사진이 있으면 넣어주세요] 삽입');
+      }
+      if (shopHours?.trim()) {
+        shopPhotoGuides.push('- 영업시간 안내 근처에 [편집가이드: 매장 내부 인테리어 사진을 넣어주세요] 삽입');
+      }
     }
     const shopPhotoGuideText = shopPhotoGuides.length > 0
       ? `\n⚠️ 매장 정보 관련 사진 가이드 (반드시 해당 내용 근처에 배치):\n${shopPhotoGuides.join('\n')}\n`
