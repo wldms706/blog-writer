@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { checkAndIncrementUsage } from '@/lib/usage';
 
+// Vercel 함수 타임아웃 60초로 설정 (Claude API 응답 대기)
+export const maxDuration = 60;
+
 const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
 
 // 다양한 글 구조 템플릿 (SEO 최적화를 위해 랜덤 선택)
