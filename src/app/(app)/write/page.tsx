@@ -232,7 +232,7 @@ export default function Home() {
           />
         );
       case 'generate':
-        return <StepGenerate onReset={handleReset} formData={formData} />;
+        return <StepGenerate onReset={handleReset} formData={formData} isRegulated={isRegulated} />;
       case 'brandingType':
         return (
           <StepBrandingType

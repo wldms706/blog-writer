@@ -9,6 +9,7 @@ import { createClient } from '@/lib/supabase/client';
 interface StepGenerateProps {
   onReset: () => void;
   formData: FormData;
+  isRegulated?: boolean;
 }
 
 // UX 메시지 (PRD 기준 - 규칙/숫자/기준 설명 없이 결과만)
@@ -47,7 +48,7 @@ const highlightKeyword = (text: string, keyword: string) => {
   });
 };
 
-export default function StepGenerate({ onReset, formData }: StepGenerateProps) {
+export default function StepGenerate({ onReset, formData, isRegulated = false }: StepGenerateProps) {
   const [phase, setPhase] = useState<'generating' | 'autofix' | 'complete' | 'error'>('generating');
   const [currentMessage, setCurrentMessage] = useState(UX_MESSAGES.generating);
   const [errorMessage, setErrorMessage] = useState('');
@@ -369,7 +370,8 @@ export default function StepGenerate({ onReset, formData }: StepGenerateProps) {
           </div>
         </div>
 
-        {/* 사진 업로드 안내 */}
+        {/* 사진 업로드 안내 (반영구 업종만) */}
+        {isRegulated && (
         <div className="card p-4 bg-orange-50 border border-orange-200">
           <div className="flex items-start gap-3">
             <svg className="w-5 h-5 text-orange-500 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -383,6 +385,7 @@ export default function StepGenerate({ onReset, formData }: StepGenerateProps) {
             </div>
           </div>
         </div>
+        )}
 
         {/* 블로그 링크 제출 */}
         {historyId && (
