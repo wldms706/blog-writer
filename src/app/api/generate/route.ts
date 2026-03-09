@@ -2,8 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { checkAndIncrementUsage } from '@/lib/usage';
 
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`;
+const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
 
 // 다양한 글 구조 템플릿 (SEO 최적화를 위해 랜덤 선택)
 const ARTICLE_STRUCTURES = [
@@ -941,7 +940,7 @@ const BRANDING_TYPE_NAMES: Record<string, string> = {
 };
 
 export async function POST(request: NextRequest) {
-  if (!GEMINI_API_KEY) {
+  if (!ANTHROPIC_API_KEY) {
     return NextResponse.json({ error: 'API 키가 설정되지 않았습니다.' }, { status: 500 });
   }
 
@@ -1257,29 +1256,30 @@ ${isLargeKeyword(keyword) ? `
 - 너무 짧으면 정보 부족, 너무 길면 지루함. 딱 적당한 분량으로`}`;
     }
 
-    const response = await fetch(GEMINI_URL, {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': ANTHROPIC_API_KEY!,
+        'anthropic-version': '2023-06-01',
+      },
       body: JSON.stringify({
-        system_instruction: {
-          parts: [{ text: systemPrompt }],
-        },
-        contents: [
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 4096,
+        temperature: 1.0,
+        system: systemPrompt,
+        messages: [
           {
             role: 'user',
-            parts: [{ text: userPrompt }],
+            content: userPrompt,
           },
         ],
-        generationConfig: {
-          temperature: 1.0,
-          maxOutputTokens: 4096,
-        },
       }),
     });
 
     if (!response.ok) {
       const errorData = await response.text();
-      console.error('Gemini API error:', errorData);
+      console.error('Claude API error:', errorData);
 
       if (response.status === 429) {
         return NextResponse.json(
@@ -1292,7 +1292,7 @@ ${isLargeKeyword(keyword) ? `
     }
 
     const data = await response.json();
-    const generatedText = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    const generatedText = data.content?.[0]?.text || '';
 
     if (!generatedText) {
       return NextResponse.json({ error: '생성된 텍스트가 없습니다.' }, { status: 500 });
