@@ -189,7 +189,7 @@ ${brandingType === 'philosophy' ? `
 - 추상적 표현 대신 구체적 숫자 사용 (경력, 건수, 비교 횟수 등)
 - 전문가/경험자의 간접증명으로 권위감 부여
 - 예: "${safeKeyword} 500건 해본 원장이 말하는 진짜 차이"
-- 예: "8년차 ${businessCategory} 원장이 ${safeKeyword} 고를 때 보는 딱 한 가지"
+- 예: "8년차 ${safeBusinessCategory} 원장이 ${safeKeyword} 고를 때 보는 딱 한 가지"
 - 예: "${safeKeyword} 5곳 비교해보고 알게 된 사실"
 
 ### 제목 4 — 자아 흠집형
@@ -247,6 +247,12 @@ ${brandingType === 'philosophy' ? `
           temperature: 0.9,
           maxOutputTokens: 1024,
         },
+        safetySettings: [
+          { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_NONE' },
+          { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'BLOCK_NONE' },
+          { category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT', threshold: 'BLOCK_NONE' },
+          { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_NONE' },
+        ],
       }),
     });
 

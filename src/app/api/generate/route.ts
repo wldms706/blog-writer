@@ -1293,8 +1293,14 @@ ${isLargeKeyword(safeKeyword) ? `
         contents: [{ role: 'user', parts: [{ text: fullPrompt }] }],
         generationConfig: {
           temperature: 1.0,
-          maxOutputTokens: 4096,
+          maxOutputTokens: 8192,
         },
+        safetySettings: [
+          { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_NONE' },
+          { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'BLOCK_NONE' },
+          { category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT', threshold: 'BLOCK_NONE' },
+          { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_NONE' },
+        ],
       }),
     });
 
@@ -1313,9 +1319,17 @@ ${isLargeKeyword(safeKeyword) ? `
     }
 
     const data = await response.json();
+
+    // Gemini 안전 필터 차단 확인
+    if (data.candidates?.[0]?.finishReason === 'SAFETY') {
+      console.error('Gemini SAFETY block:', JSON.stringify(data.candidates[0].safetyRatings));
+      return NextResponse.json({ error: 'AI 안전 필터에 의해 차단되었습니다. 다시 시도해주세요.' }, { status: 400 });
+    }
+
     const generatedText = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
 
     if (!generatedText) {
+      console.error('Gemini empty response:', JSON.stringify(data));
       return NextResponse.json({ error: '생성된 텍스트가 없습니다.' }, { status: 500 });
     }
 
