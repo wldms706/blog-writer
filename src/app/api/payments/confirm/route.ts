@@ -9,6 +9,25 @@ const PLANS: Record<string, { name: string; price: number; type: string }> = {
   pro_general: { name: '프로 (일반)', price: 14900, type: 'general' },
 };
 
+// 재시도 헬퍼 (최대 3회)
+async function retryOperation<T>(
+  operation: () => Promise<T>,
+  maxRetries: number = 3,
+): Promise<T> {
+  let lastError: unknown;
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      return await operation();
+    } catch (error) {
+      lastError = error;
+      if (attempt < maxRetries) {
+        await new Promise(resolve => setTimeout(resolve, 500 * attempt));
+      }
+    }
+  }
+  throw lastError;
+}
+
 export async function POST(request: NextRequest) {
   try {
     const { paymentKey, orderId, amount, planId } = await request.json();
@@ -38,6 +57,33 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Supabase에서 현재 유저 먼저 확인 (결제 승인 전에 유저 검증)
+    const supabase = await createClient();
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+
+    if (userError || !user) {
+      console.error('유저 인증 실패:', userError);
+      return NextResponse.json(
+        { success: false, message: '인증이 필요합니다.' },
+        { status: 401 }
+      );
+    }
+
+    // 중복 결제 방지: 같은 orderId로 이미 처리된 결제가 있는지 확인
+    const { data: existingSubscription } = await supabase
+      .from('subscriptions')
+      .select('id')
+      .eq('order_id', orderId)
+      .maybeSingle();
+
+    if (existingSubscription) {
+      return NextResponse.json({
+        success: true,
+        message: '이미 처리된 결제입니다.',
+        data: { orderId, planId, planName: plan.name },
+      });
+    }
+
     // 토스페이먼츠 결제 승인 요청
     const authString = Buffer.from(`${TOSS_SECRET_KEY}:`).toString('base64');
 
@@ -64,62 +110,83 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Supabase에서 현재 유저 가져오기
-    const supabase = await createClient();
-    const { data: { user }, error: userError } = await supabase.auth.getUser();
-
-    if (userError || !user) {
-      console.error('유저 인증 실패:', userError);
-      return NextResponse.json(
-        { success: false, message: '인증이 필요합니다.' },
-        { status: 401 }
-      );
-    }
-
-    // 구독 정보 저장
+    // 구독 정보 저장 (재시도 포함)
     const now = new Date();
     const nextBillingDate = new Date(now);
     nextBillingDate.setMonth(nextBillingDate.getMonth() + 1);
 
-    const { error: subscriptionError } = await supabase
-      .from('subscriptions')
-      .upsert({
-        user_id: user.id,
-        plan_id: planId,
-        plan_name: plan.name,
-        plan_type: plan.type,
-        price: plan.price,
-        status: 'active',
-        payment_key: paymentKey,
-        order_id: orderId,
-        billing_key: paymentData.card?.billingKey || null, // 빌링키 (자동결제용)
-        card_company: paymentData.card?.company || null,
-        card_number: paymentData.card?.number || null,
-        started_at: now.toISOString(),
-        next_billing_at: nextBillingDate.toISOString(),
-        updated_at: now.toISOString(),
-      }, {
-        onConflict: 'user_id',
-      });
+    const subscriptionData = {
+      user_id: user.id,
+      plan_id: planId,
+      plan_name: plan.name,
+      plan_type: plan.type,
+      price: plan.price,
+      status: 'active',
+      payment_key: paymentKey,
+      order_id: orderId,
+      billing_key: paymentData.card?.billingKey || null,
+      card_company: paymentData.card?.company || null,
+      card_number: paymentData.card?.number || null,
+      started_at: now.toISOString(),
+      next_billing_at: nextBillingDate.toISOString(),
+      updated_at: now.toISOString(),
+    };
 
-    if (subscriptionError) {
-      console.error('구독 정보 저장 실패:', subscriptionError);
-      // 결제는 성공했으므로 일단 성공 응답
-      // 추후 관리자가 수동으로 처리
+    let subscriptionSaved = false;
+    try {
+      await retryOperation(async () => {
+        const { error } = await supabase
+          .from('subscriptions')
+          .upsert(subscriptionData, { onConflict: 'user_id' });
+        if (error) throw error;
+      });
+      subscriptionSaved = true;
+    } catch (error) {
+      console.error('[결제 치명적 오류] 구독 저장 3회 실패:', {
+        userId: user.id,
+        orderId,
+        paymentKey,
+        planId,
+        error,
+      });
     }
 
-    // 유저 프로필 업데이트 (플랜 정보)
-    const { error: profileError } = await supabase
-      .from('profiles')
-      .update({
-        plan: planId,
-        plan_type: plan.type,
-        updated_at: now.toISOString(),
-      })
-      .eq('id', user.id);
+    // 프로필 업데이트 (재시도 포함)
+    let profileSaved = false;
+    try {
+      await retryOperation(async () => {
+        const { error } = await supabase
+          .from('profiles')
+          .update({
+            plan: planId,
+            plan_type: plan.type,
+            updated_at: now.toISOString(),
+          })
+          .eq('id', user.id);
+        if (error) throw error;
+      });
+      profileSaved = true;
+    } catch (error) {
+      console.error('[결제 치명적 오류] 프로필 업데이트 3회 실패:', {
+        userId: user.id,
+        orderId,
+        error,
+      });
+    }
 
-    if (profileError) {
-      console.error('프로필 업데이트 실패:', profileError);
+    // 결제는 성공했지만 DB 저장 실패 시, 복구용 로그 기록
+    if (!subscriptionSaved || !profileSaved) {
+      console.error('[결제 복구 필요]', JSON.stringify({
+        userId: user.id,
+        email: user.email,
+        orderId,
+        paymentKey,
+        planId,
+        planName: plan.name,
+        subscriptionSaved,
+        profileSaved,
+        timestamp: now.toISOString(),
+      }));
     }
 
     return NextResponse.json({

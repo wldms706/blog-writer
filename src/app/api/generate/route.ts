@@ -984,16 +984,35 @@ export async function POST(request: NextRequest) {
       shopParking,
     } = await request.json();
 
+    // 사용자 입력 sanitize (프롬프트 인젝션 방지)
+    const sanitize = (input: unknown): string => {
+      if (typeof input !== 'string') return '';
+      return input
+        .replace(/[{}[\]`]/g, '') // 프롬프트 구분자 제거
+        .replace(/\n/g, ' ')     // 줄바꿈 제거 (프롬프트 구조 조작 방지)
+        .slice(0, 200)           // 길이 제한
+        .trim();
+    };
+
+    const safeKeyword = sanitize(keyword);
+    const safeTopic = sanitize(topic);
+    const safePurpose = sanitize(purpose);
+    const safeReaderState = sanitize(readerState);
+    const safeSelectedTitle = sanitize(selectedTitle);
+    const safeCustomPurpose = sanitize(customPurpose);
+    const safeBusinessCategory = sanitize(businessCategory);
+    const safeTreatmentInfo = sanitize(treatmentInfo);
+
     // 규제 업종 여부 확인 (businessCategory + 키워드 기반 자동 감지)
-    const isRegulatedBusiness = businessCategory === 'semi-permanent' || businessCategory === '반영구' || REGULATED_KEYWORDS.some(k => keyword.includes(k));
+    const isRegulatedBusiness = safeBusinessCategory === 'semi-permanent' || safeBusinessCategory === '반영구' || REGULATED_KEYWORDS.some(k => safeKeyword.includes(k));
 
     // 샵 정보 텍스트 — 반영구(규제 업종)에서는 비공개 위험으로 완전 제외
     const shopInfoParts: string[] = [];
     if (!isRegulatedBusiness) {
-      if (shopAddress?.trim()) shopInfoParts.push(`주소: ${shopAddress.trim()}`);
-      if (shopHours?.trim()) shopInfoParts.push(`영업시간: ${shopHours.trim()}`);
-      if (shopPhone?.trim()) shopInfoParts.push(`연락처: ${shopPhone.trim()}`);
-      if (shopParking?.trim()) shopInfoParts.push(`주차: ${shopParking.trim()}`);
+      if (shopAddress?.trim()) shopInfoParts.push(`주소: ${sanitize(shopAddress)}`);
+      if (shopHours?.trim()) shopInfoParts.push(`영업시간: ${sanitize(shopHours)}`);
+      if (shopPhone?.trim()) shopInfoParts.push(`연락처: ${sanitize(shopPhone)}`);
+      if (shopParking?.trim()) shopInfoParts.push(`주차: ${sanitize(shopParking)}`);
     }
     const shopInfoText = shopInfoParts.length > 0 ? shopInfoParts.join(' / ') : '';
 
@@ -1050,10 +1069,10 @@ export async function POST(request: NextRequest) {
 
       userPrompt = `다음 조건에 맞는 뷰티 브랜딩 블로그 글을 작성해주세요.
 
-키워드: ${keyword}
-업종: ${businessCategory}
+키워드: ${safeKeyword}
+업종: ${safeBusinessCategory}
 브랜딩 종류: ${brandingTypeName}
-${selectedTitle ? `제목: ${selectedTitle}` : ''}
+${safeSelectedTitle ? `제목: ${safeSelectedTitle}` : ''}
 ${detailedInfo}
 
 ## 브랜딩 종류별 글 구조
@@ -1123,17 +1142,17 @@ ${isRegulatedBusiness ? `
 - 진정성 있고 따뜻한 톤으로 작성
 - 위에 제공된 정보를 최대한 활용하여 구체적이고 개성 있는 글 작성
 
-${selectedTitle ? `제목은 "${selectedTitle}"을 그대로 사용하세요.` : '제목을 첫 줄에 쓰고,'} 한 줄 띄운 후 본문을 작성해주세요.
+${safeSelectedTitle ? `제목은 "${safeSelectedTitle}"을 그대로 사용하세요.` : '제목을 첫 줄에 쓰고,'} 한 줄 띄운 후 본문을 작성해주세요.
 
-⚠️⚠️⚠️ 키워드 "${keyword}" 배치 (네이버 노출 핵심 — 이 규칙을 어기면 글 전체 거부):
-- 제목에 반드시 "${keyword}" 1회 포함 (필수)
-- 본문 첫 2~3문장 이내에 "${keyword}" 1회 (필수 — 없으면 거부)
-- 본문 중간에 "${keyword}" 2회 분산 배치 (필수)
-- 본문 마지막 2~3문장 이내에 "${keyword}" 1회 (필수 — 없으면 거부)
-- 합계: 본문에 "${keyword}"가 최소 4회, 최대 6회 등장해야 함
+⚠️⚠️⚠️ 키워드 "${safeKeyword}" 배치 (네이버 노출 핵심 — 이 규칙을 어기면 글 전체 거부):
+- 제목에 반드시 "${safeKeyword}" 1회 포함 (필수)
+- 본문 첫 2~3문장 이내에 "${safeKeyword}" 1회 (필수 — 없으면 거부)
+- 본문 중간에 "${safeKeyword}" 2회 분산 배치 (필수)
+- 본문 마지막 2~3문장 이내에 "${safeKeyword}" 1회 (필수 — 없으면 거부)
+- 합계: 본문에 "${safeKeyword}"가 최소 4회, 최대 6회 등장해야 함
 - 3회 이하이면 네이버 노출 불가 → 글 거부
 - 7회 이상이면 키워드 스팸 → 글 거부
-- "${keyword}"를 정확히 그대로 써야 함 (띄어쓰기, 순서 변경 금지)
+- "${safeKeyword}"를 정확히 그대로 써야 함 (띄어쓰기, 순서 변경 금지)
 
 ⚠️ 업종 키워드 반복 제한:
 - "속눈썹", "눈썹", "피부" 등 업종 단어는 각각 10회 이하
@@ -1162,20 +1181,20 @@ ${selectedTitle ? `제목은 "${selectedTitle}"을 그대로 사용하세요.` :
 
       userPrompt = `다음 조건에 맞는 ${isRegulatedBusiness ? '전문 정보 블로그 글' : '시술자 관점의 블로그 글'}을 작성해주세요.
 
-키워드: ${keyword}
-업종: ${businessCategory}
-글 주제: ${topic}
-글의 목적: ${purpose}
-독자 상태: ${readerState}
-${selectedTitle ? `제목: ${selectedTitle}` : ''}
-${customPurpose ? `
+키워드: ${safeKeyword}
+업종: ${safeBusinessCategory}
+글 주제: ${safeTopic}
+글의 목적: ${safePurpose}
+독자 상태: ${safeReaderState}
+${safeSelectedTitle ? `제목: ${safeSelectedTitle}` : ''}
+${safeCustomPurpose ? `
 ⚠️⚠️ 최우선 반영 필수: 아래 내용을 글 전체에서 핵심 메시지로 담아주세요.
 단순 언급이 아니라, 이 내용이 글의 중심 주제가 되어야 합니다.
 독자가 글을 다 읽었을 때 아래 내용이 자연스럽게 전달되어야 합니다.
 
-⚠️ 반드시 전달할 내용: ${customPurpose}
+⚠️ 반드시 전달할 내용: ${safeCustomPurpose}
 ` : ''}
-${treatmentInfo ? (isRegulatedBusiness ? `
+${safeTreatmentInfo ? (isRegulatedBusiness ? `
 ⚠️⚠️ 필수 반영: 이 샵의 특별한 시술/프로그램 정보
 아래 내용을 본문의 숫자 소제목 중 하나로 자연스럽게 녹여서 포함하세요.
 1인칭 없이 객관적으로 서술하세요:
@@ -1183,7 +1202,7 @@ ${treatmentInfo ? (isRegulatedBusiness ? `
 - "~기법이 적용되어야 자연스러운 결과를 기대할 수 있다"
 - "~이 함께 이루어질 때 장기적인 효과를 거둘 수 있다"
 
-⚠️ 반드시 포함할 내용: ${treatmentInfo}
+⚠️ 반드시 포함할 내용: ${safeTreatmentInfo}
 ` : `
 ⚠️⚠️ 필수 반영: 이 샵의 특별한 시술/프로그램 정보
 아래 내용을 시술자가 자기 노하우를 공유하듯 자연스럽게 녹여서 포함하세요.
@@ -1192,7 +1211,7 @@ ${treatmentInfo ? (isRegulatedBusiness ? `
 - "저희 쪽에서는 OO 방식으로 하는데, 확실히 결과가 다르더라고요"
 - "OO 프로그램도 같이 진행하는데요, 이게 꽤 반응이 좋아요"
 
-⚠️ 반드시 포함할 내용: ${treatmentInfo}
+⚠️ 반드시 포함할 내용: ${safeTreatmentInfo}
 `) : ''}
 
 ${isRegulatedBusiness ? `
@@ -1219,12 +1238,12 @@ ${shopPhotoGuideText}` : ''}
 `}
 
 위 조건을 반영하여, ${isRegulatedBusiness ? '독자에게 깊이 있는 전문 정보를 전달하는 글' : '시술자가 본인 블로그에 쓰는 자연스러운 정보 공유 글'}을 작성해주세요.
-${selectedTitle ? `제목은 "${selectedTitle}"을 그대로 사용하세요.` : '제목을 첫 줄에 쓰고,'} 한 줄 띄운 후 본문을 작성해주세요.
+${safeSelectedTitle ? `제목은 "${safeSelectedTitle}"을 그대로 사용하세요.` : '제목을 첫 줄에 쓰고,'} 한 줄 띄운 후 본문을 작성해주세요.
 
-${isLargeKeyword(keyword) ? `
-⚠️ 키워드 "${keyword}" 배치 필수 (큰 지역 키워드):
+${isLargeKeyword(safeKeyword) ? `
+⚠️ 키워드 "${safeKeyword}" 배치 필수 (큰 지역 키워드):
 - 제목에 반드시 1회 포함
-- 본문에 "${keyword}"를 정확히 5~7회만 언급 (8회 이상 절대 금지)
+- 본문에 "${safeKeyword}"를 정확히 5~7회만 언급 (8회 이상 절대 금지)
 - 첫 문단에 1회, 중간에 2~3회, 마지막 문단에 1회 - 골고루 분산 배치
 - 끝에만 몰아서 쓰면 노출 누락됨
 - 나머지는 동의어나 유사 표현으로 대체
@@ -1238,15 +1257,15 @@ ${isLargeKeyword(keyword) ? `
 ⚠️⚠️⚠️ 중요: 글자수 (필수)
 - 공백 제외 1,500자 내외 (1,400~1,600자)로 작성
 - 너무 짧으면 정보 부족, 너무 길면 지루함. 딱 적당한 분량으로` : `
-⚠️⚠️⚠️ 키워드 "${keyword}" 배치 (네이버 노출 핵심 — 이 규칙을 어기면 글 전체 거부):
-- 제목에 반드시 "${keyword}" 1회 포함 (필수)
-- 본문 첫 2~3문장 이내에 "${keyword}" 1회 (필수 — 없으면 거부)
-- 본문 중간에 "${keyword}" 2회 분산 배치 (필수)
-- 본문 마지막 2~3문장 이내에 "${keyword}" 1회 (필수 — 없으면 거부)
-- 합계: 본문에 "${keyword}"가 최소 4회, 최대 6회 등장해야 함
+⚠️⚠️⚠️ 키워드 "${safeKeyword}" 배치 (네이버 노출 핵심 — 이 규칙을 어기면 글 전체 거부):
+- 제목에 반드시 "${safeKeyword}" 1회 포함 (필수)
+- 본문 첫 2~3문장 이내에 "${safeKeyword}" 1회 (필수 — 없으면 거부)
+- 본문 중간에 "${safeKeyword}" 2회 분산 배치 (필수)
+- 본문 마지막 2~3문장 이내에 "${safeKeyword}" 1회 (필수 — 없으면 거부)
+- 합계: 본문에 "${safeKeyword}"가 최소 4회, 최대 6회 등장해야 함
 - 3회 이하이면 네이버 노출 불가 → 글 거부
 - 7회 이상이면 키워드 스팸 → 글 거부
-- "${keyword}"를 정확히 그대로 써야 함 (띄어쓰기, 순서 변경 금지)
+- "${safeKeyword}"를 정확히 그대로 써야 함 (띄어쓰기, 순서 변경 금지)
 
 ⚠️ 업종 키워드 반복 제한 (저품질 방지):
 - "속눈썹", "눈썹", "피부", "펌" 등 업종 단어는 각각 10회 이하
