@@ -237,6 +237,9 @@ export default function SettingsPage() {
         <div className="rounded-2xl bg-[#F5F5F5] p-5">
           <label className="mb-2 block text-sm font-medium text-black">가게 정보</label>
           <p className="mb-3 text-xs text-gray-500">한 번 저장하면 글 작성 시 자동으로 입력됩니다</p>
+          <div className="mb-3 rounded-lg bg-orange-50 px-3 py-2">
+            <p className="text-xs text-orange-600">반영구 업종은 비공개 위험으로 가게 정보가 글에 포함되지 않습니다</p>
+          </div>
           <div className="grid grid-cols-1 gap-2">
             <div>
               <p className="mb-1 text-xs text-gray-500">주소</p>
