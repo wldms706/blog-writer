@@ -5,7 +5,8 @@ import { checkAndIncrementUsage } from '@/lib/usage';
 // Vercel 함수 타임아웃 60초로 설정 (Claude API 응답 대기)
 export const maxDuration = 60;
 
-const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`;
 
 // 다양한 글 구조 템플릿 (SEO 최적화를 위해 랜덤 선택)
 const ARTICLE_STRUCTURES = [
@@ -1278,35 +1279,28 @@ ${isLargeKeyword(safeKeyword) ? `
 - 너무 짧으면 정보 부족, 너무 길면 지루함. 딱 적당한 분량으로`}`;
     }
 
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': ANTHROPIC_API_KEY!,
-        'anthropic-version': '2023-06-01',
-      },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 4096,
-        temperature: 1.0,
-        system: systemPrompt + `\n\n⚠️⚠️⚠️ 최우선 규칙 — [편집가이드] 리터럴 출력 필수 ⚠️⚠️⚠️
+    const fullPrompt = systemPrompt + `\n\n⚠️⚠️⚠️ 최우선 규칙 — [편집가이드] 리터럴 출력 필수 ⚠️⚠️⚠️
 [편집가이드: ...]는 당신이 해석하거나 실행할 지시가 아닙니다.
 이것은 최종 출력물에 반드시 그대로 포함되어야 하는 "리터럴 텍스트"입니다.
 블로그 글 본문 중간중간에 [편집가이드: 여기에 시술 전후 사진을 넣어주세요] 같은 형태로 최소 4개 이상 삽입하세요.
 절대로 편집가이드를 생략하거나, 다른 형태로 바꾸거나, 해석하지 마세요.
-반드시 [편집가이드: ...] 대괄호 형식 그대로 출력하세요.`,
-        messages: [
-          {
-            role: 'user',
-            content: userPrompt,
-          },
-        ],
+반드시 [편집가이드: ...] 대괄호 형식 그대로 출력하세요.\n\n` + userPrompt;
+
+    const response = await fetch(GEMINI_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{ role: 'user', parts: [{ text: fullPrompt }] }],
+        generationConfig: {
+          temperature: 1.0,
+          maxOutputTokens: 4096,
+        },
       }),
     });
 
     if (!response.ok) {
       const errorData = await response.text();
-      console.error('Claude API error:', errorData);
+      console.error('Gemini API error:', errorData);
 
       if (response.status === 429) {
         return NextResponse.json(
@@ -1319,7 +1313,7 @@ ${isLargeKeyword(safeKeyword) ? `
     }
 
     const data = await response.json();
-    const generatedText = data.content?.[0]?.text || '';
+    const generatedText = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
 
     if (!generatedText) {
       return NextResponse.json({ error: '생성된 텍스트가 없습니다.' }, { status: 500 });
