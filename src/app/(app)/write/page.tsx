@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useEffect } from 'react';
 import StepProgress from '@/components/StepProgress';
 import StepContentType from '@/components/steps/StepContentType';
 import StepBusiness from '@/components/steps/StepBusiness';
@@ -18,6 +18,8 @@ import StepRecruitTopic from '@/components/steps/StepRecruitTopic';
 import StepTone from '@/components/steps/StepTone';
 import { FormData, ContentType, BrandingType, BrandingInfo, TonePreset } from '@/types';
 import { BUSINESS_CATEGORIES } from '@/data/constants';
+import { getProfile } from '@/lib/storage';
+import { createClient } from '@/lib/supabase/client';
 
 const initialBrandingInfo: BrandingInfo = {
   recruit: { courseName: '', targetStudent: '', curriculum: '', benefit: '' },
@@ -66,6 +68,27 @@ type StepId =
 export default function Home() {
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState<FormData>(initialFormData);
+
+  // 프로필에서 저장된 가게 정보 자동 로드
+  useEffect(() => {
+    async function loadShopInfo() {
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const profile = await getProfile(user.id);
+        if (profile.shopAddress || profile.shopHours || profile.shopPhone || profile.shopParking) {
+          setFormData(prev => ({
+            ...prev,
+            shopAddress: prev.shopAddress || profile.shopAddress,
+            shopHours: prev.shopHours || profile.shopHours,
+            shopPhone: prev.shopPhone || profile.shopPhone,
+            shopParking: prev.shopParking || profile.shopParking,
+          }));
+        }
+      }
+    }
+    loadShopInfo();
+  }, []);
 
   // 규제 업종 여부
   const isRegulated = BUSINESS_CATEGORIES.find(b => b.id === formData.businessCategory)?.hasRegulation ?? false;

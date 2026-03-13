@@ -32,6 +32,10 @@ export default function SettingsPage() {
     blogUrl: '',
     blogIndexLevel: null,
     blogIndexCheckedAt: null,
+    shopAddress: '',
+    shopHours: '',
+    shopPhone: '',
+    shopParking: '',
   });
   const [subscription, setSubscription] = useState<Subscription | null>(null);
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
@@ -225,6 +229,65 @@ export default function SettingsPage() {
           {profile.locationCity && profile.locationNeighborhood && (
             <p className="mt-2 text-xs text-[#3B5CFF]">
               설정된 위치: {profile.locationCity} {profile.locationDistrict} {profile.locationNeighborhood}
+            </p>
+          )}
+        </div>
+
+        {/* 가게 정보 */}
+        <div className="rounded-2xl bg-[#F5F5F5] p-5">
+          <label className="mb-2 block text-sm font-medium text-black">가게 정보</label>
+          <p className="mb-3 text-xs text-gray-500">한 번 저장하면 글 작성 시 자동으로 입력됩니다</p>
+          <div className="grid grid-cols-1 gap-2">
+            <div>
+              <p className="mb-1 text-xs text-gray-500">주소</p>
+              <input
+                type="text"
+                value={profile.shopAddress}
+                onChange={(e) => setProfile({ ...profile, shopAddress: e.target.value })}
+                onBlur={() => handleSaveProfile({ shopAddress: profile.shopAddress })}
+                placeholder="예: 서울시 강남구 신사동 123-4 2층"
+                className="w-full rounded-xl border-2 border-gray-200 px-3 py-2.5 text-sm outline-none focus:border-[#3B5CFF]"
+              />
+            </div>
+            <div>
+              <p className="mb-1 text-xs text-gray-500">영업시간</p>
+              <input
+                type="text"
+                value={profile.shopHours}
+                onChange={(e) => setProfile({ ...profile, shopHours: e.target.value })}
+                onBlur={() => handleSaveProfile({ shopHours: profile.shopHours })}
+                placeholder="예: 평일 10:00~20:00, 주말 예약제"
+                className="w-full rounded-xl border-2 border-gray-200 px-3 py-2.5 text-sm outline-none focus:border-[#3B5CFF]"
+              />
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <div>
+                <p className="mb-1 text-xs text-gray-500">연락처</p>
+                <input
+                  type="text"
+                  value={profile.shopPhone}
+                  onChange={(e) => setProfile({ ...profile, shopPhone: e.target.value })}
+                  onBlur={() => handleSaveProfile({ shopPhone: profile.shopPhone })}
+                  placeholder="예: 010-1234-5678"
+                  className="w-full rounded-xl border-2 border-gray-200 px-3 py-2.5 text-sm outline-none focus:border-[#3B5CFF]"
+                />
+              </div>
+              <div>
+                <p className="mb-1 text-xs text-gray-500">주차</p>
+                <input
+                  type="text"
+                  value={profile.shopParking}
+                  onChange={(e) => setProfile({ ...profile, shopParking: e.target.value })}
+                  onBlur={() => handleSaveProfile({ shopParking: profile.shopParking })}
+                  placeholder="예: 건물 내 주차 가능, 1시간 무료"
+                  className="w-full rounded-xl border-2 border-gray-200 px-3 py-2.5 text-sm outline-none focus:border-[#3B5CFF]"
+                />
+              </div>
+            </div>
+          </div>
+          {(profile.shopAddress || profile.shopPhone) && (
+            <p className="mt-2 text-xs text-[#3B5CFF]">
+              저장된 정보가 글 작성 시 자동으로 적용됩니다
             </p>
           )}
         </div>

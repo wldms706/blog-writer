@@ -36,6 +36,10 @@ export type UserProfile = {
   blogUrl: string;
   blogIndexLevel: BlogIndexLevel;
   blogIndexCheckedAt: string | null;
+  shopAddress: string;
+  shopHours: string;
+  shopPhone: string;
+  shopParking: string;
 };
 
 // --- History ---
@@ -183,13 +187,17 @@ const defaultProfile: UserProfile = {
   blogUrl: '',
   blogIndexLevel: null,
   blogIndexCheckedAt: null,
+  shopAddress: '',
+  shopHours: '',
+  shopPhone: '',
+  shopParking: '',
 };
 
 export async function getProfile(userId: string): Promise<UserProfile> {
   const supabase = createClient();
   const { data, error } = await supabase
     .from('profiles')
-    .select('name, business_name, location_city, location_district, location_neighborhood, blog_url, blog_index_level, blog_index_checked_at')
+    .select('name, business_name, location_city, location_district, location_neighborhood, blog_url, blog_index_level, blog_index_checked_at, shop_address, shop_hours, shop_phone, shop_parking')
     .eq('id', userId)
     .single();
 
@@ -206,6 +214,10 @@ export async function getProfile(userId: string): Promise<UserProfile> {
     blogUrl: data.blog_url || '',
     blogIndexLevel: data.blog_index_level as UserProfile['blogIndexLevel'],
     blogIndexCheckedAt: data.blog_index_checked_at,
+    shopAddress: data.shop_address || '',
+    shopHours: data.shop_hours || '',
+    shopPhone: data.shop_phone || '',
+    shopParking: data.shop_parking || '',
   };
 }
 
@@ -242,6 +254,10 @@ export async function saveProfile(userId: string, profile: Partial<UserProfile>)
     if (profile.blogUrl !== undefined) insertData.blog_url = profile.blogUrl;
     if (profile.blogIndexLevel !== undefined) insertData.blog_index_level = profile.blogIndexLevel;
     if (profile.blogIndexCheckedAt !== undefined) insertData.blog_index_checked_at = profile.blogIndexCheckedAt;
+    if (profile.shopAddress !== undefined) insertData.shop_address = profile.shopAddress;
+    if (profile.shopHours !== undefined) insertData.shop_hours = profile.shopHours;
+    if (profile.shopPhone !== undefined) insertData.shop_phone = profile.shopPhone;
+    if (profile.shopParking !== undefined) insertData.shop_parking = profile.shopParking;
 
     const { error: insertError } = await supabase
       .from('profiles')
@@ -264,6 +280,10 @@ export async function saveProfile(userId: string, profile: Partial<UserProfile>)
   if (profile.blogUrl !== undefined) updateData.blog_url = profile.blogUrl;
   if (profile.blogIndexLevel !== undefined) updateData.blog_index_level = profile.blogIndexLevel;
   if (profile.blogIndexCheckedAt !== undefined) updateData.blog_index_checked_at = profile.blogIndexCheckedAt;
+  if (profile.shopAddress !== undefined) updateData.shop_address = profile.shopAddress;
+  if (profile.shopHours !== undefined) updateData.shop_hours = profile.shopHours;
+  if (profile.shopPhone !== undefined) updateData.shop_phone = profile.shopPhone;
+  if (profile.shopParking !== undefined) updateData.shop_parking = profile.shopParking;
 
   const { error: updateError } = await supabase
     .from('profiles')
