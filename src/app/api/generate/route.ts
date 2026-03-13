@@ -944,7 +944,7 @@ const BRANDING_TYPE_NAMES: Record<string, string> = {
 };
 
 export async function POST(request: NextRequest) {
-  if (!ANTHROPIC_API_KEY) {
+  if (!GEMINI_API_KEY) {
     return NextResponse.json({ error: 'API 키가 설정되지 않았습니다.' }, { status: 500 });
   }
 
