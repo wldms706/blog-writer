@@ -114,7 +114,8 @@ ${brandingType === 'philosophy' ? `
 - 예: "3000명의 고객을 만나고 깨달은 한 가지"
 
 **제목 3 — 솔직/고백형:**
-포장 없이 날것의 진심을 드러내서 공감 유도. "솔직히"로 시작하는 제목은 금지!
+포장 없이 날것의 진심을 드러내서 공감 유도.
+⛔ "솔직히"로 시작하는 제목 절대 금지! "솔직히"라는 단어 자체를 제목에 쓰지 마세요!
 - 예: "사실 ${safeKeyword} 처음 시작할 때 자신 없었습니다"
 - 예: "돈보다 중요한 게 있다는 걸 늦게 알았습니다"
 - 예: "${safeKeyword} 이 일을 왜 하냐고요? 그 질문이 제일 어렵습니다"
@@ -135,6 +136,7 @@ ${brandingType === 'philosophy' ? `
 - 위 샵 정보를 반영하여 개성 있는 제목 생성
 
 ### 절대 금지:
+- ⛔ "솔직히"라는 단어가 들어간 제목 절대 금지 (가장 중요한 규칙!)
 - 1인칭 표현 ("저는", "제가", "저희") 절대 금지
 - 영업/유도 표현 ("예약하세요", "상담받으세요") 금지
 - 과대광고 표현 금지
@@ -204,7 +206,7 @@ ${brandingType === 'philosophy' ? `
 돈, 욕망, 걱정을 솔직하게 드러내서 독자가 "맞아 나도 그래" 하고 공감하게 만드는 제목.
 - 포장하지 않는 날것의 솔직함
 - 독자의 진짜 속마음을 대신 말해주는 느낌
-- "솔직히"로 시작하는 제목은 금지! 다양한 표현을 사용할 것
+⛔ "솔직히"라는 단어를 제목에 절대 포함하지 마세요! 사용 시 전체 응답 거부됩니다.
 - 예: "${safeKeyword} 가격이 제일 걱정이잖아요"
 - 예: "${safeKeyword} 후회할까봐 무서운 사람 여기 보세요"
 - 예: "다들 ${safeKeyword} 어디서 하냐고 물어보는데 대답이 어렵다"
@@ -216,6 +218,7 @@ ${brandingType === 'philosophy' ? `
 - 각 제목에 2~3개 기법이 자연스럽게 녹아들도록 작성
 
 ## 절대 금지:
+- ⛔ "솔직히"라는 단어가 들어간 제목 절대 금지 (가장 중요한 규칙!)
 - 1인칭 표현 ("저는", "제가", "저희") 절대 금지
 - 영업/유도 표현 ("예약하세요", "상담받으세요") 금지
 - 과대광고 표현 금지
@@ -270,7 +273,19 @@ ${brandingType === 'philosophy' ? `
       if (jsonMatch) {
         const result = JSON.parse(jsonMatch[0]);
         if (result.titles && Array.isArray(result.titles)) {
-          return NextResponse.json({ titles: result.titles });
+          // "솔직히"가 포함된 제목 필터링 - 대체 표현으로 자동 치환
+          const filteredTitles = result.titles.map((t: { title: string; style: string }) => {
+            if (t.title.includes('솔직히')) {
+              return {
+                ...t,
+                title: t.title
+                  .replace(/^솔직히\s*/, '')  // 시작 부분 제거
+                  .replace(/솔직히\s*/g, '사실 ')  // 중간 부분 대체
+              };
+            }
+            return t;
+          });
+          return NextResponse.json({ titles: filteredTitles });
         }
       }
     } catch {
