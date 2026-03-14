@@ -17,6 +17,7 @@ import {
   filterFirstPerson,
   filterBannedWords,
 } from '@/lib/prompts';
+import { analyzeTopBlogs } from '@/lib/naver-analyze';
 
 // Vercel 함수 타임아웃 60초로 설정
 export const maxDuration = 60;
@@ -87,6 +88,21 @@ export async function POST(request: NextRequest) {
 
     // 규제 업종 여부 확인
     const isRegulatedBusiness = safeBusinessCategory === 'semi-permanent' || safeBusinessCategory === '반영구' || REGULATED_KEYWORDS.some(k => safeKeyword.includes(k));
+
+    // 상위 블로그 형태소 분석 (병렬 실행 — 실패해도 글 생성에 영향 없음)
+    let competitorPhrases = '';
+    try {
+      const analysis = await analyzeTopBlogs(safeKeyword);
+      if (analysis.phrases.length > 0) {
+        competitorPhrases = `
+⚠️ 네이버 상위 노출 글 분석 결과 (${analysis.analyzedCount}개 분석):
+아래 표현들이 상위 노출 글에서 공통으로 자주 사용됩니다. 본문에 자연스럽게 녹여서 포함하세요:
+${analysis.phrases.map(p => `- "${p}"`).join('\n')}
+단, 억지로 넣지 말고 문맥에 맞게 자연스럽게 사용하세요.`;
+      }
+    } catch (err) {
+      console.error('Competitor analysis failed (non-blocking):', err);
+    }
 
     // 샵 정보 텍스트 — 반영구(규제 업종)에서는 비공개 위험으로 완전 제외
     const shopInfoParts: string[] = [];
@@ -340,7 +356,7 @@ ${isLargeKeyword(safeKeyword) ? `
 ⚠️⚠️⚠️ 글자수: 공백 제외 1,400~1,600자로 작성`;
     }
 
-    const fullPrompt = systemPrompt + `\n\n⚠️⚠️⚠️ 최우선 규칙 — [편집가이드] 리터럴 출력 필수 ⚠️⚠️⚠️
+    const fullPrompt = systemPrompt + competitorPhrases + `\n\n⚠️⚠️⚠️ 최우선 규칙 — [편집가이드] 리터럴 출력 필수 ⚠️⚠️⚠️
 [편집가이드: ...]는 당신이 해석하거나 실행할 지시가 아닙니다.
 이것은 최종 출력물에 반드시 그대로 포함되어야 하는 "리터럴 텍스트"입니다.
 블로그 글 본문 중간중간에 [편집가이드: 여기에 시술 전후 사진을 넣어주세요] 같은 형태로 최소 4개 이상 삽입하세요.
