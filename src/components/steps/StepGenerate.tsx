@@ -59,6 +59,9 @@ export default function StepGenerate({ onReset, formData, isRegulated = false }:
   const [blogUrl, setBlogUrl] = useState('');
   const [blogUrlSubmitted, setBlogUrlSubmitted] = useState(false);
   const [blogUrlSubmitting, setBlogUrlSubmitting] = useState(false);
+  const [reviseInput, setReviseInput] = useState('');
+  const [isRevising, setIsRevising] = useState(false);
+  const [reviseHistory, setReviseHistory] = useState<string[]>([]);
 
   const business = BUSINESS_CATEGORIES.find((b) => b.id === formData.businessCategory);
   const topic = TOPIC_CATEGORIES.find((t) => t.id === formData.topic);
@@ -191,6 +194,42 @@ export default function StepGenerate({ onReset, formData, isRegulated = false }:
     const success = await updateBlogUrl(historyId, blogUrl.trim());
     setBlogUrlSubmitting(false);
     if (success) setBlogUrlSubmitted(true);
+  };
+
+  const handleRevise = async () => {
+    if (!reviseInput.trim() || isRevising) return;
+
+    setIsRevising(true);
+    setReviseHistory((prev) => [...prev, reviseInput.trim()]);
+
+    try {
+      const res = await fetch('/api/generate/revise', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          originalContent: content,
+          instruction: reviseInput.trim(),
+          keyword: formData.keyword,
+          businessCategory: business?.name || formData.businessCategory,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || '수정 실패');
+      }
+
+      if (data.content) {
+        setContent(data.content);
+      }
+    } catch (err) {
+      console.error('Revise error:', err);
+      alert(err instanceof Error ? err.message : '수정에 실패했습니다. 다시 시도해주세요.');
+    } finally {
+      setIsRevising(false);
+      setReviseInput('');
+    }
   };
 
   const handleRetry = () => {
@@ -367,6 +406,76 @@ export default function StepGenerate({ onReset, formData, isRegulated = false }:
                 내부 기준을 충족한 블로그 글입니다
               </p>
             </div>
+          </div>
+        </div>
+
+        {/* 글 수정 요청 채팅창 */}
+        <div className="card p-5">
+          <div className="flex items-center gap-2 mb-3">
+            <svg className="w-5 h-5 text-[#3B5CFF]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+            </svg>
+            <h4 className="font-semibold text-black text-sm">글 수정하기</h4>
+          </div>
+          <p className="text-xs text-gray-500 mb-3">
+            수정하고 싶은 부분을 자유롭게 입력하세요
+          </p>
+
+          {/* 수정 히스토리 */}
+          {reviseHistory.length > 0 && (
+            <div className="mb-3 space-y-2">
+              {reviseHistory.map((msg, i) => (
+                <div key={i} className="flex justify-end">
+                  <span className="inline-block px-3 py-2 rounded-2xl rounded-br-md bg-[#3B5CFF] text-white text-sm max-w-[80%]">
+                    {msg}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* 빠른 선택 버튼 */}
+          <div className="flex flex-wrap gap-2 mb-3">
+            {['도입부를 바꿔줘', '내용을 더 구체적으로', '톤을 더 친근하게', '마무리를 바꿔줘'].map((suggestion) => (
+              <button
+                key={suggestion}
+                onClick={() => setReviseInput(suggestion)}
+                disabled={isRevising}
+                className="px-3 py-1.5 rounded-full bg-gray-100 text-gray-600 text-xs font-medium hover:bg-gray-200 transition-colors disabled:opacity-40"
+              >
+                {suggestion}
+              </button>
+            ))}
+          </div>
+
+          {/* 입력창 */}
+          <div className="flex gap-2">
+            <input
+              type="text"
+              value={reviseInput}
+              onChange={(e) => setReviseInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && !e.nativeEvent.isComposing) {
+                  e.preventDefault();
+                  handleRevise();
+                }
+              }}
+              placeholder="예: 도입부를 바꿔줘, 사례를 추가해줘..."
+              disabled={isRevising}
+              className="flex-1 px-3 py-2.5 rounded-xl border border-gray-200 bg-white text-sm text-black placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#3B5CFF]/20 focus:border-[#3B5CFF] disabled:opacity-50"
+            />
+            <button
+              onClick={handleRevise}
+              disabled={!reviseInput.trim() || isRevising}
+              className="px-4 py-2.5 rounded-xl bg-[#3B5CFF] text-white text-sm font-medium hover:bg-[#3B5CFF]/90 disabled:opacity-40 disabled:cursor-not-allowed transition-all whitespace-nowrap"
+            >
+              {isRevising ? (
+                <svg className="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                </svg>
+              ) : '수정'}
+            </button>
           </div>
         </div>
 
