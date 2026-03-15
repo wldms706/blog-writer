@@ -1,12 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import Link from 'next/link';
-
-interface RecommendedKeyword {
-  keyword: string;
-  reason: string;
-}
+import { useState, useEffect, useMemo } from 'react';
+import { createClient } from '@/lib/supabase/client';
 
 interface StepKeywordProps {
   value: string;
@@ -15,295 +10,291 @@ interface StepKeywordProps {
   topic: string | null;
 }
 
-export default function StepKeyword({ value, onChange, businessCategory, topic }: StepKeywordProps) {
-  const [recommendedKeywords, setRecommendedKeywords] = useState<RecommendedKeyword[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [needsLocation, setNeedsLocation] = useState(false);
-  const [needsBlogIndex, setNeedsBlogIndex] = useState(false);
-  const [blogIndexLevel, setBlogIndexLevel] = useState<string | null>(null);
-  const [location, setLocation] = useState<string>('');
+// 업종별 세부 키워드 예시
+const DETAIL_KEYWORDS: Record<string, string[]> = {
+  'semi-permanent': ['눈썹문신', '여자눈썹문신', '남자눈썹문신', '반영구눈썹', '자연눈썹문신', '콤보눈썹', '아이라인문신', '입술문신', '헤어라인문신'],
+  eyelash: ['속눈썹펌', '속눈썹연장', '래쉬리프트', '속눈썹펌추천', '자연속눈썹펌'],
+  nail: ['네일아트', '젤네일', '손톱관리', '네일케어', '패디큐어'],
+  skin: ['피부관리', '여드름관리', '모공관리', '피부관리실', '얼굴관리'],
+  hair: ['헤어컷', '머리염색', '남자헤어', '여자헤어', '펌추천', '탈색'],
+  waxing: ['왁싱', '브라질리언왁싱', '페이스왁싱', '바디왁싱'],
+  scalp: ['두피문신', '두피관리', 'SMP', '탈모관리', '두피케어'],
+  makeup: ['메이크업', '웨딩메이크업', '셀프메이크업'],
+};
+
+// 기본 세부 키워드
+const DEFAULT_DETAILS = ['시술', '관리', '추천', '잘하는곳', '가격'];
+
+export default function StepKeyword({ value, onChange, businessCategory }: StepKeywordProps) {
+  const [region, setRegion] = useState('');
+  const [detail, setDetail] = useState('');
+  const [pastKeywords, setPastKeywords] = useState<{ keyword: string; usedAt: string; count: number }[]>([]);
+  const [loading, setLoading] = useState(true);
   const [keywordWarning, setKeywordWarning] = useState<string | null>(null);
+
+  // 이전에 사용한 키워드 불러오기
+  useEffect(() => {
+    async function loadPastKeywords() {
+      try {
+        const supabase = createClient();
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) { setLoading(false); return; }
+
+        const { data } = await supabase
+          .from('histories')
+          .select('keyword, created_at')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false })
+          .limit(50);
+
+        if (data && data.length > 0) {
+          // 키워드별 사용 횟수, 최근 사용일 집계
+          const keywordMap = new Map<string, { count: number; lastUsed: string }>();
+          for (const row of data) {
+            if (!row.keyword) continue;
+            const existing = keywordMap.get(row.keyword);
+            if (existing) {
+              existing.count += 1;
+            } else {
+              keywordMap.set(row.keyword, { count: 1, lastUsed: row.created_at });
+            }
+          }
+
+          const sorted = Array.from(keywordMap.entries())
+            .map(([keyword, info]) => ({
+              keyword,
+              usedAt: info.lastUsed,
+              count: info.count,
+            }))
+            .sort((a, b) => new Date(b.usedAt).getTime() - new Date(a.usedAt).getTime());
+
+          setPastKeywords(sorted);
+
+          // 마지막으로 쓴 키워드에서 지역 추출
+          if (sorted.length > 0 && !region) {
+            const lastKeyword = sorted[0].keyword;
+            // 지역명 패턴 추출 (2~4글자 한글로 시작)
+            const regionMatch = lastKeyword.match(/^([가-힣]{2,4})/);
+            if (regionMatch) {
+              setRegion(regionMatch[1]);
+            }
+          }
+        }
+      } catch (err) {
+        console.error('Load past keywords error:', err);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadPastKeywords();
+  }, []);
+
+  // 지역 + 세부키워드 조합
+  useEffect(() => {
+    if (region && detail) {
+      const combined = `${region}${detail}`;
+      onChange(combined);
+      setKeywordWarning(null);
+    }
+  }, [region, detail]);
+
+  // 이 업종에서 아직 안 쓴 세부키워드 제안
+  const suggestedDetails = useMemo(() => {
+    const details = DETAIL_KEYWORDS[businessCategory || ''] || DEFAULT_DETAILS;
+    const usedDetails = new Set(
+      pastKeywords.map(pk => {
+        // 지역을 제거하고 세부키워드만 추출
+        const match = pk.keyword.match(/^[가-힣]{2,4}(.+)$/);
+        return match ? match[1] : pk.keyword;
+      })
+    );
+    return details.map(d => ({
+      keyword: d,
+      isUsed: usedDetails.has(d),
+    }));
+  }, [businessCategory, pastKeywords]);
 
   // 키워드 유효성 검사
   const validateKeyword = (keyword: string): string | null => {
     if (!keyword) return null;
-
-    // 한글 자모 분리 체크 (ㄱ-ㅎ, ㅏ-ㅣ 단독 사용)
     const incompleteHangul = /[ㄱ-ㅎㅏ-ㅣ]/;
     if (incompleteHangul.test(keyword)) {
-      return '키워드에 오타가 있는 것 같습니다. 올바른 키워드인지 확인해주세요.';
+      return '키워드에 오타가 있는 것 같습니다. 확인해주세요.';
     }
-
-    // 특수문자 체크 (일부 허용: -, _)
-    const invalidChars = /[!@#$%^&*()+=\[\]{};':"\\|,.<>\/?]/;
-    if (invalidChars.test(keyword)) {
-      return '키워드에 특수문자가 포함되어 있습니다. 검색어로 사용하기 어려울 수 있습니다.';
-    }
-
     return null;
   };
 
-  const handleKeywordChange = (newValue: string) => {
+  const handleDirectInput = (newValue: string) => {
     onChange(newValue);
-    const warning = validateKeyword(newValue);
-    setKeywordWarning(warning);
+    setKeywordWarning(validateKeyword(newValue));
   };
 
-  useEffect(() => {
-    if (businessCategory) {
-      fetchRecommendations();
-    }
-  }, [businessCategory, topic]);
-
-  const fetchRecommendations = async () => {
-    if (!businessCategory) return;
-
-    setLoading(true);
-    setError(null);
-    setNeedsLocation(false);
-    setNeedsBlogIndex(false);
-
-    try {
-      const res = await fetch('/api/recommend-keywords', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ businessCategory, topic }),
-      });
-
-      const data = await res.json();
-
-      if (data.needsLocation) {
-        setNeedsLocation(true);
-        setError(data.message);
-      } else if (data.needsBlogIndex) {
-        setNeedsBlogIndex(true);
-        setError(data.message);
-      } else if (data.keywords && data.keywords.length > 0) {
-        setRecommendedKeywords(data.keywords);
-        setBlogIndexLevel(data.blogIndexLevel);
-        setLocation(data.location || '');
-      } else if (data.error) {
-        setError(data.error);
-      }
-    } catch {
-      setError('키워드 추천을 불러오는 중 오류가 발생했습니다.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // 블덱스 지수를 전략 그룹으로 매핑
-  const getStrategyGroup = (level: string | null): 'optimal' | 'sub-high' | 'sub-low' | 'general' | null => {
-    if (!level) return null;
-    if (['optimal1', 'optimal2', 'optimal3'].includes(level)) return 'optimal';
-    if (['sub5', 'sub6', 'sub7'].includes(level)) return 'sub-high';
-    if (['sub1', 'sub2', 'sub3', 'sub4'].includes(level)) return 'sub-low';
-    return 'general'; // sub0 = 일반
-  };
-
-  const getBlogLevelBadge = () => {
-    if (!blogIndexLevel) return null;
-
-    // 블덱스 레벨 표시 (예: 최적3, 준최5, 일반)
-    let label: string;
-    if (blogIndexLevel === 'sub0') {
-      label = '일반';
-    } else if (blogIndexLevel.startsWith('optimal')) {
-      label = `최적${blogIndexLevel.replace('optimal', '')}`;
-    } else {
-      label = `준최${blogIndexLevel.replace('sub', '')}`;
-    }
-
-    const group = getStrategyGroup(blogIndexLevel);
-    const colorClass = group === 'optimal'
-      ? 'bg-green-100 text-green-700'
-      : group === 'sub-high'
-      ? 'bg-[#3B5CFF]/10 text-[#3B5CFF]'
-      : group === 'sub-low'
-      ? 'bg-yellow-100 text-yellow-700'
-      : 'bg-gray-100 text-gray-700';
-
-    return <span className={`px-2 py-0.5 rounded-full text-xs ${colorClass}`}>{label}</span>;
-  };
-
-  const getBlogLevelStrategy = () => {
-    const group = getStrategyGroup(blogIndexLevel);
-    switch (group) {
-      case 'optimal':
-        return '구/시 단위 경쟁 키워드로 노출을 노려보세요';
-      case 'sub-high':
-        return '동 단위 키워드로 안정적인 노출을 목표로 합니다';
-      case 'sub-low':
-        return '동 + 세부 키워드 조합 (예: 역삼동여자눈썹문신)';
-      case 'general':
-        return '초세부 틈새 키워드로 집중 공략하세요 (예: 망한눈썹문신)';
-      default:
-        return '';
-    }
+  // 날짜 포맷
+  const formatDate = (dateStr: string) => {
+    const d = new Date(dateStr);
+    const month = d.getMonth() + 1;
+    const day = d.getDate();
+    return `${month}/${day}`;
   };
 
   return (
     <div className="animate-fade-in">
       <div className="text-center mb-8">
         <h2 className="text-2xl sm:text-3xl font-black text-black mb-2">
-          검색 키워드를 선택해주세요
+          검색 키워드를 입력해주세요
         </h2>
         <p className="text-gray-500">
-          블로그 지수와 지역에 맞는 키워드를 추천해드립니다
+          지역 + 세부키워드 조합으로 입력하면 노출에 유리합니다
         </p>
       </div>
 
       <div className="max-w-xl mx-auto space-y-6">
-        {/* 직접 입력 (항상 최상단에 노출) */}
-        <div className="space-y-2">
-          <label className="block text-sm font-bold text-black">키워드 직접 입력</label>
+        {/* 지역 + 세부키워드 조합 입력 */}
+        <div className="card p-5 space-y-4">
+          <div className="flex items-center gap-2 mb-1">
+            <span className="text-sm font-bold text-black">키워드 조합</span>
+            <span className="text-xs text-gray-400">지역 + 세부키워드</span>
+          </div>
+
+          <div className="flex gap-2">
+            <div className="flex-1">
+              <label className="block text-xs text-gray-500 mb-1">지역</label>
+              <input
+                type="text"
+                value={region}
+                onChange={(e) => setRegion(e.target.value)}
+                placeholder="예: 천안, 강남, 수원"
+                className="w-full rounded-xl border-2 border-gray-200 px-3 py-2.5 text-sm outline-none focus:border-[#3B5CFF]"
+              />
+            </div>
+            <div className="flex items-end pb-0.5 text-gray-300 text-lg font-bold">+</div>
+            <div className="flex-[1.5]">
+              <label className="block text-xs text-gray-500 mb-1">세부키워드</label>
+              <input
+                type="text"
+                value={detail}
+                onChange={(e) => setDetail(e.target.value)}
+                placeholder="예: 눈썹문신, 속눈썹펌"
+                className="w-full rounded-xl border-2 border-gray-200 px-3 py-2.5 text-sm outline-none focus:border-[#3B5CFF]"
+              />
+            </div>
+          </div>
+
+          {/* 세부키워드 빠른 선택 */}
+          <div>
+            <p className="text-xs text-gray-400 mb-2">세부키워드 선택</p>
+            <div className="flex flex-wrap gap-2">
+              {suggestedDetails.map(({ keyword: d, isUsed }) => (
+                <button
+                  key={d}
+                  onClick={() => setDetail(d)}
+                  className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
+                    detail === d
+                      ? 'bg-[#3B5CFF] text-white'
+                      : isUsed
+                      ? 'bg-gray-100 text-gray-400 line-through'
+                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  }`}
+                >
+                  {d}
+                  {isUsed && detail !== d && ' (사용됨)'}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* 또는 직접 입력 */}
+        <div className="flex items-center gap-3">
+          <div className="flex-1 border-t border-gray-200" />
+          <span className="text-xs text-gray-400">또는 직접 입력</span>
+          <div className="flex-1 border-t border-gray-200" />
+        </div>
+
+        <div>
           <input
             type="text"
             value={value}
-            onChange={(e) => handleKeywordChange(e.target.value)}
-            placeholder="예: 남자 헤어컷, 천안눈썹문신, 강남피부관리"
+            onChange={(e) => handleDirectInput(e.target.value)}
+            placeholder="예: 천안눈썹문신, 강남여자눈썹문신, 수원속눈썹펌"
             className={`w-full rounded-xl border-2 px-4 py-3 text-sm outline-none focus:border-[#3B5CFF] ${
-              keywordWarning ? 'border-amber-400 bg-amber-50' : 'border-gray-200 focus:bg-white'
+              keywordWarning ? 'border-amber-400 bg-amber-50' : 'border-gray-200'
             }`}
           />
-          {keywordWarning ? (
-            <div className="flex items-start gap-2 rounded-lg bg-amber-50 border border-amber-200 p-3">
-              <span className="text-amber-500">⚠️</span>
-              <p className="text-xs text-amber-700">{keywordWarning}</p>
-            </div>
-          ) : (
-            <p className="text-xs text-gray-400">
-              원하는 주제를 직접 입력하세요. 아래 AI 추천 키워드를 선택해도 됩니다.
-            </p>
+          {keywordWarning && (
+            <p className="text-xs text-amber-600 mt-1">⚠️ {keywordWarning}</p>
           )}
         </div>
 
         {/* 선택된 키워드 표시 */}
-        {value && (
+        {value && !keywordWarning && (
           <div className="text-center animate-fade-in">
-            <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm ${
-              keywordWarning
-                ? 'bg-amber-50 text-amber-700 border border-amber-200'
-                : 'bg-[#3B5CFF] text-white font-bold'
-            }`}>
-              {keywordWarning ? (
-                <span>⚠️</span>
-              ) : (
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
-              )}
-              <span>선택된 키워드: <strong>{value}</strong></span>
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#3B5CFF] text-white font-bold text-sm">
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+              선택된 키워드: <strong>{value}</strong>
             </div>
           </div>
         )}
 
-        {/* 구분선 */}
-        <div className="flex items-center gap-3">
-          <div className="flex-1 border-t border-gray-200" />
-          <span className="text-xs text-gray-400">또는 AI 추천 키워드에서 선택</span>
-          <div className="flex-1 border-t border-gray-200" />
-        </div>
+        {/* 이전에 사용한 키워드 */}
+        {!loading && pastKeywords.length > 0 && (
+          <div className="card p-5">
+            <div className="flex items-center gap-2 mb-3">
+              <svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <span className="text-sm font-bold text-black">이전에 사용한 키워드</span>
+            </div>
 
-        {/* 로딩 상태 */}
-        {loading && (
-          <div className="text-center py-8">
-            <div className="mx-auto h-8 w-8 animate-spin rounded-full border-2 border-gray-200 border-t-[#3B5CFF] mb-3" />
-            <p className="text-sm text-gray-500">AI가 최적의 키워드를 분석 중입니다...</p>
-          </div>
-        )}
-
-        {/* 설정 필요 안내 */}
-        {(needsLocation || needsBlogIndex) && !loading && (
-          <div className="rounded-xl border border-amber-200 bg-amber-50 p-5">
-            <div className="flex items-start gap-3">
-              <span className="text-xl">⚙️</span>
-              <div>
-                <p className="font-medium text-amber-800 mb-2">{error}</p>
-                <p className="text-sm text-amber-700 mb-3">
-                  {needsLocation && '키워드 추천을 위해 샵 위치 정보가 필요합니다.'}
-                  {needsBlogIndex && '키워드 추천을 위해 블로그 지수 설정이 필요합니다.'}
+            {/* 새 키워드 제안 메시지 */}
+            {pastKeywords.length > 0 && (
+              <div className="mb-3 p-3 rounded-lg bg-[#3B5CFF]/5 border border-[#3B5CFF]/20">
+                <p className="text-xs text-gray-600">
+                  <strong className="text-[#3B5CFF]">"{pastKeywords[0].keyword}"</strong>을(를) {pastKeywords[0].count}번 사용했어요.
+                  {' '}같은 키워드를 반복하면 네이버에서 저품질로 판단할 수 있으니, 오늘은 다른 키워드를 써보는 건 어떨까요?
                 </p>
-                <Link
-                  href="/settings"
-                  className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-amber-600 text-white text-sm font-medium hover:bg-amber-700"
+              </div>
+            )}
+
+            <div className="space-y-1.5 max-h-48 overflow-y-auto">
+              {pastKeywords.slice(0, 8).map((pk, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => {
+                    onChange(pk.keyword);
+                    setKeywordWarning(null);
+                    // 지역/세부 분리
+                    const match = pk.keyword.match(/^([가-힣]{2,4})(.+)$/);
+                    if (match) {
+                      setRegion(match[1]);
+                      setDetail(match[2]);
+                    }
+                  }}
+                  className={`w-full text-left px-3 py-2.5 rounded-lg transition-all flex items-center justify-between ${
+                    value === pk.keyword
+                      ? 'bg-[#3B5CFF]/10 border border-[#3B5CFF]/30'
+                      : 'hover:bg-gray-50'
+                  }`}
                 >
-                  설정으로 이동
-                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                  </svg>
-                </Link>
-              </div>
+                  <div className="flex items-center gap-2">
+                    <span className={`text-sm font-medium ${value === pk.keyword ? 'text-[#3B5CFF]' : 'text-black'}`}>
+                      {pk.keyword}
+                    </span>
+                    <span className="text-xs text-gray-400">{pk.count}회</span>
+                  </div>
+                  <span className="text-xs text-gray-400">{formatDate(pk.usedAt)}</span>
+                </button>
+              ))}
             </div>
           </div>
         )}
 
-        {/* AI 추천 키워드 */}
-        {!loading && !needsLocation && !needsBlogIndex && recommendedKeywords.length > 0 && (
-          <div className="space-y-4">
-            {/* 지역/지수 정보 */}
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 p-3 rounded-lg bg-gray-50">
-              <div className="flex items-center gap-2 text-sm text-gray-600">
-                <span>📍</span>
-                <span className="break-keep">{location}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="text-xs text-gray-500">블로그 지수:</span>
-                {getBlogLevelBadge()}
-              </div>
-            </div>
-
-            {/* 전략 안내 */}
-            <div className="p-3 rounded-lg bg-[#3B5CFF]/5 border border-[#3B5CFF]/20">
-              <p className="text-sm text-gray-600">
-                💡 {getBlogLevelStrategy()}
-              </p>
-            </div>
-
-            {/* 추천 키워드 목록 */}
-            <div className="space-y-2">
-              <div className="space-y-2">
-                {recommendedKeywords.map((item, idx) => (
-                  <button
-                    key={idx}
-                    onClick={() => { onChange(item.keyword); setKeywordWarning(null); }}
-                    className={`w-full text-left p-4 rounded-xl border-2 transition-all ${
-                      value === item.keyword
-                        ? 'border-[#3B5CFF] bg-[#3B5CFF]/5'
-                        : 'border-gray-200 bg-white hover:border-[#3B5CFF]/50'
-                    }`}
-                  >
-                    <div className="flex items-center justify-between">
-                      <span className={`font-medium ${value === item.keyword ? 'text-[#3B5CFF]' : 'text-black'}`}>
-                        {item.keyword}
-                      </span>
-                      {value === item.keyword && (
-                        <svg className="w-5 h-5 text-[#3B5CFF]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                        </svg>
-                      )}
-                    </div>
-                    <p className="text-xs text-gray-500 mt-1">{item.reason}</p>
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* 다시 추천받기 */}
-            <button
-              onClick={fetchRecommendations}
-              className="w-full py-2 text-sm text-gray-500 hover:text-gray-700"
-            >
-              🔄 다른 키워드 추천받기
-            </button>
-          </div>
-        )}
-
-        {/* 에러 표시 (설정 필요 외) */}
-        {error && !needsLocation && !needsBlogIndex && (
-          <div className="p-4 rounded-xl bg-red-50 border border-red-100">
-            <p className="text-sm text-red-600">{error}</p>
+        {loading && (
+          <div className="text-center py-4">
+            <div className="mx-auto h-6 w-6 animate-spin rounded-full border-2 border-gray-200 border-t-[#3B5CFF]" />
           </div>
         )}
       </div>
