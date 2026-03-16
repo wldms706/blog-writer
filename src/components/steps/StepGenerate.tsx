@@ -196,11 +196,13 @@ export default function StepGenerate({ onReset, formData, isRegulated = false }:
     if (success) setBlogUrlSubmitted(true);
   };
 
-  const handleRevise = async () => {
-    if (!reviseInput.trim() || isRevising) return;
+  const handleRevise = async (directInstruction?: string) => {
+    const instruction = directInstruction || reviseInput.trim();
+    if (!instruction || isRevising) return;
 
     setIsRevising(true);
-    setReviseHistory((prev) => [...prev, reviseInput.trim()]);
+    setReviseHistory((prev) => [...prev, instruction]);
+    setReviseInput('');
 
     try {
       const res = await fetch('/api/generate/revise', {
@@ -208,7 +210,7 @@ export default function StepGenerate({ onReset, formData, isRegulated = false }:
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           originalContent: content,
-          instruction: reviseInput.trim(),
+          instruction,
           keyword: formData.keyword,
           businessCategory: business?.name || formData.businessCategory,
         }),
@@ -228,7 +230,6 @@ export default function StepGenerate({ onReset, formData, isRegulated = false }:
       alert(err instanceof Error ? err.message : '수정에 실패했습니다. 다시 시도해주세요.');
     } finally {
       setIsRevising(false);
-      setReviseInput('');
     }
   };
 
@@ -439,7 +440,7 @@ export default function StepGenerate({ onReset, formData, isRegulated = false }:
             {['도입부를 바꿔줘', '내용을 더 구체적으로', '톤을 더 친근하게', '마무리를 바꿔줘'].map((suggestion) => (
               <button
                 key={suggestion}
-                onClick={() => setReviseInput(suggestion)}
+                onClick={() => handleRevise(suggestion)}
                 disabled={isRevising}
                 className="px-3 py-1.5 rounded-full bg-gray-100 text-gray-600 text-xs font-medium hover:bg-gray-200 transition-colors disabled:opacity-40"
               >
@@ -465,7 +466,7 @@ export default function StepGenerate({ onReset, formData, isRegulated = false }:
               className="flex-1 px-3 py-2.5 rounded-xl border border-gray-200 bg-white text-sm text-black placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#3B5CFF]/20 focus:border-[#3B5CFF] disabled:opacity-50"
             />
             <button
-              onClick={handleRevise}
+              onClick={() => handleRevise()}
               disabled={!reviseInput.trim() || isRevising}
               className="px-4 py-2.5 rounded-xl bg-[#3B5CFF] text-white text-sm font-medium hover:bg-[#3B5CFF]/90 disabled:opacity-40 disabled:cursor-not-allowed transition-all whitespace-nowrap"
             >
