@@ -25,6 +25,33 @@ const DETAIL_KEYWORDS: Record<string, string[]> = {
 // 기본 세부 키워드
 const DEFAULT_DETAILS = ['시술', '관리', '추천', '잘하는곳', '가격'];
 
+// 모든 세부키워드 목록 (지역 분리용)
+const ALL_DETAIL_KEYWORDS = [
+  ...new Set(Object.values(DETAIL_KEYWORDS).flat().concat(DEFAULT_DETAILS))
+];
+
+// 키워드에서 지역과 세부키워드 분리
+function splitRegionDetail(keyword: string): { region: string; detail: string } {
+  // 세부키워드 목록에서 긴 것부터 매칭 시도
+  const sorted = [...ALL_DETAIL_KEYWORDS].sort((a, b) => b.length - a.length);
+  for (const d of sorted) {
+    if (keyword.endsWith(d)) {
+      const r = keyword.slice(0, keyword.length - d.length);
+      if (r.length >= 2) return { region: r, detail: d };
+    }
+    if (keyword.includes(d)) {
+      const idx = keyword.indexOf(d);
+      const r = keyword.slice(0, idx);
+      if (r.length >= 2) return { region: r, detail: keyword.slice(idx) };
+    }
+  }
+  // 매칭 안 되면 앞 2글자를 지역으로
+  if (keyword.length > 2) {
+    return { region: keyword.slice(0, 2), detail: keyword.slice(2) };
+  }
+  return { region: keyword, detail: '' };
+}
+
 export default function StepKeyword({ value, onChange, businessCategory }: StepKeywordProps) {
   const [region, setRegion] = useState('');
   const [detail, setDetail] = useState('');
@@ -73,10 +100,9 @@ export default function StepKeyword({ value, onChange, businessCategory }: StepK
           // 마지막으로 쓴 키워드에서 지역 추출
           if (sorted.length > 0 && !region) {
             const lastKeyword = sorted[0].keyword;
-            // 지역명 패턴 추출 (2~4글자 한글로 시작)
-            const regionMatch = lastKeyword.match(/^([가-힣]{2,4})/);
-            if (regionMatch) {
-              setRegion(regionMatch[1]);
+            const { region: extractedRegion } = splitRegionDetail(lastKeyword);
+            if (extractedRegion) {
+              setRegion(extractedRegion);
             }
           }
         }
@@ -104,9 +130,8 @@ export default function StepKeyword({ value, onChange, businessCategory }: StepK
     const details = DETAIL_KEYWORDS[businessCategory || ''] || DEFAULT_DETAILS;
     const usedDetails = new Set(
       pastKeywords.map(pk => {
-        // 지역을 제거하고 세부키워드만 추출
-        const match = pk.keyword.match(/^[가-힣]{2,4}(.+)$/);
-        return match ? match[1] : pk.keyword;
+        const { detail: d } = splitRegionDetail(pk.keyword);
+        return d || pk.keyword;
       })
     );
     return details.map(d => ({
@@ -267,11 +292,9 @@ export default function StepKeyword({ value, onChange, businessCategory }: StepK
                     onChange(pk.keyword);
                     setKeywordWarning(null);
                     // 지역/세부 분리
-                    const match = pk.keyword.match(/^([가-힣]{2,4})(.+)$/);
-                    if (match) {
-                      setRegion(match[1]);
-                      setDetail(match[2]);
-                    }
+                    const { region: r, detail: d } = splitRegionDetail(pk.keyword);
+                    if (r) setRegion(r);
+                    if (d) setDetail(d);
                   }}
                   className={`w-full text-left px-3 py-2.5 rounded-lg transition-all flex items-center justify-between ${
                     value === pk.keyword
