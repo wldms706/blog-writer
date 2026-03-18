@@ -87,7 +87,105 @@ export const ARTICLE_STRUCTURES = [
   },
 ];
 
+// 도입부 스타일 (매번 다른 방식으로 글을 시작)
+const INTRO_STYLES = [
+  {
+    name: '에피소드형',
+    instruction: `도입부를 최근 실제 있었던 에피소드 하나로 시작하세요.
+"얼마 전에 이런 분이 오셨는데요" 또는 "지난주에 상담 중에 이런 말씀을 하시더라고요" 같은 구체적인 현장 이야기로 시작.`,
+  },
+  {
+    name: '반전형',
+    instruction: `도입부를 독자의 예상을 뒤집는 한 문장으로 시작하세요.
+"대부분 OO라고 생각하시는데, 사실 정반대입니다" 같이 흔한 믿음을 뒤집는 문장으로 시작.`,
+  },
+  {
+    name: '질문형',
+    instruction: `도입부를 독자가 실제로 검색했을 법한 구체적인 질문으로 시작하세요.
+"혹시 이런 고민 해보신 적 있으세요?" 같은 막연한 질문이 아니라, "OO했는데 왜 이렇게 됐을까?" 같은 구체적 질문.`,
+  },
+  {
+    name: '공감형',
+    instruction: `도입부를 독자의 감정/상황에 깊이 공감하는 것으로 시작하세요.
+"이거 진짜 고민되시죠" "막상 결정하려니 뭘 봐야 할지 모르겠다는 분들 정말 많거든요" 같은 감정 이해.`,
+  },
+  {
+    name: '숫자/팩트형',
+    instruction: `도입부를 구체적인 숫자나 팩트 하나로 시작하세요.
+"10명 중 7명이 이 부분을 모르고 오세요" 또는 "보통 3개월 뒤에 이런 차이가 나기 시작합니다" 같은 구체적 수치.`,
+  },
+  {
+    name: '계절/시기형',
+    instruction: `도입부를 지금 시기와 연결하여 시작하세요.
+"요즘 같은 시기에 특히 이런 분들이 많이 오세요" "이맘때쯤 꼭 나오는 질문이 있거든요" 같이 시의성 있는 도입.`,
+  },
+];
+
+// 글 톤/화법 (매번 다른 톤으로 작성)
+const WRITING_TONES = [
+  {
+    name: '편한 선배 톤',
+    instruction: `업계 경력 많은 선배가 후배한테 알려주듯이 편하게 쓰세요.
+"이건 진짜 알아두면 좋은 건데요" "이건 제가 직접 겪어봐서 아는 건데" 같은 톤.`,
+  },
+  {
+    name: '꼼꼼한 전문가 톤',
+    instruction: `전문 지식을 조목조목 짚어주는 톤으로 쓰세요.
+원리, 메커니즘, 기술적 디테일을 구체적으로 설명하되 쉬운 말로 풀어주는 전문가 느낌.`,
+  },
+  {
+    name: '고민 상담사 톤',
+    instruction: `독자의 고민에 같이 고민해주는 상담사처럼 쓰세요.
+"그 마음 이해해요" "막상 결정하려면 어렵죠" 같이 공감하면서 답을 찾아가는 느낌.`,
+  },
+  {
+    name: '솔직 담백 톤',
+    instruction: `돌려 말하지 않고 솔직하게 팩트 위주로 쓰세요.
+"결론부터 말하면요" "이건 아닌 건 아닌 거예요" 같이 직설적이지만 신뢰감 있는 톤.`,
+  },
+  {
+    name: '이야기꾼 톤',
+    instruction: `하나의 이야기를 풀어가듯 서사적으로 쓰세요.
+사례를 중심으로 전후 맥락, 과정, 결과를 이야기하듯 전개. 독자가 몰입할 수 있게.`,
+  },
+];
+
+// 시작 시드 (첫 문장의 방향을 결정하는 키워드)
+const OPENING_SEEDS = [
+  '최근 상담에서 가장 많이 받는 질문을 하나 꼽자면',
+  '이 업종에서 일하면서 가장 안타까울 때가 있는데요',
+  '검색해서 여기까지 오신 분이라면 아마 이런 상황이실 거예요',
+  '같은 시술인데 결과가 완전히 다른 경우를 정말 많이 봅니다',
+  '처음 오시는 분들이 꼭 물어보시는 게 있어요',
+  '인터넷에 떠도는 정보 중에 진짜 잘못된 게 하나 있거든요',
+  '시술 전에 이것만 알아도 결과가 달라지는 게 있는데',
+  '요즘 유행이 바뀌면서 이런 분들이 확 늘었어요',
+  '가격만 보고 결정하시면 나중에 후회하는 이유가 있거든요',
+  '다른 데서 하고 와서 수정하러 오시는 분들의 공통점이 있어요',
+  '이건 사실 업계에서도 의견이 갈리는 주제인데요',
+  '저도 처음에는 이 방식이 맞다고 생각했는데 경험이 쌓이면서 달라졌어요',
+];
+
+// 랜덤 선택 유틸
+function pickRandom<T>(arr: T[]): T {
+  return arr[Math.floor(Math.random() * arr.length)];
+}
+
 export function getRandomArticleStructure(): string {
-  const randomIndex = Math.floor(Math.random() * ARTICLE_STRUCTURES.length);
-  return ARTICLE_STRUCTURES[randomIndex].structure;
+  return pickRandom(ARTICLE_STRUCTURES).structure;
+}
+
+// 다양성 조합: 구조 + 도입부 + 톤 + 시작 시드를 랜덤 조합
+export function getRandomDiversityKit(): {
+  structure: string;
+  introStyle: string;
+  tone: string;
+  openingSeed: string;
+} {
+  return {
+    structure: pickRandom(ARTICLE_STRUCTURES).structure,
+    introStyle: pickRandom(INTRO_STYLES).instruction,
+    tone: pickRandom(WRITING_TONES).instruction,
+    openingSeed: pickRandom(OPENING_SEEDS),
+  };
 }

@@ -1,6 +1,6 @@
 // 프롬프트 모듈 통합 export
 
-export { ARTICLE_STRUCTURES, getRandomArticleStructure } from './structures';
+export { ARTICLE_STRUCTURES, getRandomArticleStructure, getRandomDiversityKit } from './structures';
 export { SEO_REGULATED_PROMPT, SEO_REVIEW_STYLE_PROMPT, SEO_BASE_PROMPT } from './seo-prompts';
 export { BRANDING_GENERAL_PROMPT, BRANDING_REGULATED_PROMPT } from './branding-prompts';
 export { isLargeKeyword, REGULATED_KEYWORDS, BRANDING_TYPE_NAMES, TONE_PROMPT_OVERRIDES } from './constants';
