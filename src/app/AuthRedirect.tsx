@@ -2,31 +2,31 @@
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { createClient } from '@/lib/supabase/client';
 
 export default function AuthRedirect() {
   const router = useRouter();
 
   useEffect(() => {
-    const supabase = createClient();
+    // Supabase를 동적으로 로드해서 초기 번들 크기 줄임
+    import('@/lib/supabase/client').then(({ createClient }) => {
+      const supabase = createClient();
 
-    // 이미 세션이 있으면 바로 /write로
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) {
-        router.replace('/write');
-      }
-    });
-
-    // OAuth 콜백이 루트로 돌아왔을 때 (hash fragment의 토큰 감지)
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        if (event === 'SIGNED_IN' && session) {
+      supabase.auth.getSession().then(({ data: { session } }) => {
+        if (session) {
           router.replace('/write');
         }
-      }
-    );
+      });
 
-    return () => subscription.unsubscribe();
+      const { data: { subscription } } = supabase.auth.onAuthStateChange(
+        (event, session) => {
+          if (event === 'SIGNED_IN' && session) {
+            router.replace('/write');
+          }
+        }
+      );
+
+      return () => subscription.unsubscribe();
+    });
   }, [router]);
 
   return null;
