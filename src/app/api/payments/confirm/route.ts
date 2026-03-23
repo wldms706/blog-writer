@@ -158,8 +158,8 @@ export async function POST(request: NextRequest) {
         const { error } = await supabase
           .from('profiles')
           .update({
-            plan: planId,
-            plan_type: plan.type,
+            plan: 'paid',
+            plan_type: planId,
             updated_at: now.toISOString(),
           })
           .eq('id', user.id);

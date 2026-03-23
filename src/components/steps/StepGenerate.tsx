@@ -5,6 +5,7 @@ import { BUSINESS_CATEGORIES, TOPIC_CATEGORIES, PURPOSES, READER_STATES } from '
 import { FormData } from '@/types';
 import { saveHistory, updateBlogUrl } from '@/lib/storage';
 import { createClient } from '@/lib/supabase/client';
+import Link from 'next/link';
 
 interface StepGenerateProps {
   onReset: () => void;
@@ -124,6 +125,13 @@ export default function StepGenerate({ onReset, formData, isRegulated = false }:
 
         const data = await res.json();
 
+        if (res.status === 403) {
+          clearInterval(messageInterval);
+          setErrorMessage('PAYWALL');
+          setPhase('error');
+          return;
+        }
+
         if (!res.ok) {
           throw new Error(data.error || 'API 요청 실패');
         }
@@ -240,6 +248,53 @@ export default function StepGenerate({ onReset, formData, isRegulated = false }:
     setContent('');
     setRetryCount((c) => c + 1);
   };
+
+  // 페이월 화면 (무료 횟수 소진)
+  if (phase === 'error' && errorMessage === 'PAYWALL') {
+    return (
+      <div className="animate-fade-in">
+        <div className="max-w-xl mx-auto">
+          <div className="card p-10 text-center">
+            <div className="mb-6">
+              <div className="w-16 h-16 mx-auto rounded-full bg-[#3B5CFF]/10 flex items-center justify-center">
+                <svg className="w-8 h-8 text-[#3B5CFF]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
+              </div>
+            </div>
+            <p className="text-lg font-bold text-black mb-2">오늘의 무료 횟수를 모두 사용했어요</p>
+            <p className="text-sm text-gray-500 mb-6">프로 플랜으로 업그레이드하면<br/>무제한으로 글을 생성할 수 있습니다</p>
+            <div className="bg-[#F5F5F5] rounded-2xl p-5 mb-6 text-left">
+              <p className="text-sm font-bold text-black mb-3">프로 플랜 혜택</p>
+              <ul className="text-sm text-gray-600 space-y-2">
+                <li className="flex items-center gap-2">
+                  <svg className="w-4 h-4 text-[#3B5CFF] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7"/></svg>
+                  무제한 글 생성
+                </li>
+                <li className="flex items-center gap-2">
+                  <svg className="w-4 h-4 text-[#3B5CFF] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7"/></svg>
+                  업종 특화 글 구조 10종+
+                </li>
+                <li className="flex items-center gap-2">
+                  <svg className="w-4 h-4 text-[#3B5CFF] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7"/></svg>
+                  SEO 최적화 글쓰기
+                </li>
+                <li className="flex items-center gap-2">
+                  <svg className="w-4 h-4 text-[#3B5CFF] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7"/></svg>
+                  무제한 히스토리
+                </li>
+              </ul>
+              <p className="mt-4 text-2xl font-black text-black">월 19,900원~</p>
+            </div>
+            <div className="flex gap-3 justify-center">
+              <button onClick={onReset} className="btn-secondary">처음으로</button>
+              <Link href="/subscribe" className="btn-primary inline-block text-center">프로 플랜 시작하기</Link>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   // 에러 화면
   if (phase === 'error') {

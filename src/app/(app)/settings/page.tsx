@@ -495,14 +495,14 @@ export default function SettingsPage() {
                   <div className="flex gap-2">
                     <button
                       onClick={async () => {
-                        const supabase = createClient();
-                        await supabase
-                          .from('subscriptions')
-                          .update({ status: 'cancelled', cancelled_at: new Date().toISOString() })
-                          .eq('user_id', userId);
-                        setSubscription({ ...subscription, status: 'cancelled' });
-                        setShowCancelConfirm(false);
-                        showToast('구독이 취소되었습니다');
+                        const res = await fetch('/api/payments/cancel', { method: 'POST' });
+                        if (res.ok) {
+                          setSubscription({ ...subscription, status: 'cancelled' });
+                          setShowCancelConfirm(false);
+                          showToast('구독이 취소되었습니다');
+                        } else {
+                          showToast('구독 취소에 실패했습니다');
+                        }
                       }}
                       className="rounded-lg bg-red-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-red-700"
                     >

@@ -1,6 +1,12 @@
 import { createClient as createServerSupabase } from '@/lib/supabase/server';
 import { syncUserToSheet } from '@/lib/google-sheets';
 
+// ============================================
+// 🔧 LAUNCH TOGGLE: true = 모든 유저 무제한
+// 3/26 런칭 시 false로 변경하세요!
+// ============================================
+const UNLIMITED_FOR_ALL = true;
+
 const FREE_DAILY_LIMIT = 3;
 
 // 관리자 이메일 - 무제한 사용 가능
@@ -29,9 +35,23 @@ export async function checkAndIncrementUsage(userId: string): Promise<{
   const currentDailyUsage = profile.last_usage_date === today ? (profile.daily_usage || 0) : 0;
   const currentTotalUsage = profile.total_usage || 0;
 
+  // LAUNCH TOGGLE: 모든 유저 무제한 (사용량은 계속 추적)
+  if (UNLIMITED_FOR_ALL) {
+    const newDailyUsage = currentDailyUsage + 1;
+    const newTotalUsage = currentTotalUsage + 1;
+
+    await supabase
+      .from('profiles')
+      .update({ daily_usage: newDailyUsage, total_usage: newTotalUsage, last_usage_date: today })
+      .eq('id', userId);
+
+    return { allowed: true, remaining: -1, plan: profile.plan || 'free' };
+  }
+
   // 관리자 또는 유료 유저는 무제한
   const isAdmin = profile.email && ADMIN_EMAILS.includes(profile.email);
-  if (isAdmin || profile.plan === 'paid') {
+  const isPaid = profile.plan === 'paid' || (profile.plan && profile.plan.startsWith('pro_'));
+  if (isAdmin || isPaid) {
     const newDailyUsage = currentDailyUsage + 1;
     const newTotalUsage = currentTotalUsage + 1;
 
