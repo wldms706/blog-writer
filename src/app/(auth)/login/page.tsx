@@ -1,13 +1,34 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
 
 export default function LoginPage() {
   const [error, setError] = useState('');
   const [socialLoading, setSocialLoading] = useState(false);
+  const router = useRouter();
   const supabase = createClient();
+
+  // 이미 로그인돼 있으면 바로 /write로
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) {
+        router.replace('/write');
+      }
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        if (event === 'SIGNED_IN' && session) {
+          router.replace('/write');
+        }
+      }
+    );
+
+    return () => subscription.unsubscribe();
+  }, [router, supabase.auth]);
 
   const handleGoogleLogin = async () => {
     setSocialLoading(true);
