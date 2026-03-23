@@ -280,6 +280,9 @@ ${!isRegulatedBusiness ? `
 ${diversity.structure}
 ` : ''}
 
+## 이번 글의 관점/앵글 (가장 중요! 이 관점으로 글 전체를 관통하세요)
+${diversity.angle}
+
 ## 도입부 스타일 (반드시 이 방식으로 글을 시작하세요)
 ${diversity.introStyle}
 

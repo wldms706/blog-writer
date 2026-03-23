@@ -166,6 +166,70 @@ const OPENING_SEEDS = [
   '저도 처음에는 이 방식이 맞다고 생각했는데 경험이 쌓이면서 달라졌어요',
 ];
 
+// 관점/앵글 (같은 키워드라도 완전히 다른 글이 나오게 하는 핵심)
+const WRITING_ANGLES = [
+  {
+    name: '시술 후기 관점',
+    instruction: `이번 글은 "최근 실제 고객 사례" 중심으로 쓰세요.
+실제로 어떤 분이 왔고, 어떤 고민이 있었고, 어떻게 해드렸고, 결과가 어땠는지.
+구체적인 나이대, 상황, 과정을 담아서 읽는 사람이 "나랑 비슷하네" 느끼게.`,
+  },
+  {
+    name: '계절/시기 관점',
+    instruction: `이번 글은 "지금 이 시기/계절"과 연결해서 쓰세요.
+왜 지금 이 시술/서비스가 특히 중요한지, 계절에 따라 뭐가 달라지는지.
+"요즘 같은 시기에" "이맘때쯤이면" 같은 시의성을 살려주세요.`,
+  },
+  {
+    name: '실패/수정 사례 관점',
+    instruction: `이번 글은 "다른 곳에서 하고 와서 수정하러 온 사례" 중심으로 쓰세요.
+왜 실패했는지, 어디서 잘못됐는지, 어떻게 수정/보완했는지.
+"이런 거 주의하세요" 경고 톤이면서도 도움이 되는 정보를 담아주세요.`,
+  },
+  {
+    name: '기법/제품 비교 관점',
+    instruction: `이번 글은 "A vs B 비교" 중심으로 쓰세요.
+같은 카테고리 안에서 기법, 제품, 방식의 구체적인 차이를 비교.
+어떤 사람에게 뭐가 맞는지 판단 기준까지 제시해주세요.`,
+  },
+  {
+    name: '고객 유형별 관점',
+    instruction: `이번 글은 "특정 고객 유형"에 맞춰서 쓰세요.
+예: 30대 직장인, 20대 대학생, 40대 주부, 남성 고객 등.
+그 유형이 가장 궁금해하는 것, 주의할 점, 추천 방향을 구체적으로.`,
+  },
+  {
+    name: '트렌드/유행 관점',
+    instruction: `이번 글은 "올해/최근 트렌드" 중심으로 쓰세요.
+뭐가 바뀌었는지, 왜 바뀌었는지, 이 트렌드를 따라야 하는지 말아야 하는지.
+유행을 무작정 따르지 말라는 관점도 OK.`,
+  },
+  {
+    name: '가격/비용 관점',
+    instruction: `이번 글은 "가격과 가성비" 중심으로 쓰세요.
+왜 가격 차이가 나는지, 싼 게 왜 위험한지 또는 비싼 게 왜 그런 값인지.
+"가격만 보지 마세요" 또는 "이 가격대면 이 정도는 기대해도 됩니다" 같은 실용적 정보.`,
+  },
+  {
+    name: '초보자/처음 하는 분 관점',
+    instruction: `이번 글은 "이걸 처음 해보는 사람" 눈높이에서 쓰세요.
+전문 용어 최소화, 과정을 하나하나 설명, 겁먹지 않게 안심시키면서.
+"처음이라 불안하시죠? 이것만 알면 됩니다" 느낌으로.`,
+  },
+  {
+    name: '전문가/디테일 관점',
+    instruction: `이번 글은 "업계 전문 지식"을 깊이 있게 풀어주세요.
+기술적 원리, 왜 이 방식이 더 나은지 과학적/경험적 근거.
+읽는 사람이 "이 사람 진짜 전문가구나" 느끼게 하는 깊이.`,
+  },
+  {
+    name: '일상/공감 관점',
+    instruction: `이번 글은 "시술자의 일상 이야기" 톤으로 쓰세요.
+오늘 있었던 일, 고객과 나눈 대화, 현장에서 느낀 점.
+블로그 글이라기보다 일기/에세이 느낌으로 자연스럽게.`,
+  },
+];
+
 // 랜덤 선택 유틸
 function pickRandom<T>(arr: T[]): T {
   return arr[Math.floor(Math.random() * arr.length)];
@@ -175,17 +239,19 @@ export function getRandomArticleStructure(): string {
   return pickRandom(ARTICLE_STRUCTURES).structure;
 }
 
-// 다양성 조합: 구조 + 도입부 + 톤 + 시작 시드를 랜덤 조합
+// 다양성 조합: 구조 + 도입부 + 톤 + 시작 시드 + 관점을 랜덤 조합
 export function getRandomDiversityKit(): {
   structure: string;
   introStyle: string;
   tone: string;
   openingSeed: string;
+  angle: string;
 } {
   return {
     structure: pickRandom(ARTICLE_STRUCTURES).structure,
     introStyle: pickRandom(INTRO_STYLES).instruction,
     tone: pickRandom(WRITING_TONES).instruction,
     openingSeed: pickRandom(OPENING_SEEDS),
+    angle: pickRandom(WRITING_ANGLES).instruction,
   };
 }
