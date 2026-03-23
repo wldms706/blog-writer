@@ -371,7 +371,7 @@ ${isLargeKeyword(safeKeyword) ? `
       body: JSON.stringify({
         contents: [{ role: 'user', parts: [{ text: fullPrompt }] }],
         generationConfig: {
-          temperature: 1.0,
+          temperature: 1.3,
           maxOutputTokens: 8192,
         },
         safetySettings: [
