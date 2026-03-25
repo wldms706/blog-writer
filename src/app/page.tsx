@@ -1,5 +1,4 @@
 import Link from 'next/link';
-import AuthRedirect from './AuthRedirect';
 
 const FEATURE_TAGS = [
   'SEO 최적화', '키워드 분석', '네이버 상위노출',
@@ -10,7 +9,6 @@ const FEATURE_TAGS = [
 export default function LandingPage() {
   return (
     <div className="min-h-dvh selection:bg-[#3B5CFF] selection:text-white flex flex-col">
-      <AuthRedirect />
 
       {/* === Section 1: Hero (Black) === */}
       <section className="bg-black text-white">
@@ -121,6 +119,58 @@ export default function LandingPage() {
                 <p className="text-gray-500 text-sm leading-relaxed">{step.desc}</p>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* === Section 4: Pricing (Black) === */}
+      <section className="bg-black text-white py-20 sm:py-28 px-6">
+        <div className="max-w-4xl mx-auto">
+          <h2 className="text-3xl sm:text-4xl font-black text-center mb-4">
+            요금 안내
+          </h2>
+          <p className="text-white/50 text-center mb-12">
+            업종에 맞는 플랜을 선택하세요
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="bg-white/10 border border-white/20 p-6 rounded-2xl">
+              <p className="text-white/60 text-sm font-medium mb-2">무료</p>
+              <p className="text-3xl font-black text-white mb-1">0원</p>
+              <p className="text-white/40 text-xs mb-4">하루 3회 생성</p>
+              <ul className="space-y-2 text-sm text-white/70">
+                <li>• 기본 글 구조 5종</li>
+                <li>• 히스토리 최근 10개</li>
+              </ul>
+            </div>
+            <div className="bg-white/10 border border-white/20 p-6 rounded-2xl">
+              <p className="text-white/60 text-sm font-medium mb-2">프로 (일반)</p>
+              <p className="text-3xl font-black text-white mb-1">9,900원<span className="text-base font-normal text-white/50">/월</span></p>
+              <p className="text-white/40 text-xs mb-4">무제한 생성</p>
+              <ul className="space-y-2 text-sm text-white/70">
+                <li>• 모든 글 구조 사용</li>
+                <li>• 무제한 히스토리</li>
+                <li>• SEO 최적화</li>
+              </ul>
+            </div>
+            <div className="bg-white border-2 border-white p-6 rounded-2xl relative">
+              <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#3B5CFF] text-white text-xs font-black px-3 py-1 rounded-full">반영구 업종</span>
+              <p className="text-[#3B5CFF]/60 text-sm font-medium mb-2">프로 (반영구)</p>
+              <p className="text-3xl font-black text-[#3B5CFF] mb-1">12,900원<span className="text-base font-normal text-[#3B5CFF]/50">/월</span></p>
+              <p className="text-gray-400 text-xs mb-4">무제한 생성</p>
+              <ul className="space-y-2 text-sm text-gray-600">
+                <li>• 반영구 특화 글 구조</li>
+                <li>• 규제 표현 자동 차단</li>
+                <li>• SEO 최적화</li>
+              </ul>
+            </div>
+          </div>
+          <div className="text-center mt-10">
+            <Link
+              href="/signup"
+              className="inline-block bg-[#3B5CFF] text-white rounded-full px-8 py-3 text-sm font-bold hover:bg-[#2A45E0] transition-all"
+            >
+              무료로 시작하기
+            </Link>
           </div>
         </div>
       </section>
