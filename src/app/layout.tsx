@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Script from "next/script";
 import "./globals.css";
+import KakaoChatButton from "@/components/KakaoChatButton";
 
 export const metadata: Metadata = {
   title: "블로그 라이터 | 뷰티샵 블로그 글쓰기 도구",
@@ -68,6 +69,7 @@ export default function RootLayout({
       />
       <body className="antialiased">
         {children}
+        <KakaoChatButton />
       </body>
     </html>
   );
