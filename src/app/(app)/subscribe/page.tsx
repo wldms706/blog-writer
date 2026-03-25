@@ -1,8 +1,9 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { loadTossPayments } from '@tosspayments/tosspayments-sdk';
+import { useEffect, useRef, useState } from 'react';
+import { PaymentWidgetInstance, loadPaymentWidget } from '@tosspayments/payment-widget-sdk';
 import { createClient } from '@/lib/supabase/client';
+import { nanoid } from 'nanoid';
 
 interface Plan {
   id: string;
@@ -53,6 +54,8 @@ export default function SubscribePage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [user, setUser] = useState<{ id: string; email: string } | null>(null);
+  const paymentWidgetRef = useRef<PaymentWidgetInstance | null>(null);
+  const [widgetReady, setWidgetReady] = useState(false);
 
   // 유저 정보 가져오기
   useEffect(() => {
@@ -66,46 +69,48 @@ export default function SubscribePage() {
     getUser();
   }, []);
 
-  // 결제 요청 (API 개별 연동 방식)
+  // 플랜 선택 시 결제위젯 로드
+  useEffect(() => {
+    if (!selectedPlan || !user || !clientKey) return;
+
+    setWidgetReady(false);
+
+    const loadWidget = async () => {
+      try {
+        const paymentWidget = await loadPaymentWidget(clientKey, `customer_${user.id}`);
+        paymentWidgetRef.current = paymentWidget;
+
+        // 결제 수단 위젯 렌더링
+        paymentWidget.renderPaymentMethods('#payment-widget', { value: selectedPlan.price });
+
+        // 약관 동의 위젯 렌더링
+        paymentWidget.renderAgreement('#agreement-widget');
+
+        setWidgetReady(true);
+      } catch (err) {
+        console.error('결제위젯 로드 실패:', err);
+        setError('결제위젯을 불러오는데 실패했습니다. 새로고침 해주세요.');
+      }
+    };
+
+    loadWidget();
+  }, [selectedPlan, user]);
+
+  // 결제 요청
   const handlePayment = async () => {
-    if (!selectedPlan || !user) return;
+    if (!selectedPlan || !user || !paymentWidgetRef.current) return;
 
     setIsLoading(true);
     setError(null);
 
     try {
-      if (!clientKey) {
-        setError('토스페이먼츠 클라이언트 키가 설정되지 않았습니다.');
-        setIsLoading(false);
-        return;
-      }
-
-      const tossPayments = await loadTossPayments(clientKey);
-
-      // API 개별 연동 - payment 객체 사용
-      const payment = tossPayments.payment({
-        customerKey: `customer_${user.id}`,
-      });
-
-      // 카드 결제 요청
-      await payment.requestPayment({
-        method: 'CARD',
-        amount: {
-          currency: 'KRW',
-          value: selectedPlan.price,
-        },
-        orderId: `order_${Date.now()}_${user.id.slice(0, 8)}`,
+      await paymentWidgetRef.current.requestPayment({
+        orderId: `order_${nanoid()}`,
         orderName: `블로그라이터 ${selectedPlan.name} 월 구독`,
         successUrl: `${window.location.origin}/subscribe/success?planId=${selectedPlan.id}`,
         failUrl: `${window.location.origin}/subscribe/fail`,
         customerEmail: user.email,
         customerName: user.email.split('@')[0],
-        card: {
-          useEscrow: false,
-          flowMode: 'DEFAULT',
-          useCardPoint: false,
-          useAppCardOnly: false,
-        },
       });
     } catch (err) {
       console.error('결제 요청 실패:', err);
@@ -176,7 +181,7 @@ export default function SubscribePage() {
         ))}
       </div>
 
-      {/* 결제 버튼 영역 */}
+      {/* 결제위젯 영역 */}
       {selectedPlan && (
         <div className="bg-white rounded-2xl border border-gray-200 p-6 mb-6">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">결제 정보</h2>
@@ -202,18 +207,22 @@ export default function SubscribePage() {
             </div>
           </div>
 
+          {/* 토스 결제위젯 렌더 영역 */}
+          <div id="payment-widget" className="mb-4" />
+          <div id="agreement-widget" className="mb-4" />
+
           {/* 결제 버튼 */}
           <button
             onClick={handlePayment}
-            disabled={isLoading || !user}
+            disabled={isLoading || !user || !widgetReady}
             className={[
-              'w-full py-3 font-bold transition-colors',
-              !isLoading && user
-                ? 'bg-[#3B5CFF] text-white hover:bg-[#2A45E0] rounded-full'
-                : 'bg-gray-200 text-gray-400 cursor-not-allowed rounded-full',
+              'w-full py-3 font-bold transition-colors rounded-full',
+              !isLoading && user && widgetReady
+                ? 'bg-[#3B5CFF] text-white hover:bg-[#2A45E0]'
+                : 'bg-gray-200 text-gray-400 cursor-not-allowed',
             ].join(' ')}
           >
-            {isLoading ? '결제 페이지로 이동 중...' : `${selectedPlan.price.toLocaleString()}원 결제하기`}
+            {isLoading ? '결제 진행 중...' : `${selectedPlan.price.toLocaleString()}원 결제하기`}
           </button>
 
           {!user && (
