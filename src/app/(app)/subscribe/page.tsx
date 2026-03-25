@@ -54,14 +54,6 @@ export default function SubscribePage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [user, setUser] = useState<{ id: string; email: string } | null>(null);
-  const [payMethod, setPayMethod] = useState<string>('CARD');
-
-  const PAY_METHODS = [
-    { id: 'CARD', label: '카드' },
-    { id: 'TOSSPAY', label: '토스페이' },
-    { id: 'KAKAOPAY', label: '카카오페이' },
-    { id: 'TRANSFER', label: '계좌이체' },
-  ];
 
   useEffect(() => {
     const getUser = async () => {
@@ -85,9 +77,8 @@ export default function SubscribePage() {
       const tossPayments = await loadTossPayments(clientKey);
       const payment = tossPayments.payment({ customerKey: `customer_${user.id}` });
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      await (payment as any).requestPayment({
-        method: payMethod,
+      await payment.requestPayment({
+        method: 'CARD',
         amount: { currency: 'KRW', value: selectedPlan.price },
         orderId: `order_${nanoid()}`,
         orderName: `블로그라이터 ${selectedPlan.name} 월 구독`,
@@ -175,27 +166,6 @@ export default function SubscribePage() {
               <p className="text-xl font-bold text-gray-900">{selectedPlan.price.toLocaleString()}원</p>
             </div>
           </div>
-          {/* 결제수단 선택 */}
-          <div className="mb-4">
-            <p className="text-sm font-medium text-gray-700 mb-2">결제수단</p>
-            <div className="flex flex-wrap gap-2">
-              {PAY_METHODS.map((m) => (
-                <button
-                  key={m.id}
-                  onClick={() => setPayMethod(m.id)}
-                  className={[
-                    'px-4 py-2 rounded-full text-sm font-medium transition-all',
-                    payMethod === m.id
-                      ? 'bg-[#3B5CFF] text-white'
-                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200',
-                  ].join(' ')}
-                >
-                  {m.label}
-                </button>
-              ))}
-            </div>
-          </div>
-
           <button
             onClick={handlePayment}
             disabled={isLoading || !user}
