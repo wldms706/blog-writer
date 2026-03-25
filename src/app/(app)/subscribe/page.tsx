@@ -87,18 +87,25 @@ export default function SubscribePage() {
         const paymentWidget = await loadPaymentWidget(clientKey, `customer_${user.id}`);
         paymentWidgetRef.current = paymentWidget;
 
-        // 결제 수단 위젯 렌더링
-        paymentWidget.renderPaymentMethods('#payment-widget', { value: selectedPlan.price });
+        // 결제 수단 위젯 렌더링 (await로 완료 대기)
+        const paymentMethodWidget = await paymentWidget.renderPaymentMethods('#payment-widget', { value: selectedPlan.price });
+
+        // 위젯 내부 렌더링 완료 이벤트 대기
+        await new Promise<void>((resolve) => {
+          paymentMethodWidget.on('ready', () => resolve());
+          // 5초 후 타임아웃 (혹시 이벤트 안 오면)
+          setTimeout(() => resolve(), 5000);
+        });
 
         // 약관 동의 위젯 렌더링
-        paymentWidget.renderAgreement('#agreement-widget');
+        await paymentWidget.renderAgreement('#agreement-widget');
 
         setWidgetReady(true);
       } catch (err) {
         console.error('결제위젯 로드 실패:', err);
         setError('결제위젯을 불러오는데 실패했습니다. 새로고침 해주세요.');
       }
-    }, 200);
+    }, 300);
 
     return () => clearTimeout(timer);
   }, [selectedPlan, user]);
