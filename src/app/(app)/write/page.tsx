@@ -77,7 +77,17 @@ export default function Home() {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
         const profile = await getProfile(user.id);
-        setUserPlanType(profile.plan_type || null);
+
+        // 구독 테이블에서 활성 플랜 직접 확인 (가장 정확)
+        const { data: subscription } = await supabase
+          .from('subscriptions')
+          .select('plan_id')
+          .eq('user_id', user.id)
+          .eq('status', 'active')
+          .maybeSingle();
+
+        setUserPlanType(subscription?.plan_id || profile.plan_type || null);
+
         if (profile.shopAddress || profile.shopHours || profile.shopPhone || profile.shopParking) {
           setFormData(prev => ({
             ...prev,
