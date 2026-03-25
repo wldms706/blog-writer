@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import AuthRedirect from './AuthRedirect';
+import LandingHeader from './LandingHeader';
 
 const FEATURE_TAGS = [
   'SEO 최적화', '키워드 분석', '네이버 상위노출',
@@ -10,27 +10,10 @@ const FEATURE_TAGS = [
 export default function LandingPage() {
   return (
     <div className="min-h-dvh selection:bg-[#3B5CFF] selection:text-white flex flex-col">
-      <AuthRedirect />
 
       {/* === Section 1: Hero (Black) === */}
       <section className="bg-black text-white">
-        {/* Header */}
-        <header className="flex items-center justify-between px-6 sm:px-10 py-6">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-[#3B5CFF] flex items-center justify-center">
-              <span className="text-white text-sm font-black">B</span>
-            </div>
-            <span className="text-white text-lg font-black tracking-tight">
-              블로그라이터
-            </span>
-          </div>
-          <Link
-            href="/login"
-            className="text-white border-2 border-white rounded-full px-6 py-2 text-sm font-bold hover:bg-white hover:text-black transition-all uppercase tracking-widest"
-          >
-            LOGIN
-          </Link>
-        </header>
+        <LandingHeader />
 
         {/* Hero Content */}
         <div className="flex flex-col items-center justify-center px-6 py-20 sm:py-32">
