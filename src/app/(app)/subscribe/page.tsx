@@ -86,16 +86,14 @@ export default function SubscribePage() {
 
         paymentWidgetRef.current = paymentWidget;
 
-        const methodWidget = await paymentWidget.renderPaymentMethods(
+        await paymentWidget.renderPaymentMethods(
           '#payment-widget',
           { value: selectedPlan.price },
         );
 
-        methodWidget.on('ready', () => {
-          if (!cancelled) setWidgetReady(true);
-        });
-
         await paymentWidget.renderAgreement('#agreement-widget');
+
+        if (!cancelled) setWidgetReady(true);
       } catch (err) {
         if (!cancelled) {
           console.error('결제위젯 로드 실패:', err);
