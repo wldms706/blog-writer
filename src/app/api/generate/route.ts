@@ -52,7 +52,7 @@ export async function POST(request: NextRequest) {
   const usage = await checkAndIncrementUsage(user.id);
   if (!usage.allowed) {
     return NextResponse.json(
-      { error: '오늘의 무료 생성 횟수(3회)를 모두 사용했습니다.', remaining: 0 },
+      { error: '무료 체험(3회)을 모두 사용했습니다. 구독하시면 무제한으로 이용할 수 있습니다.', remaining: 0 },
       { status: 403 },
     );
   }

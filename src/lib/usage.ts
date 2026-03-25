@@ -7,7 +7,7 @@ import { syncUserToSheet } from '@/lib/google-sheets';
 // ============================================
 const UNLIMITED_FOR_ALL = true;
 
-const FREE_DAILY_LIMIT = 3;
+const FREE_TOTAL_LIMIT = 3; // 최초 3회만 무료
 
 // 관리자 이메일 - 무제한 사용 가능
 const ADMIN_EMAILS = ['wldms706@naver.com', 'mwm2020@nate.com', 'gkdisk9@nate.com', 'etang12330@gmail.com'];
@@ -81,8 +81,8 @@ export async function checkAndIncrementUsage(userId: string): Promise<{
     return { allowed: true, remaining: -1, plan: 'paid' };
   }
 
-  // 무료 유저: 하루 3회 제한, 날짜 바뀌면 리셋
-  if (currentDailyUsage >= FREE_DAILY_LIMIT) {
+  // 무료 유저: 최초 3회만 무료 (총 사용량 기준, 리셋 없음)
+  if (currentTotalUsage >= FREE_TOTAL_LIMIT) {
     return { allowed: false, remaining: 0, plan: 'free' };
   }
 
@@ -114,7 +114,7 @@ export async function checkAndIncrementUsage(userId: string): Promise<{
 
   return {
     allowed: true,
-    remaining: FREE_DAILY_LIMIT - newDailyUsage,
+    remaining: FREE_TOTAL_LIMIT - newTotalUsage,
     plan: 'free',
   };
 }

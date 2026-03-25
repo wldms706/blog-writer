@@ -262,8 +262,8 @@ export default function StepGenerate({ onReset, formData, isRegulated = false }:
                 </svg>
               </div>
             </div>
-            <p className="text-lg font-bold text-black mb-2">오늘의 무료 횟수를 모두 사용했어요</p>
-            <p className="text-sm text-gray-500 mb-6">프로 플랜으로 업그레이드하면<br/>무제한으로 글을 생성할 수 있습니다</p>
+            <p className="text-lg font-bold text-black mb-2">무료 체험이 끝났어요</p>
+            <p className="text-sm text-gray-500 mb-6">무료 3회를 모두 사용했습니다.<br/>구독하시면 무제한으로 글을 생성할 수 있어요</p>
             <div className="bg-[#F5F5F5] rounded-2xl p-5 mb-6 text-left">
               <p className="text-sm font-bold text-black mb-3">프로 플랜 혜택</p>
               <ul className="text-sm text-gray-600 space-y-2">
