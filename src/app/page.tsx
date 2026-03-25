@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import AuthRedirect from './AuthRedirect';
 
 const FEATURE_TAGS = [
   'SEO 최적화', '키워드 분석', '네이버 상위노출',
@@ -9,6 +10,7 @@ const FEATURE_TAGS = [
 export default function LandingPage() {
   return (
     <div className="min-h-dvh selection:bg-[#3B5CFF] selection:text-white flex flex-col">
+      <AuthRedirect />
 
       {/* === Section 1: Hero (Black) === */}
       <section className="bg-black text-white">
