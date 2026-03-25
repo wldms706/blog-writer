@@ -78,15 +78,16 @@ export default function Home() {
       if (user) {
         const profile = await getProfile(user.id);
 
-        // 구독 테이블에서 활성 플랜 직접 확인 (가장 정확)
-        const { data: subscription } = await supabase
-          .from('subscriptions')
-          .select('plan_id')
-          .eq('user_id', user.id)
-          .eq('status', 'active')
-          .maybeSingle();
-
-        setUserPlanType(subscription?.plan_id || profile.plan_type || null);
+        // 구독 플랜 확인: API 경유 (RLS 우회)
+        try {
+          const res = await fetch('/api/user-plan');
+          if (res.ok) {
+            const { planId } = await res.json();
+            setUserPlanType(planId || null);
+          }
+        } catch {
+          setUserPlanType(null);
+        }
 
         if (profile.shopAddress || profile.shopHours || profile.shopPhone || profile.shopParking) {
           setFormData(prev => ({
