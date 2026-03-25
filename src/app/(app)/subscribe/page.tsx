@@ -69,14 +69,21 @@ export default function SubscribePage() {
     getUser();
   }, []);
 
-  // 플랜 선택 시 결제위젯 로드
+  // 플랜 선택 시 결제위젯 로드 (DOM 렌더 후 약간의 딜레이)
   useEffect(() => {
     if (!selectedPlan || !user || !clientKey) return;
 
     setWidgetReady(false);
 
-    const loadWidget = async () => {
+    // DOM이 먼저 그려진 뒤에 위젯 로드
+    const timer = setTimeout(async () => {
       try {
+        // 이전 위젯 내용 클리어
+        const paymentEl = document.getElementById('payment-widget');
+        const agreementEl = document.getElementById('agreement-widget');
+        if (paymentEl) paymentEl.innerHTML = '';
+        if (agreementEl) agreementEl.innerHTML = '';
+
         const paymentWidget = await loadPaymentWidget(clientKey, `customer_${user.id}`);
         paymentWidgetRef.current = paymentWidget;
 
@@ -91,9 +98,9 @@ export default function SubscribePage() {
         console.error('결제위젯 로드 실패:', err);
         setError('결제위젯을 불러오는데 실패했습니다. 새로고침 해주세요.');
       }
-    };
+    }, 200);
 
-    loadWidget();
+    return () => clearTimeout(timer);
   }, [selectedPlan, user]);
 
   // 결제 요청
