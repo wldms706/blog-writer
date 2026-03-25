@@ -154,7 +154,8 @@ export default function LandingPage() {
                 <li>• 무제한 히스토리</li>
                 <li>• SEO 최적화</li>
               </ul>
-              <Link href="/subscribe" className="mt-6 block text-center bg-[#3B5CFF] text-white rounded-full py-2.5 text-sm font-bold hover:bg-[#2A45E0] transition-all">
+              <p className="mt-4 text-xs text-white/40">업종추천 → 헤어, 왁싱, 속눈썹, 네일, 피부</p>
+              <Link href="/subscribe" className="mt-3 block text-center bg-[#3B5CFF] text-white rounded-full py-2.5 text-sm font-bold hover:bg-[#2A45E0] transition-all">
                 구독하기
               </Link>
             </div>
