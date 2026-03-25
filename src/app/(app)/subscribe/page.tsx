@@ -86,7 +86,7 @@ export default function SubscribePage() {
       const payment = tossPayments.payment({ customerKey: `customer_${user.id}` });
 
       await payment.requestPayment({
-        method: payMethod,
+        method: payMethod as 'CARD' | 'TOSSPAY' | 'KAKAOPAY' | 'TRANSFER',
         amount: { currency: 'KRW', value: selectedPlan.price },
         orderId: `order_${nanoid()}`,
         orderName: `블로그라이터 ${selectedPlan.name} 월 구독`,
