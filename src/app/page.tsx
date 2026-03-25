@@ -121,10 +121,10 @@ export default function LandingPage() {
             <div className="bg-white/10 border border-white/20 p-6 rounded-2xl flex flex-col">
               <p className="text-white/60 text-sm font-medium mb-2">무료</p>
               <p className="text-3xl font-black text-white mb-1">0원</p>
-              <p className="text-white/40 text-xs mb-4">하루 3회 생성</p>
+              <p className="text-white/40 text-xs mb-4">최초 3회 무료 글쓰기</p>
               <ul className="space-y-2 text-sm text-white/70 flex-1">
+                <li>• 모든 업종 체험 가능</li>
                 <li>• 기본 글 구조 5종</li>
-                <li>• 히스토리 최근 10개</li>
               </ul>
               <Link href="/signup" className="mt-6 block text-center border border-white/30 text-white rounded-full py-2.5 text-sm font-bold hover:bg-white/10 transition-all">
                 무료로 시작하기
