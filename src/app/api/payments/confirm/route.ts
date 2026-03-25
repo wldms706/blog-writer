@@ -5,8 +5,8 @@ const TOSS_SECRET_KEY = process.env.TOSS_SECRET_KEY || '';
 
 // 플랜 정보
 const PLANS: Record<string, { name: string; price: number; type: string }> = {
-  pro_permanent: { name: '프로 (반영구)', price: 19900, type: 'permanent' },
-  pro_general: { name: '프로 (일반)', price: 14900, type: 'general' },
+  pro_permanent: { name: '프로 (반영구)', price: 12900, type: 'permanent' },
+  pro_general: { name: '프로 (일반)', price: 9900, type: 'general' },
 };
 
 // 재시도 헬퍼 (최대 3회)

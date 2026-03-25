@@ -17,7 +17,7 @@ const PLANS: Plan[] = [
   {
     id: 'pro_permanent',
     name: '프로 (반영구)',
-    price: 19900,
+    price: 12900,
     description: '반영구 업종 특화 블로그 글 생성',
     badge: '반영구 업종',
     features: [
@@ -32,7 +32,7 @@ const PLANS: Plan[] = [
   {
     id: 'pro_general',
     name: '프로 (일반)',
-    price: 14900,
+    price: 9900,
     description: '다양한 업종을 위한 블로그 글 생성',
     badge: '일반 업종',
     features: [

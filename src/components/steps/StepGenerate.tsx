@@ -284,7 +284,7 @@ export default function StepGenerate({ onReset, formData, isRegulated = false }:
                   무제한 히스토리
                 </li>
               </ul>
-              <p className="mt-4 text-2xl font-black text-black">월 19,900원~</p>
+              <p className="mt-4 text-2xl font-black text-black">월 9,900원~</p>
             </div>
             <div className="flex gap-3 justify-center">
               <button onClick={onReset} className="btn-secondary">처음으로</button>

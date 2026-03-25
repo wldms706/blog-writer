@@ -35,7 +35,7 @@ const plans: Plan[] = [
   },
   {
     name: '프로 (반영구)',
-    price: '19,900',
+    price: '12,900',
     period: '/월',
     description: '반영구 업종 특화 블로그 글 생성',
     badge: '반영구 업종',
@@ -53,7 +53,7 @@ const plans: Plan[] = [
   },
   {
     name: '프로 (일반)',
-    price: '14,900',
+    price: '9,900',
     period: '/월',
     description: '다양한 업종을 위한 블로그 글 생성',
     badge: '일반 업종',
