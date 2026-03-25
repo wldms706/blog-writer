@@ -42,9 +42,6 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
           <HeaderLogo />
 
           <nav className="flex items-center gap-1 sm:gap-2">
-            <Link href="/assignment" className="rounded-full px-3 sm:px-4 py-1.5 text-xs sm:text-sm text-white/70 hover:text-white hover:bg-white/10 transition-colors">
-              과제
-            </Link>
             <Link href="/history" className="rounded-full px-3 sm:px-4 py-1.5 text-xs sm:text-sm text-white/70 hover:text-white hover:bg-white/10 transition-colors">
               히스토리
             </Link>
