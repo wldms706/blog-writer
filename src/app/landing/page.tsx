@@ -46,6 +46,58 @@ export default function LandingPage() {
         </div>
       </main>
 
+      {/* Pricing Section */}
+      <section className="px-6 sm:px-10 py-16 sm:py-24">
+        <div className="max-w-4xl mx-auto">
+          <h2 className="text-2xl sm:text-3xl font-black text-white text-center mb-12">
+            요금 안내
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            {/* 무료 */}
+            <div className="bg-white/10 backdrop-blur-sm border border-white/20 p-6 rounded-2xl">
+              <p className="text-white/60 text-sm font-medium mb-2">무료</p>
+              <p className="text-3xl font-black text-white mb-1">0원</p>
+              <p className="text-white/40 text-xs mb-4">하루 3회 생성</p>
+              <ul className="space-y-2 text-sm text-white/70">
+                <li>• 기본 글 구조 5종</li>
+                <li>• 히스토리 최근 10개</li>
+              </ul>
+            </div>
+            {/* 일반 */}
+            <div className="bg-white/10 backdrop-blur-sm border border-white/20 p-6 rounded-2xl">
+              <p className="text-white/60 text-sm font-medium mb-2">프로 (일반)</p>
+              <p className="text-3xl font-black text-white mb-1">9,900원<span className="text-base font-normal text-white/50">/월</span></p>
+              <p className="text-white/40 text-xs mb-4">무제한 생성</p>
+              <ul className="space-y-2 text-sm text-white/70">
+                <li>• 모든 글 구조 사용</li>
+                <li>• 무제한 히스토리</li>
+                <li>• SEO 최적화</li>
+              </ul>
+            </div>
+            {/* 반영구 */}
+            <div className="bg-white border-2 border-white p-6 rounded-2xl relative">
+              <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#0047FF] text-white text-xs font-black px-3 py-1 rounded-full">반영구 업종</span>
+              <p className="text-[#0047FF]/60 text-sm font-medium mb-2">프로 (반영구)</p>
+              <p className="text-3xl font-black text-[#0047FF] mb-1">12,900원<span className="text-base font-normal text-[#0047FF]/50">/월</span></p>
+              <p className="text-gray-400 text-xs mb-4">무제한 생성</p>
+              <ul className="space-y-2 text-sm text-gray-600">
+                <li>• 반영구 특화 글 구조</li>
+                <li>• 규제 표현 자동 차단</li>
+                <li>• SEO 최적화</li>
+              </ul>
+            </div>
+          </div>
+          <div className="text-center mt-8">
+            <Link
+              href="/signup"
+              className="inline-block text-[#0047FF] bg-white px-8 py-3 text-sm font-bold hover:bg-white/90 transition-all"
+            >
+              무료로 시작하기
+            </Link>
+          </div>
+        </div>
+      </section>
+
       {/* Footer */}
       <footer className="px-6 sm:px-10 py-6 flex items-center justify-between text-white/30 text-xs">
         <span>© 2026 블로그라이터</span>
