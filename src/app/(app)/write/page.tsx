@@ -68,14 +68,16 @@ type StepId =
 export default function Home() {
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState<FormData>(initialFormData);
+  const [userPlanType, setUserPlanType] = useState<string | null>(null);
 
-  // 프로필에서 저장된 가게 정보 자동 로드
+  // 프로필에서 저장된 가게 정보 + 플랜 정보 자동 로드
   useEffect(() => {
     async function loadShopInfo() {
       const supabase = createClient();
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
         const profile = await getProfile(user.id);
+        setUserPlanType(profile.plan_type || null);
         if (profile.shopAddress || profile.shopHours || profile.shopPhone || profile.shopParking) {
           setFormData(prev => ({
             ...prev,
@@ -198,6 +200,7 @@ export default function Home() {
             onSelect={(id) =>
               setFormData({ ...formData, businessCategory: id })
             }
+            userPlanType={userPlanType}
           />
         );
       case 'keyword':

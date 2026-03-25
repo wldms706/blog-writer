@@ -40,6 +40,7 @@ export type UserProfile = {
   shopHours: string;
   shopPhone: string;
   shopParking: string;
+  plan_type?: string | null;
 };
 
 // --- History ---
@@ -197,7 +198,7 @@ export async function getProfile(userId: string): Promise<UserProfile> {
   const supabase = createClient();
   const { data, error } = await supabase
     .from('profiles')
-    .select('name, business_name, location_city, location_district, location_neighborhood, blog_url, blog_index_level, blog_index_checked_at, shop_address, shop_hours, shop_phone, shop_parking')
+    .select('name, business_name, location_city, location_district, location_neighborhood, blog_url, blog_index_level, blog_index_checked_at, shop_address, shop_hours, shop_phone, shop_parking, plan_type')
     .eq('id', userId)
     .single();
 
@@ -218,6 +219,7 @@ export async function getProfile(userId: string): Promise<UserProfile> {
     shopHours: data.shop_hours || '',
     shopPhone: data.shop_phone || '',
     shopParking: data.shop_parking || '',
+    plan_type: data.plan_type || null,
   };
 }
 
