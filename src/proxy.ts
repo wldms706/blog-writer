@@ -60,11 +60,6 @@ export async function proxy(request: NextRequest) {
     return redirectResponse;
   }
 
-  // 로그인 + 루트(랜딩) 접속 → 대시보드로
-  if (user && pathname === '/') {
-    return redirectWithCookies('/write');
-  }
-
   // 로그인 + 인증 페이지 → 대시보드로
   if (user && isAuthPage) {
     return redirectWithCookies('/write');
