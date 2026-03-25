@@ -10,7 +10,8 @@ export async function POST() {
   }
 
   try {
-    // 구독 상태 업데이트
+    // 구독 상태: cancelled로 변경 + 빌링키 제거 (자동결제 중단)
+    // 단, next_billing_at까지는 플랜 유지 (즉시 무료 전환 안 함)
     const { error: subError } = await supabase
       .from('subscriptions')
       .update({
@@ -25,15 +26,7 @@ export async function POST() {
       return NextResponse.json({ error: '구독 취소에 실패했습니다.' }, { status: 500 });
     }
 
-    // 프로필 플랜을 free로 변경
-    const { error: profileError } = await supabase
-      .from('profiles')
-      .update({ plan: 'free' })
-      .eq('id', user.id);
-
-    if (profileError) {
-      console.error('프로필 업데이트 실패:', profileError);
-    }
+    // 프로필은 변경하지 않음 — next_billing_at 만료 시 크론에서 free로 전환
 
     return NextResponse.json({ success: true });
   } catch (error) {
