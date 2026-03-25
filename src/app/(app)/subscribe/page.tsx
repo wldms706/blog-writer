@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { loadTossPayments } from '@tosspayments/tosspayments-sdk';
 import { createClient } from '@/lib/supabase/client';
 import { nanoid } from 'nanoid';
 
@@ -65,7 +66,7 @@ export default function SubscribePage() {
     getUser();
   }, []);
 
-  // 결제 요청 — SDK 없이 토스 결제창 URL로 직접 이동
+  // API 개별 연동 방식 결제
   const handlePayment = async () => {
     if (!selectedPlan || !user || !clientKey) return;
 
@@ -73,23 +74,25 @@ export default function SubscribePage() {
     setError(null);
 
     try {
-      const orderId = `order_${nanoid()}`;
-      const successUrl = `${window.location.origin}/subscribe/success?planId=${selectedPlan.id}`;
-      const failUrl = `${window.location.origin}/subscribe/fail`;
+      const tossPayments = await loadTossPayments(clientKey);
+      const payment = tossPayments.payment({ customerKey: `customer_${user.id}` });
 
-      // 토스페이먼츠 결제창 URL로 직접 리다이렉트
-      const params = new URLSearchParams({
-        clientKey,
-        orderId,
+      await payment.requestPayment({
+        method: 'CARD',
+        amount: { currency: 'KRW', value: selectedPlan.price },
+        orderId: `order_${nanoid()}`,
         orderName: `블로그라이터 ${selectedPlan.name} 월 구독`,
-        amount: String(selectedPlan.price),
-        method: '카드',
-        successUrl,
-        failUrl,
+        successUrl: `${window.location.origin}/subscribe/success?planId=${selectedPlan.id}`,
+        failUrl: `${window.location.origin}/subscribe/fail`,
         customerEmail: user.email,
+        customerName: user.email.split('@')[0],
+        card: {
+          useEscrow: false,
+          flowMode: 'DEFAULT',
+          useCardPoint: false,
+          useAppCardOnly: false,
+        },
       });
-
-      window.location.href = `https://api.tosspayments.com/v1/payments?${params.toString()}`;
     } catch (err) {
       console.error('결제 요청 실패:', err);
       setError(err instanceof Error ? err.message : '결제 요청에 실패했습니다.');
@@ -104,7 +107,6 @@ export default function SubscribePage() {
         <p className="text-gray-600">업종에 맞는 플랜을 선택하고 결제를 진행하세요</p>
       </div>
 
-      {/* 플랜 선택 */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
         {PLANS.map((plan) => (
           <button
@@ -153,7 +155,6 @@ export default function SubscribePage() {
         ))}
       </div>
 
-      {/* 결제 버튼 */}
       {selectedPlan && (
         <div className="bg-white rounded-2xl border border-gray-200 p-6 mb-6">
           {error && (
@@ -162,19 +163,15 @@ export default function SubscribePage() {
               <p>{error}</p>
             </div>
           )}
-
           <div className="mb-4 rounded-lg bg-gray-50 p-4">
             <div className="flex justify-between items-center">
               <div>
                 <p className="font-medium text-gray-900">{selectedPlan.name}</p>
                 <p className="text-sm text-gray-500">월 정기 구독</p>
               </div>
-              <p className="text-xl font-bold text-gray-900">
-                {selectedPlan.price.toLocaleString()}원
-              </p>
+              <p className="text-xl font-bold text-gray-900">{selectedPlan.price.toLocaleString()}원</p>
             </div>
           </div>
-
           <button
             onClick={handlePayment}
             disabled={isLoading || !user}
@@ -187,10 +184,7 @@ export default function SubscribePage() {
           >
             {isLoading ? '결제 페이지로 이동 중...' : `${selectedPlan.price.toLocaleString()}원 결제하기`}
           </button>
-
-          {!user && (
-            <p className="mt-2 text-center text-sm text-gray-500">로그인이 필요합니다</p>
-          )}
+          {!user && <p className="mt-2 text-center text-sm text-gray-500">로그인이 필요합니다</p>}
         </div>
       )}
 
