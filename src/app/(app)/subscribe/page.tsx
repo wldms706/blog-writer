@@ -85,8 +85,9 @@ export default function SubscribePage() {
       const tossPayments = await loadTossPayments(clientKey);
       const payment = tossPayments.payment({ customerKey: `customer_${user.id}` });
 
-      await payment.requestPayment({
-        method: payMethod as 'CARD' | 'TOSSPAY' | 'KAKAOPAY' | 'TRANSFER',
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      await (payment as any).requestPayment({
+        method: payMethod,
         amount: { currency: 'KRW', value: selectedPlan.price },
         orderId: `order_${nanoid()}`,
         orderName: `블로그라이터 ${selectedPlan.name} 월 구독`,
