@@ -16,6 +16,7 @@ export async function POST() {
       .update({
         status: 'cancelled',
         cancelled_at: new Date().toISOString(),
+        billing_key: null,
       })
       .eq('user_id', user.id);
 

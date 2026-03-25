@@ -75,13 +75,12 @@ export default function SubscribePage() {
 
     try {
       const tossPayments = await loadTossPayments(clientKey);
-      const payment = tossPayments.payment({ customerKey: `customer_${user.id}` });
+      const customerKey = `customer_${user.id}`;
+      const payment = tossPayments.payment({ customerKey });
 
-      await payment.requestPayment({
+      // 자동결제(빌링) 카드 등록 요청
+      await payment.requestBillingAuth({
         method: 'CARD',
-        amount: { currency: 'KRW', value: selectedPlan.price },
-        orderId: `order_${nanoid()}`,
-        orderName: `블로그라이터 ${selectedPlan.name} 월 구독`,
         successUrl: `${window.location.origin}/subscribe/success?planId=${selectedPlan.id}`,
         failUrl: `${window.location.origin}/subscribe/fail`,
         customerEmail: user.email,
