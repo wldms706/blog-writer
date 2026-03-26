@@ -33,7 +33,7 @@ async function retryOperation<T>(
 
 export async function POST(request: NextRequest) {
   try {
-    const { authKey, customerKey, planId, coupon } = await request.json();
+    const { authKey, customerKey, planId, coupon, couponPhone } = await request.json();
     const couponData = coupon ? VALID_COUPONS[coupon.toUpperCase()] : null;
 
     if (!authKey || !customerKey) {
@@ -171,6 +171,19 @@ export async function POST(request: NextRequest) {
       });
     } catch (error) {
       console.error('[빌링 치명적 오류] 프로필 업데이트 실패:', { userId: user.id, error });
+    }
+
+    // 쿠폰 사용 완료 마킹
+    if (coupon && couponPhone) {
+      try {
+        await supabase
+          .from('coupon_phones')
+          .update({ used: true, used_by: user.id, used_at: now.toISOString() })
+          .eq('phone', couponPhone.replace(/-/g, ''))
+          .eq('coupon_code', coupon.toUpperCase());
+      } catch (err) {
+        console.error('쿠폰 사용 마킹 실패:', err);
+      }
     }
 
     return NextResponse.json({

@@ -15,6 +15,7 @@ export default function SubscribeSuccessPage() {
       const customerKey = searchParams.get('customerKey');
       const planId = searchParams.get('planId');
       const coupon = searchParams.get('coupon');
+      const couponPhone = searchParams.get('couponPhone');
 
       if (!authKey || !customerKey) {
         setError('카드 등록 정보가 올바르지 않습니다.');
@@ -26,7 +27,7 @@ export default function SubscribeSuccessPage() {
         const response = await fetch('/api/payments/billing-issue', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ authKey, customerKey, planId, coupon }),
+          body: JSON.stringify({ authKey, customerKey, planId, coupon, couponPhone }),
         });
 
         const data = await response.json();

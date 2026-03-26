@@ -60,8 +60,10 @@ export default function SubscribePage() {
   const [error, setError] = useState<string | null>(null);
   const [user, setUser] = useState<{ id: string; email: string } | null>(null);
   const [couponCode, setCouponCode] = useState('');
+  const [couponPhone, setCouponPhone] = useState('');
   const [couponApplied, setCouponApplied] = useState(false);
   const [couponError, setCouponError] = useState('');
+  const [couponChecking, setCouponChecking] = useState(false);
 
   useEffect(() => {
     const getUser = async () => {
@@ -75,16 +77,45 @@ export default function SubscribePage() {
   }, []);
 
   // API 개별 연동 방식 결제
-  const handleApplyCoupon = () => {
+  const handleApplyCoupon = async () => {
     const code = couponCode.trim().toUpperCase();
-    if (!code) return;
+    const phone = couponPhone.trim().replace(/-/g, '');
+    if (!code || !phone) {
+      setCouponError('쿠폰 코드와 휴대폰 번호를 모두 입력해주세요.');
+      return;
+    }
     const coupon = VALID_COUPONS[code];
-    if (coupon) {
-      setCouponApplied(true);
-      setCouponError('');
-    } else {
+    if (!coupon) {
       setCouponApplied(false);
       setCouponError('유효하지 않은 쿠폰 코드입니다.');
+      return;
+    }
+    // DB에서 번호 확인
+    setCouponChecking(true);
+    setCouponError('');
+    try {
+      const supabase = createClient();
+      const { data, error } = await supabase
+        .from('coupon_phones')
+        .select('id, used')
+        .eq('phone', phone)
+        .eq('coupon_code', code)
+        .single();
+
+      if (error || !data) {
+        setCouponApplied(false);
+        setCouponError('등록되지 않은 번호입니다. 쿠폰 대상자가 아닙니다.');
+      } else if (data.used) {
+        setCouponApplied(false);
+        setCouponError('이미 사용된 쿠폰입니다.');
+      } else {
+        setCouponApplied(true);
+        setCouponError('');
+      }
+    } catch {
+      setCouponError('쿠폰 확인 중 오류가 발생했습니다.');
+    } finally {
+      setCouponChecking(false);
     }
   };
 
@@ -107,7 +138,7 @@ export default function SubscribePage() {
       const customerKey = `customer_${user.id}`;
       const payment = tossPayments.payment({ customerKey });
 
-      const couponParam = couponApplied ? `&coupon=${couponCode.trim().toUpperCase()}` : '';
+      const couponParam = couponApplied ? `&coupon=${couponCode.trim().toUpperCase()}&couponPhone=${couponPhone.trim().replace(/-/g, '')}` : '';
 
       // 자동결제(빌링) 카드 등록 요청
       await payment.requestBillingAuth({
@@ -193,19 +224,27 @@ export default function SubscribePage() {
           {/* 쿠폰 입력 */}
           <div className="mb-4">
             <label className="block text-sm font-medium text-gray-700 mb-1">쿠폰 코드</label>
-            <div className="flex gap-2">
+            <div className="flex gap-2 mb-2">
               <input
                 type="text"
                 value={couponCode}
                 onChange={(e) => { setCouponCode(e.target.value); setCouponApplied(false); setCouponError(''); }}
-                placeholder="쿠폰 코드를 입력하세요"
+                placeholder="쿠폰 코드"
+                className="flex-1 px-3 py-2.5 rounded-xl border border-gray-200 text-sm outline-none focus:border-[#3B5CFF]"
+              />
+              <input
+                type="tel"
+                value={couponPhone}
+                onChange={(e) => { setCouponPhone(e.target.value); setCouponApplied(false); setCouponError(''); }}
+                placeholder="휴대폰 번호 (- 없이)"
                 className="flex-1 px-3 py-2.5 rounded-xl border border-gray-200 text-sm outline-none focus:border-[#3B5CFF]"
               />
               <button
                 onClick={handleApplyCoupon}
-                className="px-4 py-2.5 rounded-xl bg-gray-900 text-white text-sm font-medium hover:bg-gray-800"
+                disabled={couponChecking}
+                className="px-4 py-2.5 rounded-xl bg-gray-900 text-white text-sm font-medium hover:bg-gray-800 disabled:opacity-50"
               >
-                적용
+                {couponChecking ? '확인중...' : '적용'}
               </button>
             </div>
             {couponError && <p className="text-xs text-red-500 mt-1">{couponError}</p>}
