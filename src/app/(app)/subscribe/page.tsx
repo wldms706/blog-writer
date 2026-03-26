@@ -11,6 +11,7 @@ interface Plan {
   id: string;
   name: string;
   price: number;
+  originalPrice: number;
   description: string;
   features: string[];
   badge?: string;
@@ -21,6 +22,7 @@ const PLANS: Plan[] = [
     id: 'pro_permanent',
     name: '프로 (반영구)',
     price: 12900,
+    originalPrice: 19900,
     description: '반영구 업종 특화 블로그 글 생성',
     badge: '반영구 업종',
     features: [
@@ -36,6 +38,7 @@ const PLANS: Plan[] = [
     id: 'pro_general',
     name: '프로 (일반)',
     price: 9900,
+    originalPrice: 15900,
     description: '다양한 업종을 위한 블로그 글 생성',
     badge: '일반 업종',
     features: [
@@ -150,8 +153,10 @@ export default function SubscribePage() {
               <p className="text-sm opacity-60 mt-1">{plan.description}</p>
             </div>
             <div className="mb-4">
+              <p className={`text-sm line-through ${selectedPlan?.id === plan.id ? 'text-white/40' : 'text-gray-400'}`}>{plan.originalPrice.toLocaleString()}원</p>
               <span className="text-3xl font-black">{plan.price.toLocaleString()}원</span>
               <span className="opacity-60">/월</span>
+              <p className={`text-xs font-bold mt-1 ${selectedPlan?.id === plan.id ? 'text-yellow-300' : 'text-yellow-500'}`}>한 달간 할인 중</p>
             </div>
             <ul className="space-y-2">
               {plan.features.map((feature, idx) => (
