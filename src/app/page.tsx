@@ -132,8 +132,9 @@ export default function LandingPage() {
             </div>
             <div className="bg-white/10 border border-white/20 p-6 rounded-2xl flex flex-col">
               <p className="text-white/60 text-sm font-medium mb-2">프로 (일반)</p>
+              <p className="text-sm text-white/40 line-through mb-1">15,900원</p>
               <p className="text-3xl font-black text-white mb-1">9,900원<span className="text-base font-normal text-white/50">/월</span></p>
-              <p className="text-white/40 text-xs mb-4">무제한 생성</p>
+              <p className="text-yellow-400 text-xs font-bold mb-4">한 달간 할인 중</p>
               <ul className="space-y-2 text-sm text-white/70 flex-1">
                 <li>• 반영구 제외 모든 업종 글쓰기</li>
                 <li>• 모든 글 구조 사용</li>
@@ -148,8 +149,9 @@ export default function LandingPage() {
             <div className="bg-white border-2 border-white p-6 rounded-2xl relative flex flex-col">
               <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#3B5CFF] text-white text-xs font-black px-3 py-1 rounded-full">반영구 업종</span>
               <p className="text-[#3B5CFF]/60 text-sm font-medium mb-2">프로 (반영구)</p>
+              <p className="text-sm text-gray-400 line-through mb-1">19,900원</p>
               <p className="text-3xl font-black text-[#3B5CFF] mb-1">12,900원<span className="text-base font-normal text-[#3B5CFF]/50">/월</span></p>
-              <p className="text-gray-400 text-xs mb-4">무제한 생성</p>
+              <p className="text-yellow-500 text-xs font-bold mb-4">한 달간 할인 중</p>
               <ul className="space-y-2 text-sm text-gray-600 flex-1">
                 <li>• 반영구 포함 모든 업종 글쓰기</li>
                 <li>• 반영구 특화 글 구조</li>

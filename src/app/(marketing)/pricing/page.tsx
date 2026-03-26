@@ -6,9 +6,11 @@ import Footer from '@/components/Footer';
 interface Plan {
   name: string;
   price: string;
+  originalPrice?: string;
   period: string;
   description: string;
   badge?: string;
+  discount?: string;
   features: { text: string; included: boolean }[];
   cta: string;
   ctaLink: string;
@@ -36,9 +38,11 @@ const plans: Plan[] = [
   {
     name: '프로 (반영구)',
     price: '12,900',
+    originalPrice: '19,900',
     period: '/월',
     description: '반영구 업종 특화 블로그 글 생성',
     badge: '반영구 업종',
+    discount: '한 달간 할인 중',
     features: [
       { text: '반영구 포함 모든 업종 글쓰기', included: true },
       { text: '무제한 글 생성', included: true },
@@ -54,9 +58,11 @@ const plans: Plan[] = [
   {
     name: '프로 (일반)',
     price: '9,900',
+    originalPrice: '15,900',
     period: '/월',
     description: '다양한 업종을 위한 블로그 글 생성',
     badge: '일반 업종',
+    discount: '한 달간 할인 중',
     features: [
       { text: '반영구 제외 모든 업종 글쓰기', included: true },
       { text: '무제한 글 생성', included: true },
@@ -144,6 +150,9 @@ export default function PricingPage() {
                 </div>
 
                 <div className="mb-6">
+                  {plan.originalPrice && (
+                    <p className="text-sm opacity-40 line-through mb-1">₩{plan.originalPrice}</p>
+                  )}
                   <div className="flex items-baseline gap-1">
                     <span className="text-4xl font-black">
                       {plan.price === '0' ? '무료' : `₩${plan.price}`}
@@ -152,6 +161,9 @@ export default function PricingPage() {
                       <span className="opacity-60">{plan.period}</span>
                     )}
                   </div>
+                  {plan.discount && (
+                    <p className="text-yellow-400 text-xs font-bold mt-1">{plan.discount}</p>
+                  )}
                 </div>
 
                 <ul className="space-y-3 mb-8 flex-1">
