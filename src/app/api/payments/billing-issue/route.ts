@@ -9,6 +9,10 @@ const PLANS: Record<string, { name: string; price: number; type: string }> = {
   pro_general: { name: '프로 (일반)', price: 9900, type: 'general' },
 };
 
+const VALID_COUPONS: Record<string, { firstMonthFree: boolean; discountPercent: number }> = {
+  EAZY10: { firstMonthFree: true, discountPercent: 10 },
+};
+
 async function retryOperation<T>(
   operation: () => Promise<T>,
   maxRetries: number = 3,
@@ -29,7 +33,8 @@ async function retryOperation<T>(
 
 export async function POST(request: NextRequest) {
   try {
-    const { authKey, customerKey, planId } = await request.json();
+    const { authKey, customerKey, planId, coupon } = await request.json();
+    const couponData = coupon ? VALID_COUPONS[coupon.toUpperCase()] : null;
 
     if (!authKey || !customerKey) {
       return NextResponse.json(
@@ -80,33 +85,40 @@ export async function POST(request: NextRequest) {
 
     const billingKey = billingData.billingKey;
 
-    // 2단계: 첫 결제 승인
+    // 2단계: 첫 결제 승인 (쿠폰 첫 달 무료면 건너뜀)
     const orderId = `billing_${nanoid()}`;
+    const isFirstMonthFree = couponData?.firstMonthFree === true;
+    const discountPercent = couponData?.discountPercent || 0;
+    const actualPrice = isFirstMonthFree ? 0 : (discountPercent > 0 ? Math.round(plan.price * (1 - discountPercent / 100)) : plan.price);
 
-    const chargeResponse = await fetch(`https://api.tosspayments.com/v1/billing/${billingKey}`, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Basic ${authString}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        customerKey,
-        amount: plan.price,
-        orderId,
-        orderName: `블로그라이터 ${plan.name} 월 구독`,
-        customerEmail: user.email || '',
-        customerName: user.email?.split('@')[0] || '',
-      }),
-    });
+    let chargeData: Record<string, unknown> = {};
 
-    const chargeData = await chargeResponse.json();
+    if (!isFirstMonthFree) {
+      const chargeResponse = await fetch(`https://api.tosspayments.com/v1/billing/${billingKey}`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Basic ${authString}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          customerKey,
+          amount: actualPrice,
+          orderId,
+          orderName: `블로그라이터 ${plan.name} 월 구독`,
+          customerEmail: user.email || '',
+          customerName: user.email?.split('@')[0] || '',
+        }),
+      });
 
-    if (!chargeResponse.ok) {
-      console.error('첫 결제 승인 실패:', chargeData);
-      return NextResponse.json(
-        { success: false, message: chargeData.message || '첫 결제에 실패했습니다.' },
-        { status: 400 },
-      );
+      chargeData = await chargeResponse.json();
+
+      if (!chargeResponse.ok) {
+        console.error('첫 결제 승인 실패:', chargeData);
+        return NextResponse.json(
+          { success: false, message: (chargeData.message as string) || '첫 결제에 실패했습니다.' },
+          { status: 400 },
+        );
+      }
     }
 
     // 3단계: DB 저장
@@ -114,23 +126,29 @@ export async function POST(request: NextRequest) {
     const nextBillingDate = new Date(now);
     nextBillingDate.setMonth(nextBillingDate.getMonth() + 1);
 
-    const subscriptionData = {
+    const subscriptionData: Record<string, unknown> = {
       user_id: user.id,
       plan_id: planId,
       plan_name: plan.name,
       plan_type: plan.type,
       price: plan.price,
       status: 'active',
-      payment_key: chargeData.paymentKey,
+      payment_key: (chargeData.paymentKey as string) || null,
       order_id: orderId,
       billing_key: billingKey,
       customer_key: customerKey,
-      card_company: chargeData.card?.issuerCode || null,
-      card_number: chargeData.card?.number || null,
+      card_company: (chargeData.card as Record<string, unknown>)?.issuerCode || null,
+      card_number: (chargeData.card as Record<string, unknown>)?.number || null,
       started_at: now.toISOString(),
       next_billing_at: nextBillingDate.toISOString(),
       updated_at: now.toISOString(),
     };
+
+    // 쿠폰 정보 저장
+    if (coupon) {
+      subscriptionData.coupon_code = coupon.toUpperCase();
+      subscriptionData.discount_percent = discountPercent;
+    }
 
     try {
       await retryOperation(async () => {

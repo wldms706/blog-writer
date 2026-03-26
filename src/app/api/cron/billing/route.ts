@@ -40,6 +40,10 @@ export async function GET(request: NextRequest) {
     const orderId = `billing_${nanoid()}`;
 
     try {
+      // 쿠폰 할인 적용
+      const discountPercent = sub.discount_percent || 0;
+      const chargeAmount = discountPercent > 0 ? Math.round(sub.price * (1 - discountPercent / 100)) : sub.price;
+
       const res = await fetch(`https://api.tosspayments.com/v1/billing/${sub.billing_key}`, {
         method: 'POST',
         headers: {
@@ -48,9 +52,9 @@ export async function GET(request: NextRequest) {
         },
         body: JSON.stringify({
           customerKey: sub.customer_key,
-          amount: sub.price,
+          amount: chargeAmount,
           orderId,
-          orderName: `블로그라이터 ${sub.plan_name} 월 구독`,
+          orderName: `블로그라이터 ${sub.plan_name} 월 구독${discountPercent > 0 ? ` (${discountPercent}% 할인)` : ''}`,
         }),
       });
 
