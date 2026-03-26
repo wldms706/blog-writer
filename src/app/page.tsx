@@ -136,7 +136,7 @@ export default function LandingPage() {
               <p className="text-3xl font-black text-white mb-1">9,900원<span className="text-base font-normal text-white/50">/월</span></p>
               <p className="text-yellow-400 text-xs font-bold mb-4">한 달간 할인 중</p>
               <ul className="space-y-2 text-sm text-white/70 flex-1">
-                <li>• 반영구 제외 모든 업종 글쓰기</li>
+                <li>• 반영구 제외 업종 가능</li>
                 <li>• 모든 글 구조 사용</li>
                 <li>• 무제한 히스토리</li>
                 <li>• SEO 최적화</li>
@@ -153,7 +153,7 @@ export default function LandingPage() {
               <p className="text-3xl font-black text-[#3B5CFF] mb-1">12,900원<span className="text-base font-normal text-[#3B5CFF]/50">/월</span></p>
               <p className="text-yellow-500 text-xs font-bold mb-4">한 달간 할인 중</p>
               <ul className="space-y-2 text-sm text-gray-600 flex-1">
-                <li>• 반영구 포함 모든 업종 글쓰기</li>
+                <li>• 반영구 포함 외 타업종 글 가능</li>
                 <li>• 반영구 특화 글 구조</li>
                 <li>• 규제 표현 자동 차단</li>
                 <li>• SEO 최적화</li>
