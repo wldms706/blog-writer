@@ -20,7 +20,7 @@ export type AppSettings = {
   keywordPresets: string[];
 };
 
-// 블덱스 지수 체계: 최적 3~1, 준최 7~0
+// 블라이 지수 체계: 최적 3~1, 준최 7~0
 export type BlogIndexLevel =
   | 'optimal3' | 'optimal2' | 'optimal1'  // 최적화
   | 'sub7' | 'sub6' | 'sub5' | 'sub4'     // 준최적화 상위

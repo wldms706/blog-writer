@@ -111,7 +111,7 @@ function getTopicKeywords(businessCategory: string, topic: string | null): strin
   return [];
 }
 
-// 블덱스 지수를 키워드 전략 그룹으로 매핑
+// 블라이 지수를 키워드 전략 그룹으로 매핑
 function getKeywordStrategy(blogIndexLevel: string): 'broad' | 'medium' | 'narrow' | 'niche' {
   // 최적화 1~3: 넓은 지역 (구/시 단위)
   if (['optimal1', 'optimal2', 'optimal3'].includes(blogIndexLevel)) {
@@ -225,7 +225,7 @@ export async function POST(request: NextRequest) {
 - 업종 관련 키워드: ${businessKeywords.join(', ')}
 - 지역: ${locationCity} ${locationDistrict}
 - ${neighborhoodGuide}
-- 블로그 지수: ${blogIndexLevel} (블덱스 기준)
+- 블로그 지수: ${blogIndexLevel} (블라이 기준)
 ${topicGuide}
 
 현재 키워드 전략: ${strategyDesc}

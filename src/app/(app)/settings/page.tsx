@@ -106,7 +106,7 @@ export default function SettingsPage() {
     showToast('히스토리가 삭제되었습니다');
   };
 
-  // 블덱스 지수 체계 (4그룹: 최적, 준최 상위(5~7), 준최 하위(1~4), 일반)
+  // 블라이 지수 체계 (4그룹: 최적, 준최 상위(5~7), 준최 하위(1~4), 일반)
   const BLOG_INDEX_OPTIONS: { value: NonNullable<BlogIndexLevel>; label: string; group: string; color: string }[] = [
     { value: 'optimal3', label: '최적 3', group: 'optimal', color: 'green' },
     { value: 'optimal2', label: '최적 2', group: 'optimal', color: 'green' },
@@ -311,16 +311,16 @@ export default function SettingsPage() {
             />
           </div>
 
-          {/* 블덱스 링크 */}
+          {/* 블라이 링크 */}
           <div className="mb-3 rounded-lg bg-[#3B5CFF]/5 p-3">
             <p className="mb-2 text-xs text-[#3B5CFF]">블로그 지수를 모르시나요?</p>
             <a
-              href="https://blogdex.space"
+              href="https://blai.co.kr"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-1 rounded-full bg-[#3B5CFF] px-3 py-1.5 text-xs font-bold text-white hover:bg-[#2A45E0]"
             >
-              블덱스에서 내 블로그 지수 확인하기
+              블라이에서 내 블로그 지수 확인하기
               <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
               </svg>
@@ -329,7 +329,7 @@ export default function SettingsPage() {
 
           {/* 블로그 지수 수동 선택 */}
           <div className="mb-3">
-            <label className="mb-2 block text-xs font-medium text-black">블로그 지수 선택 (블덱스 기준)</label>
+            <label className="mb-2 block text-xs font-medium text-black">블로그 지수 선택 (블라이 기준)</label>
 
             {/* 최적 그룹 */}
             <div className="mb-2">
