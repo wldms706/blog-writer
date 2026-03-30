@@ -11,8 +11,7 @@ import {
 
 export const maxDuration = 60;
 
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`;
+const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
 
 function sanitize(input: unknown): string {
   if (typeof input !== 'string') return '';
@@ -24,7 +23,7 @@ function sanitize(input: unknown): string {
 }
 
 export async function POST(request: NextRequest) {
-  if (!GEMINI_API_KEY) {
+  if (!ANTHROPIC_API_KEY) {
     return NextResponse.json({ error: 'API 키가 설정되지 않았습니다.' }, { status: 500 });
   }
 
@@ -68,31 +67,30 @@ ${originalContent}
 
 위 수정 요청을 반영한 전체 글을 출력하세요. 수정된 부분만이 아니라 전체 글을 출력해야 합니다.`;
 
-    const response = await fetch(GEMINI_URL, {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': ANTHROPIC_API_KEY!,
+        'anthropic-version': '2023-06-01',
+      },
       body: JSON.stringify({
-        contents: [{ role: 'user', parts: [{ text: prompt }] }],
-        generationConfig: {
-          temperature: 0.7,
-          maxOutputTokens: 8192,
-        },
-        safetySettings: [
-          { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_NONE' },
-          { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'BLOCK_NONE' },
-          { category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT', threshold: 'BLOCK_NONE' },
-          { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_NONE' },
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 8192,
+        temperature: 0.7,
+        messages: [
+          { role: 'user', content: prompt },
         ],
       }),
     });
 
     if (!response.ok) {
-      console.error('Gemini revise error:', await response.text());
+      console.error('Claude revise error:', await response.text());
       return NextResponse.json({ error: '수정에 실패했습니다.' }, { status: 500 });
     }
 
     const data = await response.json();
-    const generatedText = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    const generatedText = data.content?.[0]?.text || '';
 
     if (!generatedText) {
       return NextResponse.json({ error: '수정된 텍스트가 없습니다.' }, { status: 500 });

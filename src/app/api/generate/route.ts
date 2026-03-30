@@ -22,8 +22,7 @@ import {
 // Vercel 함수 타임아웃 60초로 설정
 export const maxDuration = 60;
 
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`;
+const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
 
 // 사용자 입력 sanitize (프롬프트 인젝션 방지)
 function sanitize(input: unknown): string {
@@ -36,7 +35,7 @@ function sanitize(input: unknown): string {
 }
 
 export async function POST(request: NextRequest) {
-  if (!GEMINI_API_KEY) {
+  if (!ANTHROPIC_API_KEY) {
     return NextResponse.json({ error: 'API 키가 설정되지 않았습니다.' }, { status: 500 });
   }
 
@@ -386,27 +385,26 @@ ${isLargeKeyword(safeKeyword) ? `
 절대로 편집가이드를 생략하거나, 다른 형태로 바꾸거나, 해석하지 마세요.
 반드시 [편집가이드: ...] 대괄호 형식 그대로 출력하세요.\n\n` + userPrompt;
 
-    const response = await fetch(GEMINI_URL, {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': ANTHROPIC_API_KEY!,
+        'anthropic-version': '2023-06-01',
+      },
       body: JSON.stringify({
-        contents: [{ role: 'user', parts: [{ text: fullPrompt }] }],
-        generationConfig: {
-          temperature: 1.3,
-          maxOutputTokens: 8192,
-        },
-        safetySettings: [
-          { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_NONE' },
-          { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'BLOCK_NONE' },
-          { category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT', threshold: 'BLOCK_NONE' },
-          { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_NONE' },
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 8192,
+        temperature: 1,
+        messages: [
+          { role: 'user', content: fullPrompt },
         ],
       }),
     });
 
     if (!response.ok) {
       const errorData = await response.text();
-      console.error('Gemini API error:', errorData);
+      console.error('Claude API error:', errorData);
 
       if (response.status === 429) {
         return NextResponse.json(
@@ -419,14 +417,7 @@ ${isLargeKeyword(safeKeyword) ? `
     }
 
     const data = await response.json();
-
-    // Gemini 안전 필터 차단 확인
-    if (data.candidates?.[0]?.finishReason === 'SAFETY') {
-      console.error('Gemini SAFETY block:', JSON.stringify(data.candidates[0].safetyRatings));
-      return NextResponse.json({ error: 'AI 안전 필터에 의해 차단되었습니다. 다시 시도해주세요.' }, { status: 400 });
-    }
-
-    const generatedText = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    const generatedText = data.content?.[0]?.text || '';
 
     if (!generatedText) {
       console.error('Gemini empty response:', JSON.stringify(data));

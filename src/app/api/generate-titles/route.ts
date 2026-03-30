@@ -3,8 +3,7 @@ import { createClient } from '@/lib/supabase/server';
 
 export const maxDuration = 30;
 
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`;
+const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
 
 const BRANDING_TYPE_NAMES: Record<string, string> = {
   recruit: '수강생 모집',
@@ -13,7 +12,7 @@ const BRANDING_TYPE_NAMES: Record<string, string> = {
 };
 
 export async function POST(request: NextRequest) {
-  if (!GEMINI_API_KEY) {
+  if (!ANTHROPIC_API_KEY) {
     return NextResponse.json({ error: 'API 키가 설정되지 않았습니다.' }, { status: 500 });
   }
 
@@ -260,31 +259,30 @@ ${brandingType === 'philosophy' ? `
 }`;
     }
 
-    const response = await fetch(GEMINI_URL, {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': ANTHROPIC_API_KEY!,
+        'anthropic-version': '2023-06-01',
+      },
       body: JSON.stringify({
-        contents: [{ role: 'user', parts: [{ text: prompt }] }],
-        generationConfig: {
-          temperature: 1.3,
-          maxOutputTokens: 1024,
-        },
-        safetySettings: [
-          { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_NONE' },
-          { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'BLOCK_NONE' },
-          { category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT', threshold: 'BLOCK_NONE' },
-          { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_NONE' },
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1024,
+        temperature: 1,
+        messages: [
+          { role: 'user', content: prompt },
         ],
       }),
     });
 
     if (!response.ok) {
-      console.error('Gemini API error:', await response.text());
+      console.error('Claude API error:', await response.text());
       return NextResponse.json({ error: 'AI 제목 생성에 실패했습니다.' }, { status: 500 });
     }
 
     const data = await response.json();
-    const generatedText = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    const generatedText = data.content?.[0]?.text || '';
 
     // JSON 파싱
     try {
