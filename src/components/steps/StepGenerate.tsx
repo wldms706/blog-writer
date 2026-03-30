@@ -24,8 +24,11 @@ const UX_MESSAGES = {
   complete: '기준을 충족한 글이 완성되었습니다.',
 };
 
-// 공백 제외 글자수 계산
-const countCharsWithoutSpaces = (text: string) => text.replace(/\s/g, '').length;
+// 공백 제외 글자수 계산 (편집가이드 제외)
+const countCharsWithoutSpaces = (text: string) => {
+  const withoutGuides = text.replace(/\[편집가이드:.*?\]/g, '');
+  return withoutGuides.replace(/\s/g, '').length;
+};
 
 // 키워드 하이라이트 함수
 const highlightKeyword = (text: string, keyword: string) => {
