@@ -5,7 +5,15 @@ import { nanoid } from 'nanoid';
 const TOSS_SECRET_KEY = process.env.TOSS_SECRET_KEY || '';
 const CRON_SECRET = process.env.CRON_SECRET || '';
 
+// 점검 모드 — 수정 완료 후 false로 변경
+const MAINTENANCE_MODE = true;
+
 export async function GET(request: NextRequest) {
+  // 점검 중에는 빌링 중지
+  if (MAINTENANCE_MODE) {
+    return NextResponse.json({ message: '점검 모드: 빌링 일시 중지', charged: 0 });
+  }
+
   // 크론 인증
   const authHeader = request.headers.get('authorization');
   if (authHeader !== `Bearer ${CRON_SECRET}`) {

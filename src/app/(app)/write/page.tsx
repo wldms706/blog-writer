@@ -65,7 +65,37 @@ type StepId =
   | 'brandingInfo'
   | 'treatmentInfo';
 
+// 점검 모드 — 수정 완료 후 false로 변경
+const MAINTENANCE_MODE = true;
+
 export default function Home() {
+  if (MAINTENANCE_MODE) {
+    return (
+      <div className="min-h-screen flex items-center justify-center px-4">
+        <div className="max-w-md w-full text-center">
+          <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-yellow-100 flex items-center justify-center">
+            <svg className="w-10 h-10 text-yellow-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+            </svg>
+          </div>
+          <h1 className="text-2xl font-black text-black mb-3">서비스 점검 중</h1>
+          <p className="text-gray-600 mb-4">
+            더 좋은 글을 뽑아드리기 위해 시스템을 업그레이드하고 있습니다.
+          </p>
+          <div className="bg-gray-50 rounded-2xl p-5 text-left mb-6">
+            <p className="text-sm text-gray-700 font-medium mb-2">안내사항</p>
+            <ul className="space-y-1.5 text-sm text-gray-500">
+              <li>• 점검 기간: 약 1주일</li>
+              <li>• 구독 중인 분들은 점검 일수만큼 이용 기간이 자동 연장됩니다</li>
+              <li>• 점검 기간 중 결제는 발생하지 않습니다</li>
+            </ul>
+          </div>
+          <p className="text-xs text-gray-400">문의: 카카오톡 채널로 연락 주세요</p>
+        </div>
+      </div>
+    );
+  }
+
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState<FormData>(initialFormData);
   const [userPlanType, setUserPlanType] = useState<string | null>(null);
