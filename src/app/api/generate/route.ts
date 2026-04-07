@@ -20,7 +20,7 @@ import {
 // analyzeTopBlogs 제거 — 타샵 상호/내용이 복사되는 문제 발생
 
 // Vercel 함수 타임아웃 60초로 설정
-export const maxDuration = 60;
+export const maxDuration = 120;
 
 const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
 
