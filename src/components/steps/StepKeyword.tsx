@@ -128,15 +128,28 @@ export default function StepKeyword({ value, onChange, businessCategory }: StepK
   // 이 업종에서 아직 안 쓴 세부키워드 제안
   const suggestedDetails = useMemo(() => {
     const details = DETAIL_KEYWORDS[businessCategory || ''] || DEFAULT_DETAILS;
-    const usedDetails = new Set(
-      pastKeywords.map(pk => {
-        const { detail: d } = splitRegionDetail(pk.keyword);
-        return d || pk.keyword;
-      })
-    );
+    // 세부키워드별 마지막 사용일 매핑
+    const usedDetailMap = new Map<string, string>();
+    for (const pk of pastKeywords) {
+      const { detail: d } = splitRegionDetail(pk.keyword);
+      const key = d || pk.keyword;
+      if (!usedDetailMap.has(key)) {
+        usedDetailMap.set(key, pk.usedAt);
+      }
+    }
+
+    const getDaysAgo = (dateStr: string) => {
+      const diff = Date.now() - new Date(dateStr).getTime();
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+      if (days === 0) return '오늘';
+      if (days === 1) return '어제';
+      return `${days}일전`;
+    };
+
     return details.map(d => ({
       keyword: d,
-      isUsed: usedDetails.has(d),
+      isUsed: usedDetailMap.has(d),
+      daysAgo: usedDetailMap.has(d) ? getDaysAgo(usedDetailMap.get(d)!) : null,
     }));
   }, [businessCategory, pastKeywords]);
 
@@ -210,7 +223,7 @@ export default function StepKeyword({ value, onChange, businessCategory }: StepK
           <div>
             <p className="text-xs text-gray-400 mb-2">세부키워드 선택</p>
             <div className="flex flex-wrap gap-2">
-              {suggestedDetails.map(({ keyword: d, isUsed }) => (
+              {suggestedDetails.map(({ keyword: d, isUsed, daysAgo }) => (
                 <button
                   key={d}
                   onClick={() => setDetail(d)}
@@ -223,7 +236,7 @@ export default function StepKeyword({ value, onChange, businessCategory }: StepK
                   }`}
                 >
                   {d}
-                  {isUsed && detail !== d && ' (사용됨)'}
+                  {isUsed && detail !== d && ` (${daysAgo})`}
                 </button>
               ))}
             </div>
