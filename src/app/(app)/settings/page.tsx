@@ -36,6 +36,11 @@ export default function SettingsPage() {
     shopHours: '',
     shopPhone: '',
     shopParking: '',
+    storyMotivation: '',
+    storyPriority: '',
+    storyMessage: '',
+    storyDifference: '',
+    storyReward: '',
   });
   const [subscription, setSubscription] = useState<Subscription | null>(null);
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
@@ -292,6 +297,36 @@ export default function SettingsPage() {
             <p className="mt-2 text-xs text-[#3B5CFF]">
               저장된 정보가 글 작성 시 자동으로 적용됩니다
             </p>
+          )}
+        </div>
+
+        {/* 원장님 스토리 */}
+        <div className="rounded-2xl bg-[#3B5CFF]/5 border border-[#3B5CFF]/20 p-5">
+          <label className="mb-1 block text-sm font-bold text-black">원장님 스토리</label>
+          <p className="mb-4 text-xs text-gray-500">답변을 작성하면 글에 원장님의 신념과 개성이 자연스럽게 녹아듭니다</p>
+          <div className="space-y-4">
+            {[
+              { key: 'storyMotivation' as const, q: '이 일을 시작하게 된 계기가 뭔가요?', placeholder: '예: 원래 미용에 관심이 많았는데, 반영구를 처음 접하고 완전 빠져버렸어요...' },
+              { key: 'storyPriority' as const, q: '시술할 때 가장 중요하게 생각하는 건 뭔가요?', placeholder: '예: 자연스러움이요. 티 안 나게 하는 게 제일 어렵고 제일 중요해요...' },
+              { key: 'storyMessage' as const, q: '고객에게 꼭 해주고 싶은 말이 있다면?', placeholder: '예: 가격만 보지 마세요. 내 얼굴에 하는 투자인데 한번에 제대로...' },
+              { key: 'storyDifference' as const, q: '다른 샵과 다르다고 생각하는 점은?', placeholder: '예: 저는 피부 상태를 먼저 보고 기법을 추천해요. 무조건 비싼 걸 권하지 않아요...' },
+              { key: 'storyReward' as const, q: '이 일을 하면서 가장 보람 느끼는 순간은?', placeholder: '예: 시술 끝나고 거울 보면서 웃으시는 순간이요. 그 표정 보면 다 보람이에요...' },
+            ].map(({ key, q, placeholder }) => (
+              <div key={key}>
+                <p className="mb-1 text-xs font-medium text-[#3B5CFF]">{q}</p>
+                <textarea
+                  value={profile[key]}
+                  onChange={(e) => setProfile({ ...profile, [key]: e.target.value })}
+                  onBlur={() => handleSaveProfile({ [key]: profile[key] })}
+                  placeholder={placeholder}
+                  rows={2}
+                  className="w-full rounded-xl border-2 border-gray-200 px-3 py-2.5 text-sm outline-none focus:border-[#3B5CFF] resize-none"
+                />
+              </div>
+            ))}
+          </div>
+          {(profile.storyMotivation || profile.storyPriority) && (
+            <p className="mt-3 text-xs text-[#3B5CFF]">작성한 스토리가 글 생성 시 자동 반영됩니다</p>
           )}
         </div>
 
