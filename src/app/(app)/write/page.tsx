@@ -66,7 +66,7 @@ type StepId =
   | 'treatmentInfo';
 
 // 점검 모드 — 수정 완료 후 false로 변경
-const MAINTENANCE_MODE = true;
+const MAINTENANCE_MODE = false;
 
 export default function Home() {
   if (MAINTENANCE_MODE) {
