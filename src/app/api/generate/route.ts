@@ -88,13 +88,6 @@ export async function POST(request: NextRequest) {
     // 규제 업종 여부 확인
     const isRegulatedBusiness = safeBusinessCategory === 'semi-permanent' || safeBusinessCategory === '반영구' || REGULATED_KEYWORDS.some(k => safeKeyword.includes(k));
 
-    // 타샵 내용 복사 방지 규칙
-    const antiCopyRule = `
-⚠️⚠️ 타샵 내용 복사 절대 금지:
-- 다른 블로그/샵의 상호명, 원장명, 브랜드명을 절대 언급하지 마세요
-- 인터넷에서 본 다른 글의 문장을 그대로 가져오지 마세요
-- 완전히 새롭고 독창적인 문장으로만 작성하세요`;
-
     // 샵 정보 텍스트 — 반영구(규제 업종)에서는 비공개 위험으로 완전 제외
     const shopInfoParts: string[] = [];
     if (!isRegulatedBusiness) {
@@ -393,7 +386,7 @@ ${isLargeKeyword(safeKeyword) ? `
 
     const currentYear = new Date().getFullYear();
 
-    const fullPrompt = systemPrompt + antiCopyRule + `\n\n⚠️ 현재 연도: ${currentYear}년
+    const fullPrompt = systemPrompt + `\n\n⚠️ 현재 연도: ${currentYear}년
 - 트렌드, 유행, 시기를 언급할 때 반드시 ${currentYear}년 기준으로 작성하세요
 - 과거 연도(2024년, 2025년 등)의 트렌드를 현재인 것처럼 쓰지 마세요
 
