@@ -146,9 +146,8 @@ const PROMO_WORD_REPLACEMENTS: [RegExp, string][] = [
   [/완전\s/g, '정말 '], [/엄청\s*/g, '꽤 '],
   [/효과적/g, '도움이 되는'], [/효과가/g, '변화가'],
   [/효과를/g, '변화를'], [/효과/g, '변화'],
-  [/체험/g, '경험'], [/후기/g, '이야기'],
   [/추천드립니다/g, '좋습니다'], [/추천합니다/g, '좋습니다'],
-  [/추천해요/g, '좋아요'], [/추천/g, ''], [/카드/g, ''],
+  [/추천해요/g, '좋아요'],
 ];
 
 export function filterBannedWords(text: string): string {

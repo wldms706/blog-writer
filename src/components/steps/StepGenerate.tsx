@@ -73,9 +73,8 @@ export default function StepGenerate({ onReset, formData, isRegulated = false }:
   const reader = READER_STATES.find((r) => r.id === formData.readerState);
 
   const BRANDING_TYPE_NAMES: Record<string, string> = {
-    intro: '자기소개',
+    recruit: '수강생 모집',
     philosophy: '철학/신념',
-    story: '샵 스토리',
   };
 
   const isBranding = formData.contentType === 'branding';

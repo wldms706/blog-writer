@@ -217,6 +217,7 @@ export default function Home() {
             purpose={formData.contentType === 'seo' ? (formData.purpose || '') : 'branding'}
             readerState={formData.readerState || ''}
             contentType={formData.contentType}
+            seoStyle={formData.seoStyle}
             brandingType={formData.brandingType}
             brandingInfo={formData.brandingInfo}
           />

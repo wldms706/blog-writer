@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { ContentType, BrandingType, BrandingInfo } from '@/types';
+import { ContentType, SeoStyle, BrandingType, BrandingInfo } from '@/types';
 
 interface TitleOption {
   title: string;
@@ -17,6 +17,7 @@ interface StepTitleSelectProps {
   purpose: string;
   readerState: string;
   contentType?: ContentType;
+  seoStyle?: SeoStyle;
   brandingType?: BrandingType | null;
   brandingInfo?: BrandingInfo;
 }
@@ -30,6 +31,7 @@ export default function StepTitleSelect({
   purpose,
   readerState,
   contentType = 'seo',
+  seoStyle = 'review',
   brandingType,
   brandingInfo,
 }: StepTitleSelectProps) {
@@ -57,6 +59,7 @@ export default function StepTitleSelect({
           purpose,
           readerState,
           contentType,
+          seoStyle,
           brandingType,
           brandingInfo,
         }),
