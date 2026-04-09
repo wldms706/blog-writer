@@ -5,8 +5,7 @@ import { nanoid } from 'nanoid';
 const TOSS_SECRET_KEY = process.env.TOSS_SECRET_KEY || '';
 const CRON_SECRET = process.env.CRON_SECRET || '';
 
-// 점검 모드 — 수정 완료 후 false로 변경
-const MAINTENANCE_MODE = true;
+const MAINTENANCE_MODE = false;
 
 export async function GET(request: NextRequest) {
   // 점검 중에는 빌링 중지
@@ -22,6 +21,21 @@ export async function GET(request: NextRequest) {
 
   const supabase = createAdminClient();
   const now = new Date().toISOString();
+
+  // 취소된 구독 중 만료일이 지난 것 → free로 전환
+  const { data: expiredSubs } = await supabase
+    .from('subscriptions')
+    .select('id, user_id')
+    .eq('status', 'cancelled')
+    .lte('next_billing_at', now);
+
+  if (expiredSubs && expiredSubs.length > 0) {
+    for (const sub of expiredSubs) {
+      await supabase.from('profiles').update({ plan: 'free' }).eq('id', sub.user_id);
+      await supabase.from('subscriptions').update({ status: 'expired' }).eq('id', sub.id);
+    }
+    console.log(`[빌링 크론] 만료 처리: ${expiredSubs.length}건`);
+  }
 
   // 결제일이 지난 활성 구독 조회
   const { data: subscriptions, error } = await supabase
@@ -101,7 +115,7 @@ export async function GET(request: NextRequest) {
           // 프로필도 무료로 변경
           await supabase
             .from('profiles')
-            .update({ plan: 'free', plan_type: null, updated_at: new Date().toISOString() })
+            .update({ plan: 'free' })
             .eq('id', sub.user_id);
         }
 

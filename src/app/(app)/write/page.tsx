@@ -6,9 +6,6 @@ import StepContentType from '@/components/steps/StepContentType';
 import StepBusiness from '@/components/steps/StepBusiness';
 import StepKeyword from '@/components/steps/StepKeyword';
 import StepTopic from '@/components/steps/StepTopic';
-import StepPurpose from '@/components/steps/StepPurpose';
-import StepReader from '@/components/steps/StepReader';
-import StepRules from '@/components/steps/StepRules';
 import StepTitleSelect from '@/components/steps/StepTitleSelect';
 import StepGenerate from '@/components/steps/StepGenerate';
 import StepBrandingType from '@/components/steps/StepBrandingType';
@@ -172,12 +169,6 @@ export default function Home() {
         return formData.keyword.trim().length > 0;
       case 'topic':
         return formData.topic !== null;
-      case 'purpose':
-        return formData.purpose !== null;
-      case 'reader':
-        return formData.readerState !== null;
-      case 'rules':
-        return formData.rulesConfirmed;
       case 'title':
         return formData.selectedTitle.trim().length > 0;
       case 'brandingType':
@@ -229,9 +220,6 @@ export default function Home() {
     }));
   };
 
-  const handleRulesConfirm = useCallback((confirmed: boolean) => {
-    setFormData((prev) => ({ ...prev, rulesConfirmed: confirmed }));
-  }, []);
 
   const renderStep = () => {
     switch (currentStepId) {
@@ -268,28 +256,6 @@ export default function Home() {
             selected={formData.topic}
             onSelect={(id) => setFormData({ ...formData, topic: id })}
             businessCategory={formData.businessCategory}
-          />
-        );
-      case 'purpose':
-        return (
-          <StepPurpose
-            selected={formData.purpose}
-            onSelect={(id) => setFormData((prev) => ({ ...prev, purpose: id }))}
-          />
-        );
-      case 'reader':
-        return (
-          <StepReader
-            selected={formData.readerState}
-            onSelect={(id) => setFormData({ ...formData, readerState: id })}
-          />
-        );
-      case 'rules':
-        return (
-          <StepRules
-            businessCategory={formData.businessCategory}
-            confirmed={formData.rulesConfirmed}
-            onConfirm={handleRulesConfirm}
           />
         );
       case 'title':

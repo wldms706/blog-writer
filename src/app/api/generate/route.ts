@@ -531,7 +531,7 @@ ${isLargeKeyword(safeKeyword) ? `
     const generatedText = data.content?.[0]?.text || '';
 
     if (!generatedText) {
-      console.error('Gemini empty response:', JSON.stringify(data));
+      console.error('Claude empty response:', JSON.stringify(data));
       return NextResponse.json({ error: '생성된 텍스트가 없습니다.' }, { status: 500 });
     }
 

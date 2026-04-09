@@ -127,6 +127,7 @@ export async function POST(request: NextRequest) {
       billing_key: paymentData.card?.billingKey || null,
       card_company: paymentData.card?.company || null,
       card_number: paymentData.card?.number || null,
+      customer_key: `customer_${user.id}`,
       started_at: now.toISOString(),
       next_billing_at: nextBillingDate.toISOString(),
       updated_at: now.toISOString(),
