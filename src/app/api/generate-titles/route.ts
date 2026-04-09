@@ -32,6 +32,7 @@ export async function POST(request: NextRequest) {
       purpose,
       readerState,
       contentType = 'seo',
+      seoStyle = 'review',
       brandingType,
       brandingInfo,
     } = await request.json();
@@ -64,8 +65,8 @@ export async function POST(request: NextRequest) {
     const safeKeyword = sanitize(keyword);
     const safeBusinessCategory = sanitize(businessCategory);
     const safeTopic = sanitize(topic);
-    const safePurpose = sanitize(purpose);
-    const safeReaderState = sanitize(readerState);
+    const _safePurpose = sanitize(purpose);
+    const _safeReaderState = sanitize(readerState);
 
     let prompt: string;
 
@@ -174,16 +175,29 @@ ${usedTitlesText}
 
     } else {
       // SEO 글 제목 생성 프롬프트
+      const isReviewStyle = seoStyle === 'review';
+
       prompt = `당신은 네이버 블로그 클릭률 극대화 제목 전문가입니다.
 사람의 뇌는 지루한 걸 싫어합니다. 수백 개의 블로그 글 중 선택받으려면, 뇌에 충격을 주는 제목이 필요합니다.
 
 키워드: ${safeKeyword}
 업종: ${safeBusinessCategory}
 글 주제: ${safeTopic}
-글의 목적: ${safePurpose}
-독자 상태: ${safeReaderState}
+글 스타일: ${isReviewStyle ? '체험 후기형 (고객이 직접 방문한 후기)' : '전문가 정보형 (원장이 전문 지식 전달)'}
 
-## 핵심 규칙: 5개의 제목은 반드시 서로 다른 심리 기법을 사용해야 합니다!
+${isReviewStyle ? `## 체험 후기형 제목 특별 규칙
+이 글은 고객이 직접 방문해서 쓴 후기입니다. 제목도 후기/방문 톤이어야 합니다.
+- "~다녀왔어요", "~받아봤는데", "~찾았다", "~후기", "~솔직 리뷰" 같은 체험자 톤 활용
+- 실제 네이버 1위 후기 제목 예시:
+  - "${safeKeyword}, 밀키 글리터 인생 네일 찾음"
+  - "${safeKeyword} 블랙 빼고 깔끔하게 염색한 후기"
+  - "${safeKeyword} 생각보다 좋았던 후기"
+  - "${safeKeyword} 잘하는 곳 내 눈매 맞춤형 컬링"
+  - "${safeKeyword} 깔끔했던 관리"
+- 전문가/원장 톤 금지 ("원장이 말하는", "전문가가 추천하는" 등)
+` : ''}
+
+## 핵심 규칙: 7개의 제목은 반드시 서로 다른 심리 기법을 사용해야 합니다!
 
 ### 제목 1 — 상식 파괴형
 사람들이 "${safeKeyword}"에 대해 "당연하다"고 생각하는 상식을 정반대로 뒤집어서 "왜?"라는 궁금증을 유발하는 제목.
@@ -237,12 +251,16 @@ ${usedTitlesText}
 - 예: "${safeKeyword} 투블럭 vs 리프컷, 뭐가 나한테 맞을까"
 - 예: "${safeKeyword} 싼 곳 vs 비싼 곳, 진짜 차이는 이거였습니다"
 
-### 제목 7 — 공감/경험형
-독자가 실제로 겪었을 법한 경험을 콕 짚어서 "맞아 나도!" 반응을 유발하는 제목.
+### 제목 7 — ${isReviewStyle ? '방문 후기형' : '공감/경험형'}
+${isReviewStyle ? `실제로 다녀온 사람이 쓴 솔직한 후기 느낌의 제목.
+⛔ "솔직히"라는 단어 절대 금지!
+- 예: "${safeKeyword} 직접 받아봤는데 인생 시술 찾음"
+- 예: "${safeKeyword} 3곳 다녀보고 정착한 곳 후기"
+- 예: "${safeKeyword} 처음이라 떨렸는데 결과 대박"` : `독자가 실제로 겪었을 법한 경험을 콕 짚어서 "맞아 나도!" 반응을 유발하는 제목.
 ⛔ "솔직히"라는 단어 절대 금지!
 - 예: "${safeKeyword} 망한 경험 있으시죠? 이유가 있어요"
 - 예: "${safeKeyword} 하고 후회한 적 있다면 이 글 보세요"
-- 예: "${safeKeyword} 할 때마다 마음에 안 드는 이유"
+- 예: "${safeKeyword} 할 때마다 마음에 안 드는 이유"`}
 
 ## 기법 조합 원칙 (중요!):
 - 위 5가지 스타일은 기본 골격이지만, 하나의 제목 안에 여러 기법을 조합하면 클릭력이 극대화됩니다
@@ -273,7 +291,7 @@ ${usedTitlesText}
     {"title": "자아 흠집형 제목", "style": "자아 흠집형"},
     {"title": "트렌드/연예인 연결형 제목", "style": "트렌드형"},
     {"title": "비교/분석형 제목", "style": "비교형"},
-    {"title": "공감/경험형 제목", "style": "공감형"}
+    {"title": "${isReviewStyle ? '방문 후기형 제목' : '공감/경험형 제목'}", "style": "${isReviewStyle ? '후기형' : '공감형'}"}
   ]
 }`;
     }
