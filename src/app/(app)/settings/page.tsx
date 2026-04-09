@@ -45,6 +45,8 @@ export default function SettingsPage() {
   const [subscription, setSubscription] = useState<Subscription | null>(null);
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
   const [showClearConfirm, setShowClearConfirm] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [toast, setToast] = useState('');
   const [loading, setLoading] = useState(true);
   const [userId, setUserId] = useState<string | null>(null);
@@ -297,36 +299,6 @@ export default function SettingsPage() {
             <p className="mt-2 text-xs text-[#3B5CFF]">
               저장된 정보가 글 작성 시 자동으로 적용됩니다
             </p>
-          )}
-        </div>
-
-        {/* 원장님 스토리 */}
-        <div className="rounded-2xl bg-[#3B5CFF]/5 border border-[#3B5CFF]/20 p-5">
-          <label className="mb-1 block text-sm font-bold text-black">원장님 스토리</label>
-          <p className="mb-4 text-xs text-gray-500">답변을 작성하면 글에 원장님의 신념과 개성이 자연스럽게 녹아듭니다</p>
-          <div className="space-y-4">
-            {[
-              { key: 'storyMotivation' as const, q: '이 일을 시작하게 된 계기가 뭔가요?', placeholder: '예: 원래 미용에 관심이 많았는데, 반영구를 처음 접하고 완전 빠져버렸어요...' },
-              { key: 'storyPriority' as const, q: '시술할 때 가장 중요하게 생각하는 건 뭔가요?', placeholder: '예: 자연스러움이요. 티 안 나게 하는 게 제일 어렵고 제일 중요해요...' },
-              { key: 'storyMessage' as const, q: '고객에게 꼭 해주고 싶은 말이 있다면?', placeholder: '예: 가격만 보지 마세요. 내 얼굴에 하는 투자인데 한번에 제대로...' },
-              { key: 'storyDifference' as const, q: '다른 샵과 다르다고 생각하는 점은?', placeholder: '예: 저는 피부 상태를 먼저 보고 기법을 추천해요. 무조건 비싼 걸 권하지 않아요...' },
-              { key: 'storyReward' as const, q: '이 일을 하면서 가장 보람 느끼는 순간은?', placeholder: '예: 시술 끝나고 거울 보면서 웃으시는 순간이요. 그 표정 보면 다 보람이에요...' },
-            ].map(({ key, q, placeholder }) => (
-              <div key={key}>
-                <p className="mb-1 text-xs font-medium text-[#3B5CFF]">{q}</p>
-                <textarea
-                  value={profile[key]}
-                  onChange={(e) => setProfile({ ...profile, [key]: e.target.value })}
-                  onBlur={() => handleSaveProfile({ [key]: profile[key] })}
-                  placeholder={placeholder}
-                  rows={2}
-                  className="w-full rounded-xl border-2 border-gray-200 px-3 py-2.5 text-sm outline-none focus:border-[#3B5CFF] resize-none"
-                />
-              </div>
-            ))}
-          </div>
-          {(profile.storyMotivation || profile.storyPriority) && (
-            <p className="mt-3 text-xs text-[#3B5CFF]">작성한 스토리가 글 생성 시 자동 반영됩니다</p>
           )}
         </div>
 
@@ -594,31 +566,81 @@ export default function SettingsPage() {
           )}
         </div>
 
-        {/* 히스토리 삭제 */}
+        {/* 데이터 관리 */}
         <div className="rounded-2xl bg-[#F5F5F5] p-5">
           <label className="mb-2 block text-sm font-medium text-black">데이터 관리</label>
-          {!showClearConfirm ? (
+          <div className="space-y-3">
+            {!showClearConfirm ? (
+              <button
+                onClick={() => setShowClearConfirm(true)}
+                className="rounded-lg border border-red-200 px-3 py-2 text-xs font-medium text-red-600 hover:bg-red-50"
+              >
+                히스토리 전체 삭제
+              </button>
+            ) : (
+              <div className="rounded-lg bg-red-50 p-3">
+                <p className="mb-2 text-xs text-red-700">정말 모든 히스토리를 삭제하시겠습니까?</p>
+                <div className="flex gap-2">
+                  <button
+                    onClick={handleClearHistory}
+                    className="rounded-lg bg-red-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-red-700"
+                  >
+                    삭제
+                  </button>
+                  <button
+                    onClick={() => setShowClearConfirm(false)}
+                    className="rounded-lg bg-white px-3 py-1.5 text-xs text-gray-600 hover:bg-gray-50"
+                  >
+                    취소
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* 회원 탈퇴 */}
+        <div className="rounded-2xl bg-[#F5F5F5] p-5">
+          <label className="mb-2 block text-sm font-medium text-black">회원 탈퇴</label>
+          {!showDeleteConfirm ? (
             <button
-              onClick={() => setShowClearConfirm(true)}
-              className="rounded-lg border border-red-200 px-3 py-2 text-xs font-medium text-red-600 hover:bg-red-50"
+              onClick={() => setShowDeleteConfirm(true)}
+              className="text-xs text-gray-400 hover:text-red-500 underline"
             >
-              히스토리 전체 삭제
+              회원 탈퇴하기
             </button>
           ) : (
             <div className="rounded-lg bg-red-50 p-3">
-              <p className="mb-2 text-xs text-red-700">정말 모든 히스토리를 삭제하시겠습니까?</p>
+              <p className="mb-1 text-xs font-medium text-red-700">정말 탈퇴하시겠습니까?</p>
+              <p className="mb-3 text-xs text-red-600">모든 데이터(프로필, 히스토리, 설정)가 삭제되며 복구할 수 없습니다.</p>
               <div className="flex gap-2">
                 <button
-                  onClick={handleClearHistory}
-                  className="rounded-lg bg-red-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-red-700"
+                  onClick={async () => {
+                    setDeleting(true);
+                    try {
+                      const res = await fetch('/api/delete-account', { method: 'POST' });
+                      if (res.ok) {
+                        const supabase = createClient();
+                        await supabase.auth.signOut();
+                        router.push('/login');
+                      } else {
+                        showToast('탈퇴 처리에 실패했습니다');
+                      }
+                    } catch {
+                      showToast('오류가 발생했습니다');
+                    }
+                    setDeleting(false);
+                  }}
+                  disabled={deleting}
+                  className="rounded-lg bg-red-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-red-700 disabled:opacity-50"
                 >
-                  삭제
+                  {deleting ? '처리 중...' : '탈퇴 확인'}
                 </button>
                 <button
-                  onClick={() => setShowClearConfirm(false)}
+                  onClick={() => setShowDeleteConfirm(false)}
                   className="rounded-lg bg-white px-3 py-1.5 text-xs text-gray-600 hover:bg-gray-50"
                 >
-                  취소
+                  돌아가기
                 </button>
               </div>
             </div>
