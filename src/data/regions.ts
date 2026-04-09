@@ -110,12 +110,14 @@ export function getRegionSuggestions(
     };
   }
 
-  // 준최 5~7: 동 단위 + 시/구 혼합
+  // 준최 5~7: 시/구 단위 + 동 단위 혼합
   if (['sub7', 'sub6', 'sub5'].includes(blogIndexLevel)) {
-    const regions = dongs.length > 0 ? [city, ...dongs.slice(0, 6)] : [city];
+    const regions = [city];
+    if (district && district !== city) regions.push(district);
+    if (dongs.length > 0) regions.push(...dongs.slice(0, 6));
     return {
       regions,
-      message: '동 단위 키워드 위주로, 간간이 시/구 키워드도 도전해보세요',
+      message: '시/구 단위 키워드도 가능! 동 단위와 섞어서 쓰세요',
     };
   }
 
