@@ -379,6 +379,7 @@ export default function Home() {
           currentStep={currentStep}
           totalSteps={totalSteps}
           contentType={formData.contentType}
+          isRegulated={isRegulated}
         />
       </div>
 

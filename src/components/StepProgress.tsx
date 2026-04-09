@@ -1,17 +1,25 @@
 'use client';
 
-import { SEO_STEPS, BRANDING_STEPS } from '@/data/constants';
+import { SEO_STEPS, SEO_STEPS_REGULATED, BRANDING_STEPS } from '@/data/constants';
 import { ContentType } from '@/types';
 
 interface StepProgressProps {
   currentStep: number;
   totalSteps?: number;
   contentType?: ContentType;
+  isRegulated?: boolean;
 }
 
-export default function StepProgress({ currentStep, totalSteps, contentType = 'seo' }: StepProgressProps) {
-  const steps = contentType === 'seo' ? SEO_STEPS : BRANDING_STEPS;
-  const total = totalSteps || steps.length;
+export default function StepProgress({ currentStep, totalSteps, contentType = 'seo', isRegulated = false }: StepProgressProps) {
+  const stepsSource = contentType === 'branding'
+    ? BRANDING_STEPS
+    : isRegulated
+      ? SEO_STEPS_REGULATED
+      : SEO_STEPS;
+
+  const total = totalSteps || stepsSource.length;
+  // 실제 표시할 스텝: totalSteps가 주어지면 그 수만큼만 표시
+  const steps = stepsSource.slice(0, total);
 
   return (
     <div className="w-full max-w-3xl mx-auto px-4">
@@ -45,21 +53,21 @@ export default function StepProgress({ currentStep, totalSteps, contentType = 's
             style={{ width: `${((currentStep - 1) / (total - 1)) * 100}%` }}
           />
 
-          {steps.map((step) => (
+          {steps.map((step, index) => (
             <div
               key={step.id}
               className="flex flex-col items-center relative z-10"
             >
               <div
                 className={`step-indicator ${
-                  step.id < currentStep
+                  index + 1 < currentStep
                     ? 'step-indicator-completed'
-                    : step.id === currentStep
+                    : index + 1 === currentStep
                     ? 'step-indicator-active'
                     : 'step-indicator-pending'
                 }`}
               >
-                {step.id < currentStep ? (
+                {index + 1 < currentStep ? (
                   <svg
                     className="w-4 h-4"
                     fill="none"
@@ -74,14 +82,14 @@ export default function StepProgress({ currentStep, totalSteps, contentType = 's
                     />
                   </svg>
                 ) : (
-                  step.id
+                  index + 1
                 )}
               </div>
               <span
                 className={`mt-2 text-xs font-bold text-center whitespace-nowrap transition-colors ${
-                  step.id === currentStep
+                  index + 1 === currentStep
                     ? 'text-[#3B5CFF]'
-                    : step.id < currentStep
+                    : index + 1 < currentStep
                     ? 'text-black'
                     : 'text-gray-400'
                 }`}

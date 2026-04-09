@@ -16,12 +16,10 @@ export const SEO_STEPS: Step[] = [
   { id: 2, title: '업종', subtitle: '어떤 뷰티 업종인가요?' },
   { id: 3, title: '주제', subtitle: '어떤 주제로 글을 쓸까요?' },
   { id: 4, title: '키워드', subtitle: '검색 키워드를 입력해주세요' },
-  { id: 5, title: '목적', subtitle: '이 글의 목적은 무엇인가요?' },
-  { id: 6, title: '독자 상태', subtitle: '독자는 어떤 상태인가요?' },
-  { id: 7, title: '글 톤', subtitle: '어떤 느낌으로 쓸까요?' },
-  { id: 8, title: '규칙 확인', subtitle: '적용되는 규칙을 확인해주세요' },
-  { id: 9, title: '제목 선택', subtitle: '블로그 제목을 선택해주세요' },
-  { id: 10, title: '글 생성', subtitle: '블로그 글이 생성됩니다' },
+  { id: 5, title: '시술 정보', subtitle: '시술/매장 정보를 입력해주세요' },
+  { id: 6, title: '글 톤', subtitle: '어떤 느낌으로 쓸까요?' },
+  { id: 7, title: '제목 선택', subtitle: '블로그 제목을 선택해주세요' },
+  { id: 8, title: '글 생성', subtitle: '블로그 글이 생성됩니다' },
 ];
 
 // SEO 글 작성 단계 (반영구 - 톤 선택 없음)
@@ -30,11 +28,9 @@ export const SEO_STEPS_REGULATED: Step[] = [
   { id: 2, title: '업종', subtitle: '어떤 뷰티 업종인가요?' },
   { id: 3, title: '주제', subtitle: '어떤 주제로 글을 쓸까요?' },
   { id: 4, title: '키워드', subtitle: '검색 키워드를 입력해주세요' },
-  { id: 5, title: '목적', subtitle: '이 글의 목적은 무엇인가요?' },
-  { id: 6, title: '독자 상태', subtitle: '독자는 어떤 상태인가요?' },
-  { id: 7, title: '규칙 확인', subtitle: '적용되는 규칙을 확인해주세요' },
-  { id: 8, title: '제목 선택', subtitle: '블로그 제목을 선택해주세요' },
-  { id: 9, title: '글 생성', subtitle: '블로그 글이 생성됩니다' },
+  { id: 5, title: '시술 정보', subtitle: '시술/매장 정보를 입력해주세요' },
+  { id: 6, title: '제목 선택', subtitle: '블로그 제목을 선택해주세요' },
+  { id: 7, title: '글 생성', subtitle: '블로그 글이 생성됩니다' },
 ];
 
 // 브랜딩 글 작성 단계
