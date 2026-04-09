@@ -5,7 +5,7 @@ import { syncUserToSheet } from '@/lib/google-sheets';
 // 🔧 LAUNCH TOGGLE: true = 모든 유저 무제한
 // 3/26 런칭 시 false로 변경하세요!
 // ============================================
-const UNLIMITED_FOR_ALL = true;
+const UNLIMITED_FOR_ALL = false;
 
 const FREE_TOTAL_LIMIT = 3; // 최초 3회만 무료
 
