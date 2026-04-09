@@ -50,7 +50,24 @@ export async function checkAndIncrementUsage(userId: string): Promise<{
 
   // 관리자 또는 유료 유저는 무제한
   const isAdmin = profile.email && ADMIN_EMAILS.includes(profile.email);
-  const isPaid = profile.plan === 'paid' || (profile.plan && profile.plan.startsWith('pro_'));
+  let isPaid = profile.plan === 'paid' || (profile.plan && profile.plan.startsWith('pro_'));
+
+  // 이중 방어: plan이 free인데 active 구독이 있으면 paid로 자동 복구
+  if (!isPaid && !isAdmin) {
+    const { data: activeSub } = await supabase
+      .from('subscriptions')
+      .select('id')
+      .eq('user_id', userId)
+      .eq('status', 'active')
+      .limit(1)
+      .single();
+
+    if (activeSub) {
+      await supabase.from('profiles').update({ plan: 'paid' }).eq('id', userId);
+      isPaid = true;
+    }
+  }
+
   if (isAdmin || isPaid) {
     const newDailyUsage = currentDailyUsage + 1;
     const newTotalUsage = currentTotalUsage + 1;
