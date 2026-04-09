@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { createClient } from '@/lib/supabase/client';
+import { getRegionSuggestions } from '@/data/regions';
 
 interface StepKeywordProps {
   value: string;
@@ -58,15 +59,50 @@ export default function StepKeyword({ value, onChange, businessCategory }: StepK
   const [pastKeywords, setPastKeywords] = useState<{ keyword: string; usedAt: string; count: number }[]>([]);
   const [loading, setLoading] = useState(true);
   const [keywordWarning, setKeywordWarning] = useState<string | null>(null);
+  const [regionSuggestions, setRegionSuggestions] = useState<{ regions: string[]; message: string }>({ regions: [], message: '' });
 
-  // 이전에 사용한 키워드 불러오기
+  // 프로필에서 지역 + 블로그 지수 로드 → 지역 추천
   useEffect(() => {
-    async function loadPastKeywords() {
+    async function loadProfileAndKeywords() {
       try {
         const supabase = createClient();
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) { setLoading(false); return; }
 
+        // 프로필에서 지역/블로그지수 가져오기
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('location_city, location_district, location_neighborhood, blog_index_level')
+          .eq('id', user.id)
+          .single();
+
+        if (profile) {
+          const suggestions = getRegionSuggestions(
+            profile.blog_index_level,
+            profile.location_city || '',
+            profile.location_district || '',
+          );
+          setRegionSuggestions(suggestions);
+
+          // 지역 자동 채우기 (아직 비어있을 때)
+          if (!region) {
+            const city = profile.location_city?.replace(/시$|도$/, '') || '';
+            const district = profile.location_district?.replace(/구$|군$/, '') || '';
+            const neighborhood = profile.location_neighborhood || '';
+
+            if (profile.blog_index_level?.startsWith('optimal')) {
+              setRegion(city || district);
+            } else if (['sub7', 'sub6', 'sub5'].includes(profile.blog_index_level || '')) {
+              setRegion(neighborhood || city);
+            } else if (neighborhood) {
+              setRegion(neighborhood);
+            } else if (city) {
+              setRegion(city);
+            }
+          }
+        }
+
+        // 이전에 사용한 키워드 불러오기
         const { data } = await supabase
           .from('histories')
           .select('keyword, created_at')
@@ -75,7 +111,6 @@ export default function StepKeyword({ value, onChange, businessCategory }: StepK
           .limit(50);
 
         if (data && data.length > 0) {
-          // 키워드별 사용 횟수, 최근 사용일 집계
           const keywordMap = new Map<string, { count: number; lastUsed: string }>();
           for (const row of data) {
             if (!row.keyword) continue;
@@ -96,24 +131,15 @@ export default function StepKeyword({ value, onChange, businessCategory }: StepK
             .sort((a, b) => new Date(b.usedAt).getTime() - new Date(a.usedAt).getTime());
 
           setPastKeywords(sorted);
-
-          // 마지막으로 쓴 키워드에서 지역 추출
-          if (sorted.length > 0 && !region) {
-            const lastKeyword = sorted[0].keyword;
-            const { region: extractedRegion } = splitRegionDetail(lastKeyword);
-            if (extractedRegion) {
-              setRegion(extractedRegion);
-            }
-          }
         }
       } catch (err) {
-        console.error('Load past keywords error:', err);
+        console.error('Load profile/keywords error:', err);
       } finally {
         setLoading(false);
       }
     }
 
-    loadPastKeywords();
+    loadProfileAndKeywords();
   }, []);
 
   // 지역 + 세부키워드 조합
@@ -194,6 +220,28 @@ export default function StepKeyword({ value, onChange, businessCategory }: StepK
             <span className="text-sm font-bold text-black">키워드 조합</span>
             <span className="text-xs text-gray-400">지역 + 세부키워드</span>
           </div>
+
+          {/* 지역 추천 (블로그 지수 기반) */}
+          {regionSuggestions.regions.length > 0 && (
+            <div>
+              <p className="text-xs text-[#3B5CFF] mb-2">{regionSuggestions.message}</p>
+              <div className="flex flex-wrap gap-2">
+                {regionSuggestions.regions.map((r) => (
+                  <button
+                    key={r}
+                    onClick={() => setRegion(r)}
+                    className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
+                      region === r
+                        ? 'bg-[#3B5CFF] text-white'
+                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                    }`}
+                  >
+                    {r}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
 
           <div className="flex gap-2">
             <div className="flex-1">
