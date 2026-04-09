@@ -34,6 +34,7 @@ export type SafetyCondition = {
 };
 
 export type ContentType = 'seo' | 'branding';
+export type SeoStyle = 'review' | 'expert';
 export type BrandingType = 'recruit' | 'philosophy';
 export type TonePreset = 'warm' | 'professional' | 'conversational';
 
@@ -59,6 +60,7 @@ export type BrandingInfo = {
 
 export type FormData = {
   contentType: ContentType;
+  seoStyle: SeoStyle;
   businessCategory: string | null;
   keyword: string;
   topic: string | null;

@@ -27,6 +27,7 @@ const initialBrandingInfo: BrandingInfo = {
 
 const initialFormData: FormData = {
   contentType: 'seo',
+  seoStyle: 'review',
   businessCategory: null,
   keyword: '',
   topic: null,

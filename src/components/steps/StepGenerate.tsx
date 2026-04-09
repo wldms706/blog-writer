@@ -111,6 +111,7 @@ export default function StepGenerate({ onReset, formData, isRegulated = false }:
             readerState: reader?.name || formData.readerState,
             selectedTitle: formData.selectedTitle,
             contentType: formData.contentType,
+            seoStyle: formData.seoStyle,
             brandingType: formData.brandingType,
             brandingInfo: formData.brandingInfo,
             treatmentInfo: formData.additionalContext,

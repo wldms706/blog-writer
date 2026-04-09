@@ -16,7 +16,8 @@ import StepBrandingInfo from '@/components/steps/StepBrandingInfo';
 import StepTreatmentInfo from '@/components/steps/StepTreatmentInfo';
 import StepRecruitTopic from '@/components/steps/StepRecruitTopic';
 import StepTone from '@/components/steps/StepTone';
-import { FormData, ContentType, BrandingType, BrandingInfo, TonePreset } from '@/types';
+import StepSeoStyle from '@/components/steps/StepSeoStyle';
+import { FormData, ContentType, SeoStyle, BrandingType, BrandingInfo, TonePreset } from '@/types';
 import { BUSINESS_CATEGORIES } from '@/data/constants';
 import { getProfile } from '@/lib/storage';
 import { createClient } from '@/lib/supabase/client';
@@ -28,6 +29,7 @@ const initialBrandingInfo: BrandingInfo = {
 
 const initialFormData: FormData = {
   contentType: 'seo',
+  seoStyle: 'review',
   businessCategory: null,
   keyword: '',
   topic: null,
@@ -51,6 +53,7 @@ const initialFormData: FormData = {
 
 type StepId =
   | 'contentType'
+  | 'seoStyle'
   | 'business'
   | 'keyword'
   | 'topic'
@@ -140,11 +143,11 @@ export default function Home() {
   const steps: StepId[] = useMemo(() => {
     if (formData.contentType === 'seo') {
       if (isRegulated) {
-        // 반영구: 톤 선택 없음
+        // 반영구: 톤 선택 없음, 글 스타일 선택 없음
         return ['contentType', 'business', 'topic', 'keyword', 'treatmentInfo', 'purpose', 'reader', 'rules', 'title', 'generate'];
       }
-      // 일반 업종: 독자상태 다음에 톤 선택 추가
-      return ['contentType', 'business', 'topic', 'keyword', 'treatmentInfo', 'purpose', 'reader', 'tone', 'rules', 'title', 'generate'];
+      // 일반 업종: 글 스타일 선택 추가
+      return ['contentType', 'seoStyle', 'business', 'topic', 'keyword', 'treatmentInfo', 'purpose', 'reader', 'tone', 'rules', 'title', 'generate'];
     } else {
       const isRecruit = formData.brandingType === 'recruit';
       if (isRegulated) {
@@ -161,7 +164,9 @@ export default function Home() {
   const canProceed = useCallback(() => {
     switch (currentStepId) {
       case 'contentType':
-        return true; // Always has a default value
+        return true;
+      case 'seoStyle':
+        return true;
       case 'business':
         return formData.businessCategory !== null;
       case 'keyword':
@@ -232,6 +237,13 @@ export default function Home() {
           <StepContentType
             selected={formData.contentType}
             onSelect={handleContentTypeChange}
+          />
+        );
+      case 'seoStyle':
+        return (
+          <StepSeoStyle
+            selected={formData.seoStyle}
+            onSelect={(style) => setFormData({ ...formData, seoStyle: style })}
           />
         );
       case 'business':
