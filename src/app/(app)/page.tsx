@@ -15,7 +15,7 @@ import StepBrandingType from '@/components/steps/StepBrandingType';
 import StepBrandingInfo from '@/components/steps/StepBrandingInfo';
 import StepTreatmentInfo from '@/components/steps/StepTreatmentInfo';
 import StepTone from '@/components/steps/StepTone';
-import { FormData, ContentType, BrandingType, BrandingInfo, TonePreset } from '@/types';
+import { FormData, ContentType, SeoStyle, BrandingType, BrandingInfo, TonePreset } from '@/types';
 import { BUSINESS_CATEGORIES } from '@/data/constants';
 import { getProfile } from '@/lib/storage';
 import { createClient } from '@/lib/supabase/client';
@@ -96,11 +96,9 @@ export default function Home() {
   const steps: StepId[] = useMemo(() => {
     if (formData.contentType === 'seo') {
       if (isRegulated) {
-        // 반영구: 톤 선택 없음
-        return ['contentType', 'business', 'topic', 'keyword', 'treatmentInfo', 'purpose', 'reader', 'rules', 'title', 'generate'];
+        return ['contentType', 'business', 'topic', 'keyword', 'treatmentInfo', 'title', 'generate'];
       }
-      // 일반 업종: 독자상태 다음에 톤 선택 추가
-      return ['contentType', 'business', 'topic', 'keyword', 'treatmentInfo', 'purpose', 'reader', 'tone', 'rules', 'title', 'generate'];
+      return ['contentType', 'business', 'topic', 'keyword', 'treatmentInfo', 'tone', 'title', 'generate'];
     } else {
       if (isRegulated) {
         return ['contentType', 'business', 'brandingType', 'keyword', 'brandingInfo', 'title', 'generate'];
@@ -167,11 +165,11 @@ export default function Home() {
     setCurrentStep(1);
   };
 
-  const handleContentTypeChange = (type: ContentType) => {
-    // 콘텐츠 타입 변경 시 관련 필드 리셋
+  const handleContentTypeChange = (type: ContentType, seoStyle?: SeoStyle) => {
     setFormData({
       ...initialFormData,
       contentType: type,
+      seoStyle: seoStyle || 'review',
     });
   };
 
@@ -185,6 +183,7 @@ export default function Home() {
         return (
           <StepContentType
             selected={formData.contentType}
+            seoStyle={formData.seoStyle}
             onSelect={handleContentTypeChange}
           />
         );
