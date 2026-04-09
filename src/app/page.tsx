@@ -30,17 +30,23 @@ export default function LandingPage() {
               규칙은 시스템이 책임집니다
             </p>
 
-            <div className="mt-12 sm:mt-16">
+            <div className="mt-12 sm:mt-16 flex flex-col items-center gap-3">
               <Link
                 href="/signup"
                 className="inline-block text-black bg-white rounded-full px-10 py-4 text-base sm:text-lg font-bold hover:bg-white/90 transition-all tracking-wide"
               >
                 무료로 시작하기
               </Link>
+              <Link
+                href="/pricing"
+                className="inline-block text-white/70 border border-white/30 rounded-full px-8 py-3 text-sm font-medium hover:bg-white/10 transition-all"
+              >
+                요금제 알아보기
+              </Link>
             </div>
 
             <p className="mt-6 text-xs text-white/30">
-              가입 즉시 하루 3회 무료 생성
+              가입 즉시 3회 무료 생성
             </p>
           </div>
         </div>
