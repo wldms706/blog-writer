@@ -52,17 +52,19 @@ export async function checkAndIncrementUsage(userId: string): Promise<{
   const isAdmin = profile.email && ADMIN_EMAILS.includes(profile.email);
   let isPaid = profile.plan === 'paid' || (profile.plan && profile.plan.startsWith('pro_'));
 
-  // 이중 방어: plan이 free인데 active 구독이 있으면 paid로 자동 복구
+  // 이중 방어: plan이 free인데 유효한 구독이 있으면 paid로 자동 복구
+  // active 구독 또는 취소했지만 아직 만료 안 된(next_billing_at이 미래) 구독 포함
   if (!isPaid && !isAdmin) {
-    const { data: activeSub } = await supabase
+    const now = new Date().toISOString();
+    const { data: validSub } = await supabase
       .from('subscriptions')
       .select('id')
       .eq('user_id', userId)
-      .eq('status', 'active')
+      .or(`status.eq.active,and(status.eq.cancelled,next_billing_at.gt.${now})`)
       .limit(1)
-      .single();
+      .maybeSingle();
 
-    if (activeSub) {
+    if (validSub) {
       await supabase.from('profiles').update({ plan: 'paid' }).eq('id', userId);
       isPaid = true;
     }
