@@ -166,11 +166,15 @@ export default function Home() {
   };
 
   const handleContentTypeChange = (type: ContentType, seoStyle?: SeoStyle) => {
-    setFormData({
+    setFormData(prev => ({
       ...initialFormData,
       contentType: type,
       seoStyle: seoStyle || 'review',
-    });
+      shopAddress: prev.shopAddress,
+      shopHours: prev.shopHours,
+      shopPhone: prev.shopPhone,
+      shopParking: prev.shopParking,
+    }));
   };
 
   const handleRulesConfirm = useCallback((confirmed: boolean) => {
