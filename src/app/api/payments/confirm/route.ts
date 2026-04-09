@@ -159,8 +159,6 @@ export async function POST(request: NextRequest) {
           .from('profiles')
           .update({
             plan: 'paid',
-            plan_type: planId,
-            updated_at: now.toISOString(),
           })
           .eq('id', user.id);
         if (error) throw error;
