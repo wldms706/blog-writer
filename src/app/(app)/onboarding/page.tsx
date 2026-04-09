@@ -43,7 +43,7 @@ export default function OnboardingPage() {
       businessName: businessName.trim(),
     });
     setSaving(false);
-    router.push('/write');
+    router.push('/settings');
   };
 
   return (
@@ -55,7 +55,7 @@ export default function OnboardingPage() {
           </div>
           <h1 className="text-2xl font-black text-black">환영합니다!</h1>
           <p className="mt-2 text-sm text-gray-500">
-            시작하기 전에 간단한 정보를 입력해주세요
+            이름을 입력하면 매장 정보를 설정할 수 있어요
           </p>
         </div>
 
