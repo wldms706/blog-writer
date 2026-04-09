@@ -36,6 +36,21 @@ export async function POST(request: NextRequest) {
       brandingInfo,
     } = await request.json();
 
+    // 모든 사용자의 최근 제목 가져와서 중복 방지
+    const { data: recentHistories } = await supabase
+      .from('histories')
+      .select('content')
+      .order('created_at', { ascending: false })
+      .limit(30);
+
+    const usedTitles = (recentHistories || [])
+      .map(h => h.content?.split('\n')?.[0]?.trim())
+      .filter(Boolean);
+
+    const usedTitlesText = usedTitles.length > 0
+      ? `\n\n⚠️ 아래 제목들은 이미 사용되었습니다. 이 제목들과 겹치지 않는 완전히 새로운 제목을 만드세요:\n${usedTitles.map(t => `- ${t}`).join('\n')}`
+      : '';
+
     // 사용자 입력 sanitize (프롬프트 인젝션 방지)
     const sanitize = (input: unknown): string => {
       if (typeof input !== 'string') return '';
@@ -144,6 +159,7 @@ ${brandingType === 'philosophy' ? `
 
 ### 형식:
 - 제목 길이: 15~40자 권장
+${usedTitlesText}
 
 반드시 다음 JSON 형식으로만 응답하세요:
 {
@@ -203,15 +219,16 @@ ${brandingType === 'philosophy' ? `
 
 ### 제목 5 — 트렌드/연예인 연결형
 지금 유행하는 연예인 스타일, 시즌 트렌드, SNS 화제를 키워드와 연결해서 "나도 저렇게 되고 싶다"는 욕망을 자극하는 제목.
-- 해당 업종에서 실제로 검색될 만한 연예인/트렌드를 연결
+- 다양한 연예인을 활용하세요 (매번 다른 연예인 사용):
+  장원영, 수지, 아이유, 한소희, 제니, 김지원, 차은우, 송혜교, 전지현, 고윤정, 안유진, 카리나, 윈터, 해린, 민지, 다니엘, 뷔, 정국, 차은우, 김수현, 변우석, 선우은숙, 이효리
 - 계절, 시즌, 올해 트렌드와 연결해도 좋음
 - "~처럼", "~스타일", "올해 유행하는" 등 활용
-- 예: "${safeKeyword} 김우빈 스타일, 아무 얼굴형이나 되는 건 아닙니다"
+- 예: "${safeKeyword} 장원영 스타일 vs 한소희 스타일, 뭐가 다를까"
 - 예: "${safeKeyword} 요즘 20대가 제일 많이 찾는 스타일"
 - 예: "2026 ${safeKeyword} 트렌드, 작년이랑 완전히 달라졌어요"
-- 예: "${safeKeyword} 장원영 스타일 vs 수지 스타일, 뭐가 다를까"
-- 예: "올 봄 ${safeKeyword} 이 스타일 안 하면 후회합니다"
+- 예: "${safeKeyword} 고윤정처럼 자연스러운 눈썹, 아무나 되는 건 아닙니다"
 ⚠️ 연예인 이름은 해당 업종/키워드와 실제로 연관 있는 사람만 사용하세요.
+⚠️ 매번 다른 연예인을 사용하세요. 같은 연예인만 반복하지 마세요.
 
 ### 제목 6 — 비교/분석형
 같은 키워드 안에서 구체적인 선택지 2~3개를 비교해서 "뭐가 나한테 맞지?" 궁금증을 유발하는 제목.
@@ -244,6 +261,8 @@ ${brandingType === 'philosophy' ? `
 ### 형식:
 - 제목 길이: 20~40자 권장
 - 5개의 제목 구조, 어투, 분위기가 모두 달라야 합니다
+
+${usedTitlesText}
 
 반드시 다음 JSON 형식으로만 응답하세요 (7개 제목):
 {
