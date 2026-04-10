@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import LandingHeader from './LandingHeader';
+import TutorialModal from './TutorialModal';
 
 const FEATURE_TAGS = [
   'SEO 최적화', '키워드 분석', '네이버 상위노출',
@@ -37,12 +38,15 @@ export default function LandingPage() {
               >
                 무료로 시작하기
               </Link>
-              <Link
-                href="/pricing"
-                className="inline-block text-white/70 border border-white/30 rounded-full px-8 py-3 text-sm font-medium hover:bg-white/10 transition-all"
-              >
-                요금제 알아보기
-              </Link>
+              <div className="flex flex-col sm:flex-row items-center gap-3">
+                <TutorialModal />
+                <Link
+                  href="/pricing"
+                  className="inline-block text-white/70 border border-white/30 rounded-full px-6 py-3 text-sm font-medium hover:bg-white/10 transition-all"
+                >
+                  요금제 알아보기
+                </Link>
+              </div>
             </div>
 
             <p className="mt-6 text-xs text-white/30">
