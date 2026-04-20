@@ -71,6 +71,22 @@
     .card-1 {
       background: #000;
       color: #fff;
+      position: relative;
+    }
+    .card-1::before {
+      content: '💵💰💵💰💵💰💵💰💵💰💵💰💵💰💵💰💵💰💵💰💵💰💵💰💵💰💵💰💵💰💵💰💵💰💵💰💵💰💵💰';
+      position: absolute;
+      inset: 0;
+      font-size: 48px;
+      line-height: 1.2;
+      opacity: 0.08;
+      word-break: break-all;
+      overflow: hidden;
+      z-index: 0;
+    }
+    .card-1 > * {
+      position: relative;
+      z-index: 1;
     }
     .card-1 .line1 {
       font-size: 36px;
@@ -147,6 +163,21 @@
       font-size: 26px;
       font-weight: 700;
       color: rgba(255,255,255,0.85);
+    }
+    .card-3 .card3-rules {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: center;
+      margin-top: 24px;
+    }
+    .card-3 .rule-item {
+      background: rgba(255,255,255,0.1);
+      color: rgba(255,255,255,0.5);
+      font-size: 14px;
+      font-weight: 700;
+      padding: 8px 16px;
+      border-radius: 100px;
     }
     .card-3 .logo { color: #fff; }
 
@@ -264,9 +295,9 @@
     <div class="card-wrapper">
       <div class="card-label">카드 1 — 훅</div>
       <div class="card card-1">
-        <div class="line1" style="font-size:22px; color:rgba(255,255,255,0.5); margin-bottom:20px; font-weight:600;">뷰티샵 원장님들</div>
-        <div class="line1">상위노출 블로그?</div>
-        <div class="line2">이제 배우지 마세요.</div>
+        <div class="line1" style="font-size:22px; color:#fff; margin-bottom:20px;">블로그로만</div>
+        <div class="line2" style="font-size:42px;">월 1,500만원</div>
+        <div class="line1" style="font-size:24px; color:rgba(255,255,255,0.6); margin-top:30px;">다음은 원장님 차례입니다.</div>
         <div class="logo">BLOG WRITER</div>
       </div>
     </div>
@@ -291,6 +322,13 @@
       <div class="card card-3">
         <div class="line1">당연해요.</div>
         <div class="line2">네이버 SEO 규칙이<br>따로 있거든요.</div>
+        <div class="card3-rules">
+          <div class="rule-item">제목 공식</div>
+          <div class="rule-item">키워드 배치</div>
+          <div class="rule-item">글자수 규칙</div>
+          <div class="rule-item">이미지 수</div>
+          <div class="rule-item">금지 표현</div>
+        </div>
         <div class="logo">BLOG WRITER</div>
       </div>
     </div>
@@ -324,7 +362,7 @@
     <div class="card-wrapper">
       <div class="card-label">카드 6 — CTA</div>
       <div class="card card-6">
-        <div class="line1" style="font-size:26px; color:#000; margin-bottom:16px; text-decoration: line-through; text-decoration-color: red; text-decoration-thickness: 3px;">블로그 대행 한 달에<br>50만원 이상</div>
+        <div class="line1" style="font-size:26px; color:#000; margin-bottom:16px; text-decoration: line-through; text-decoration-color: red; text-decoration-thickness: 1.5px;">블로그 대행 한 달에<br>50만원 이상</div>
         <div class="line1" style="font-size:26px; margin-bottom:24px;">한 달에 9,900원으로<br>네이버 블로그 장악하세요</div>
         <div class="line2">무료 체험하기</div>
         <div class="logo">BLOG WRITER</div>
