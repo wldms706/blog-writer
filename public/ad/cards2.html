@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>블로그라이터 메타 광고 소재 2</title>
+  <style>
+    @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Pretendard', -apple-system, sans-serif;
+      background: #f0f0f0;
+      padding: 40px 20px;
+    }
+    h1 {
+      text-align: center;
+      font-size: 14px;
+      color: #999;
+      margin-bottom: 40px;
+      font-weight: 400;
+    }
+    .cards {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 30px;
+      justify-content: center;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    .card-wrapper {
+      text-align: center;
+    }
+    .card-label {
+      font-size: 12px;
+      color: #999;
+      margin-bottom: 8px;
+      font-weight: 600;
+    }
+    .card {
+      width: 360px;
+      height: 450px;
+      border-radius: 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px;
+      position: relative;
+      overflow: hidden;
+    }
+    .logo {
+      position: absolute;
+      bottom: 20px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      opacity: 0.4;
+    }
+
+    /* Card 1 — 훅 */
+    .card-1 {
+      background: #000;
+      color: #fff;
+    }
+    .card-1 .naver-img {
+      width: 120px;
+      height: auto;
+      border-radius: 12px;
+      margin-bottom: 20px;
+    }
+    .card-1 .sub {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 20px;
+    }
+    .card-1 .main {
+      font-size: 32px;
+      font-weight: 900;
+      text-align: center;
+      line-height: 1.4;
+    }
+    .card-1 .highlight {
+      color: #3B5CFF;
+    }
+    .card-1 .logo { color: #fff; }
+
+    /* Card 2 — 숫자 증거 */
+    .card-2 {
+      background: #fff;
+      color: #000;
+      border: 1px solid #e0e0e0;
+    }
+    .card-2 .sub {
+      font-size: 16px;
+      color: #000;
+      font-weight: 600;
+      margin-bottom: 16px;
+    }
+    .card-2 .main {
+      font-size: 24px;
+      font-weight: 900;
+      text-align: center;
+      line-height: 1.5;
+    }
+    .card-2 .big-number {
+      font-size: 64px;
+      font-weight: 900;
+      color: #3B5CFF;
+      margin-bottom: 8px;
+    }
+    .card-2 .desc {
+      font-size: 18px;
+      color: #666;
+      margin-top: 12px;
+    }
+    .card-2 .logo { color: #000; }
+
+    /* Card 3 — 공감 1 (누끼 사진 + 말풍선) */
+    .card-3 {
+      background: #f5f5f5;
+      color: #000;
+      padding: 30px 30px 0;
+      justify-content: flex-start;
+    }
+    .card-3 .card3-person {
+      width: 200px;
+      height: auto;
+      object-fit: contain;
+      margin-bottom: 16px;
+    }
+    .card-3 .speech {
+      background: #fff;
+      border-radius: 20px;
+      padding: 20px 24px;
+      font-size: 20px;
+      font-weight: 800;
+      line-height: 1.5;
+      text-align: center;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+      position: relative;
+    }
+    .card-3 .speech::after {
+      content: '';
+      position: absolute;
+      bottom: -12px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 0;
+      height: 0;
+      border-left: 12px solid transparent;
+      border-right: 12px solid transparent;
+      border-top: 14px solid #fff;
+    }
+    .card-3 .card3-person {
+      margin-top: auto;
+      margin-bottom: 0;
+    }
+    .card-3 .logo { color: #000; }
+
+    /* Card 4 — 공감 2 (누끼 사진 + 말풍선) */
+    .card-4 {
+      background: #f5f5f5;
+      color: #000;
+      padding: 30px 30px 0;
+      justify-content: flex-start;
+    }
+    .card-4 .card4-person {
+      width: 220px;
+      height: auto;
+      object-fit: contain;
+    }
+    .card-4 .speech {
+      background: #fff;
+      border-radius: 20px;
+      padding: 24px 28px;
+      font-size: 28px;
+      font-weight: 800;
+      line-height: 1.5;
+      text-align: center;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+      position: relative;
+    }
+    .card-4 .speech::after {
+      content: '';
+      position: absolute;
+      bottom: -12px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 0;
+      height: 0;
+      border-left: 12px solid transparent;
+      border-right: 12px solid transparent;
+      border-top: 14px solid #fff;
+    }
+    .card-4 .card4-person {
+      margin-top: auto;
+      margin-bottom: 0;
+    }
+    .card-4 .logo { color: #000; }
+
+    /* Card 5 — 해결 */
+    .card-5 {
+      background: #3B5CFF;
+      color: #fff;
+    }
+    .card-5 .sub {
+      font-size: 18px;
+      color: rgba(255,255,255,0.6);
+      font-weight: 600;
+      margin-bottom: 20px;
+    }
+    .card-5 .main {
+      font-size: 28px;
+      font-weight: 900;
+      text-align: center;
+      line-height: 1.5;
+    }
+    .card-5 .logo { color: #fff; }
+
+    /* Card 6 — 제품 화면 */
+    .card-6 {
+      background: #fff;
+      color: #000;
+      padding: 0;
+      justify-content: flex-start;
+      border: 1px solid #e0e0e0;
+    }
+    .card-6 .card6-img {
+      width: 100%;
+      height: 60%;
+      object-fit: contain;
+      background: #f5f5f5;
+      border-radius: 16px 16px 0 0;
+    }
+    .card-6 .card6-text {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      flex: 1;
+      padding: 20px;
+    }
+    .card-6 .card6-text .main {
+      font-size: 22px;
+      font-weight: 900;
+      text-align: center;
+      line-height: 1.5;
+    }
+    .card-6 .card6-text .highlight {
+      color: #3B5CFF;
+    }
+    .card-6 .logo { color: #000; }
+
+    /* Card 7 — CTA */
+    .card-7 {
+      background: #000;
+      color: #fff;
+    }
+    .card-7 .main {
+      font-size: 24px;
+      font-weight: 900;
+      text-align: center;
+      line-height: 1.5;
+      margin-bottom: 24px;
+    }
+    .card-7 .main .highlight {
+      color: #3B5CFF;
+    }
+    .card-7 .cta-btn {
+      background: #3B5CFF;
+      color: #fff;
+      font-size: 22px;
+      font-weight: 800;
+      padding: 14px 36px;
+      border-radius: 100px;
+    }
+    .card-7 .logo { color: #fff; }
+  </style>
+</head>
+<body>
+  <h1>메타 광고 소재 2 — 블로그 중요성 공감형 (1080x1350)</h1>
+
+  <div class="cards">
+    <div class="card-wrapper">
+      <div class="card-label">카드 1 — 훅</div>
+      <div class="card card-1">
+        <img src="naver-logo.jpeg" alt="" class="naver-img">
+        <div class="sub" style="color:#3B5CFF;">뷰티샵 원장님들</div>
+        <div class="main">네이버 블로그<br><span class="highlight">중요성</span><br>아직도 모르세요?</div>
+        <div class="logo">BLOG WRITER</div>
+      </div>
+    </div>
+
+    <div class="card-wrapper">
+      <div class="card-label">카드 2 — 숫자 증거</div>
+      <div class="card card-2">
+        <div class="sub">월 평균 매출 2000만원 중</div>
+        <div class="big-number">1500만원</div>
+        <div class="main">유입은<br>블로그였습니다.</div>
+        <div class="logo">BLOG WRITER</div>
+      </div>
+    </div>
+
+    <div class="card-wrapper">
+      <div class="card-label">카드 3 — 공감 1</div>
+      <div class="card card-3">
+        <div class="speech">아, 블로그<br>중요한 거 알지..<br>아는데 너무 어려운 걸<br>어떡해?</div>
+        <img src="card3-person.png" alt="" class="card3-person">
+        <div class="logo">BLOG WRITER</div>
+      </div>
+    </div>
+
+    <div class="card-wrapper">
+      <div class="card-label">카드 4 — 공감 2</div>
+      <div class="card card-4">
+        <div class="speech">귀찮은 걸<br>어떡해?</div>
+        <img src="card4-person.png" alt="" class="card4-person">
+        <div class="logo">BLOG WRITER</div>
+      </div>
+    </div>
+
+    <div class="card-wrapper">
+      <div class="card-label">카드 5 — 해결</div>
+      <div class="card card-5">
+        <div class="sub">그래서</div>
+        <div class="main">제가<br>만들었습니다.</div>
+        <div class="logo">BLOG WRITER</div>
+      </div>
+    </div>
+
+    <div class="card-wrapper">
+      <div class="card-label">카드 6 — 제품</div>
+      <div class="card card-6">
+        <img src="card-product.png" alt="" class="card6-img">
+        <div class="card6-text">
+          <div class="main">원장님 <span class="highlight">글 뽑아서</span><br>그냥 블로그에<br>옮기기만 하세요</div>
+        </div>
+        <div class="logo">BLOG WRITER</div>
+      </div>
+    </div>
+
+    <div class="card-wrapper">
+      <div class="card-label">카드 7 — CTA</div>
+      <div class="card card-7">
+        <div class="main"><span class="highlight">3회 무료</span>로<br>직접 써보세요.</div>
+        <div class="cta-btn">무료 체험하기</div>
+        <div class="logo">BLOG WRITER</div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
