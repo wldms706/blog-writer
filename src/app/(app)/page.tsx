@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useMemo, useEffect } from 'react';
 import StepProgress from '@/components/StepProgress';
+import WeeklyStreak from '@/components/WeeklyStreak';
 import StepContentType from '@/components/steps/StepContentType';
 import StepBusiness from '@/components/steps/StepBusiness';
 import StepKeyword from '@/components/steps/StepKeyword';
@@ -271,6 +272,9 @@ export default function Home() {
 
   return (
     <div>
+      {/* Weekly Streak */}
+      {currentStep === 1 && <WeeklyStreak />}
+
       {/* Progress */}
       <div className="mb-6">
         <StepProgress

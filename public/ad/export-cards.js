@@ -18,10 +18,14 @@ body { font-family: 'Pretendard', -apple-system, sans-serif; width: 1080px; heig
 
 // ========== 소재 1 ==========
 const AD1_CARDS = [
-  { name: 'ad1_1_hook', style: `.card { background: #000; color: #fff; }
-.line1 { font-size: 108px; margin-bottom: 36px; } .line2 { font-size: 84px; color: #3B5CFF; font-weight: 800; } .logo { color: #fff; }
-.sub { font-size: 66px; color: rgba(255,255,255,0.5); font-weight: 600; margin-bottom: 60px; }`,
-    html: `<div class="card"><div class="sub">뷰티샵 원장님들</div><div class="line1">상위노출 블로그?</div><div class="line2">이제 배우지 마세요.</div><div class="logo">BLOG WRITER</div></div>` },
+  { name: 'ad1_1_hook', style: `.card { background: #000; color: #fff; position: relative; }
+.card::before { content: '💵💰💵💰💵💰💵💰💵💰💵💰💵💰💵💰💵💰💵💰💵💰💵💰💵💰💵💰💵💰💵💰💵💰💵💰💵💰💵💰'; position: absolute; inset: 0; font-size: 144px; line-height: 1.2; opacity: 0.08; word-break: break-all; overflow: hidden; z-index: 0; }
+.card > * { position: relative; z-index: 1; }
+.sub { font-size: 66px; color: #fff; font-weight: 600; margin-bottom: 60px; }
+.line2 { font-size: 126px; color: #3B5CFF; font-weight: 900; margin-bottom: 12px; }
+.bottom { font-size: 66px; color: rgba(255,255,255,0.6); font-weight: 600; margin-top: 48px; }
+.logo { color: #fff; }`,
+    html: `<div class="card"><div class="sub">블로그로만</div><div class="line2">월 1,500만원</div><div class="bottom">다음은 원장님 차례입니다.</div><div class="logo">BLOG WRITER</div></div>` },
 
   { name: 'ad1_2_pain', style: `.card { background: #fff; color: #000; padding: 0; justify-content: flex-start; }
 .img-wrap { width: 100%; height: 65%; position: relative; overflow: hidden; } .img-wrap img { width: 100%; height: 100%; object-fit: cover; }
@@ -31,13 +35,15 @@ const AD1_CARDS = [
     html: `<div class="card"><div class="img-wrap"><img src="file://${AD_DIR}/card2-bg.png"><div class="badge">GPT</div></div><div class="text"><div class="line1">블로그 강의 듣고,<br>GPT 돌려보고</div><div class="line2">그래도 상위노출<br>안 되셨죠?</div></div><div class="logo">BLOG WRITER</div></div>` },
 
   { name: 'ad1_3_reason', style: `.card { background: #3B5CFF; color: #fff; }
-.line1 { font-size: 96px; margin-bottom: 36px; } .line2 { font-size: 78px; font-weight: 700; color: rgba(255,255,255,0.85); } .logo { color: #fff; }`,
-    html: `<div class="card"><div class="line1">당연해요.</div><div class="line2">네이버 SEO 규칙이<br>따로 있거든요.</div><div class="logo">BLOG WRITER</div></div>` },
+.line1 { font-size: 96px; margin-bottom: 36px; } .line2 { font-size: 78px; font-weight: 700; color: rgba(255,255,255,0.85); margin-bottom: 48px; } .logo { color: #fff; }
+.rules { display: flex; flex-wrap: wrap; gap: 18px; justify-content: center; }
+.rule { background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.5); font-size: 36px; font-weight: 700; padding: 18px 36px; border-radius: 100px; }`,
+    html: `<div class="card"><div class="line1">당연해요.</div><div class="line2">네이버 SEO 규칙이<br>따로 있거든요.</div><div class="rules"><div class="rule">제목 공식</div><div class="rule">키워드 배치</div><div class="rule">글자수 규칙</div><div class="rule">이미지 수</div><div class="rule">금지 표현</div></div><div class="logo">BLOG WRITER</div></div>` },
 
   { name: 'ad1_4_solution', style: `.card { background: #000; color: #fff; padding: 0; justify-content: flex-start; }
 .img { width: 100%; height: 55%; object-fit: cover; } .text { display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; padding: 60px; }
 .line2 { font-size: 84px; font-weight: 900; } .logo { color: #fff; }`,
-    html: `<div class="card"><img src="file://${AD_DIR}/og-image.png" class="img"><div class="text"><div class="line2">규칙을 대신<br>지켜드립니다.</div></div><div class="logo">BLOG WRITER</div></div>` },
+    html: `<div class="card"><img src="file://${AD_DIR}/og-image.png" class="img"><div class="text"><div class="line2">50만원 대행비 → 9,900원.<br>상위노출은 덤입니다.</div></div><div class="logo">BLOG WRITER</div></div>` },
 
   { name: 'ad1_5_method', style: `.card { background: #fff; color: #000; padding: 0; justify-content: flex-start; }
 .img-wrap { width: 100%; height: 55%; position: relative; overflow: hidden; } .img-wrap img { width: 100%; height: 100%; object-fit: contain; background: #f5f5f5; }
