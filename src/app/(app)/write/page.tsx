@@ -139,11 +139,12 @@ export default function Home() {
   // 현재 콘텐츠 타입에 따른 스텝 배열
   const steps: StepId[] = useMemo(() => {
     if (formData.contentType === 'seo') {
-      if (isRegulated) {
-        // 반영구: 톤/스타일 선택 없음
+      const isReview = formData.seoStyle === 'review';
+      if (isRegulated && !isReview) {
+        // 반영구 전문가 정보형: 톤 선택 없음
         return ['contentType', 'business', 'topic', 'keyword', 'treatmentInfo', 'title', 'generate'];
       }
-      // 일반 업종: 8단계
+      // 일반 업종 or 반영구 후기형: 톤 선택 포함
       return ['contentType', 'business', 'topic', 'keyword', 'treatmentInfo', 'tone', 'title', 'generate'];
     } else {
       const isRecruit = formData.brandingType === 'recruit';

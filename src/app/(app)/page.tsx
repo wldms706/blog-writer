@@ -93,7 +93,8 @@ export default function Home() {
   // 현재 콘텐츠 타입에 따른 스텝 배열
   const steps: StepId[] = useMemo(() => {
     if (formData.contentType === 'seo') {
-      if (isRegulated) {
+      const isReview = formData.seoStyle === 'review';
+      if (isRegulated && !isReview) {
         return ['contentType', 'business', 'topic', 'keyword', 'treatmentInfo', 'title', 'generate'];
       }
       return ['contentType', 'business', 'topic', 'keyword', 'treatmentInfo', 'tone', 'title', 'generate'];
