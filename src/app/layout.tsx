@@ -11,6 +11,9 @@ export const metadata: Metadata = {
     icon: "/favicon.svg",
   },
   metadataBase: new URL("https://blogwriter.co.kr"),
+  verification: {
+    google: "Db0YQ9mAEnv3OZacJVtCfzQRWLXGp6k1OT4ft55PUKo",
+  },
   openGraph: {
     title: "블로그 라이터",
     description: "뷰티샵 원장님을 위한 AI 블로그 글쓰기",
