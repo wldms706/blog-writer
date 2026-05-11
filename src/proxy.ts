@@ -44,10 +44,14 @@ export async function proxy(request: NextRequest) {
     isAuthPage ||
     pathname === '/' ||
     pathname.startsWith('/pricing') ||
+    pathname.startsWith('/tutorial') ||
     pathname.startsWith('/terms') ||
     pathname.startsWith('/privacy') ||
     pathname.startsWith('/api') ||
-    pathname.startsWith('/auth');
+    pathname.startsWith('/auth') ||
+    pathname === '/sitemap.xml' ||
+    pathname === '/robots.txt' ||
+    pathname.endsWith('.html');
 
   // 리다이렉트 시 세션 쿠키를 함께 전달하는 헬퍼
   function redirectWithCookies(destination: string) {
