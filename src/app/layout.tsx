@@ -70,6 +70,22 @@ export default function RootLayout({
           `,
         }}
       />
+      <Script
+        src="https://www.googletagmanager.com/gtag/js?id=G-JYT0FEXTVS"
+        strategy="afterInteractive"
+      />
+      <Script
+        id="google-analytics"
+        strategy="afterInteractive"
+        dangerouslySetInnerHTML={{
+          __html: `
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-JYT0FEXTVS');
+          `,
+        }}
+      />
       <body className="antialiased">
         {children}
         <KakaoChatButton />
