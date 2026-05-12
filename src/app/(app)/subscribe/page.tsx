@@ -64,6 +64,7 @@ export default function SubscribePage() {
   const [couponApplied, setCouponApplied] = useState(false);
   const [couponError, setCouponError] = useState('');
   const [couponChecking, setCouponChecking] = useState(false);
+  const [promoData, setPromoData] = useState<{ remaining: number; isPromoOpen: boolean; prices: Record<string, number>; originalPrices: Record<string, number> } | null>(null);
 
   useEffect(() => {
     const getUser = async () => {
@@ -74,7 +75,23 @@ export default function SubscribePage() {
       }
     };
     getUser();
+
+    // 프로모션 카운트 가져오기
+    fetch('/api/promo-count')
+      .then(res => res.json())
+      .then(data => setPromoData(data))
+      .catch(() => {});
   }, []);
+
+  // 프로모션 가격 적용된 플랜
+  const displayPlans = PLANS.map(plan => {
+    if (!promoData) return plan;
+    return {
+      ...plan,
+      price: promoData.prices[plan.id] ?? plan.price,
+      originalPrice: promoData.originalPrices[plan.id] ?? plan.originalPrice,
+    };
+  });
 
   // API 개별 연동 방식 결제
   const handleApplyCoupon = async () => {
@@ -162,8 +179,30 @@ export default function SubscribePage() {
         <p className="text-gray-600">업종에 맞는 플랜을 선택하고 결제를 진행하세요</p>
       </div>
 
+      {/* 얼리버드 한정 프로모션 배너 */}
+      {promoData && promoData.isPromoOpen && (
+        <div className="bg-yellow-400 border-y-4 border-black -mx-4 px-4 py-5 mb-8">
+          <div className="max-w-3xl mx-auto text-center">
+            <span className="inline-block bg-black text-yellow-400 text-xs font-black px-3 py-1 rounded-full mb-2">
+              🔥 한정 프로모션
+            </span>
+            <p className="text-lg sm:text-2xl font-black text-black">
+              앞으로 <span className="bg-black text-yellow-400 px-2">{promoData.remaining}명</span> 만 이 가격!
+            </p>
+            <p className="text-xs sm:text-sm text-black/70 mt-1 font-medium">
+              100명 한정 얼리버드 할인 · 12개월간 가격 유지
+            </p>
+          </div>
+        </div>
+      )}
+      {promoData && !promoData.isPromoOpen && (
+        <div className="bg-gray-100 border border-gray-300 rounded-xl py-3 mb-8 text-center">
+          <p className="text-sm text-gray-600">한정 프로모션이 마감되었습니다 · 정상가로 표시됩니다</p>
+        </div>
+      )}
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-        {PLANS.map((plan) => (
+        {displayPlans.map((plan) => (
           <button
             key={plan.id}
             onClick={() => setSelectedPlan(plan)}
