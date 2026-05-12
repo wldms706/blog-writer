@@ -63,6 +63,27 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* === Section 1.5: 가치 제안 배너 === */}
+      <section className="bg-yellow-400 text-black py-12 sm:py-16 px-6 border-y-4 border-black">
+        <div className="max-w-4xl mx-auto text-center">
+          <p className="inline-block bg-black text-yellow-400 text-xs sm:text-sm font-black px-4 py-1.5 rounded-full mb-4 tracking-wider">
+            JUST ₩9,900/월
+          </p>
+          <h2 className="text-3xl sm:text-5xl md:text-6xl font-black leading-tight">
+            월 구독 하나로<br />
+            <span className="bg-black text-yellow-400 px-3 py-1 inline-block mt-2">블로그 상위노출</span>
+            <br className="sm:hidden" />
+            <span className="text-2xl sm:text-4xl"> 글 무한 생성</span>
+          </h2>
+          <p className="mt-6 text-base sm:text-xl font-bold text-black/80">
+            비싼 블로그 마케팅 대행, 이제 쓰지 마세요!
+          </p>
+          <p className="mt-2 text-sm sm:text-base text-black/60">
+            월 50만원 → 월 9,900원으로 끝.
+          </p>
+        </div>
+      </section>
+
       {/* === Section 2: Features (Blue) === */}
       <section className="bg-[#3B5CFF] text-white py-20 sm:py-28 px-6">
         <div className="max-w-4xl mx-auto text-center">
