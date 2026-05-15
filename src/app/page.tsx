@@ -1,5 +1,14 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import LandingHeader from './LandingHeader';
+
+const PROOF_CASES = [
+  { src: '/proofs/proof_eyebrow.png', keyword: '성정동 눈썹문신', label: '눈썹문신' },
+  { src: '/proofs/proof_hairline.png', keyword: '분당 헤어라인문신', label: '헤어라인' },
+  { src: '/proofs/proof_lip.png', keyword: '천안입술문신', label: '입술문신' },
+  { src: '/proofs/proof_nail.jpeg', keyword: '청주 네일아트', label: '네일아트' },
+  { src: '/proofs/proof_estetic.jpeg', keyword: '천안 예신관리', label: '예신관리' },
+];
 
 const FEATURE_TAGS = [
   'SEO 최적화', '키워드 분석', '네이버 상위노출',
@@ -143,6 +152,51 @@ export default function LandingPage() {
               </div>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* === Section 3.5: 네이버 상위 노출 실제 증거 === */}
+      <section className="bg-[#F5F5F5] text-black py-20 sm:py-28 px-6">
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-12">
+            <p className="inline-block bg-[#03C75A] text-white text-xs sm:text-sm font-black px-4 py-1.5 rounded-full mb-4 tracking-wider">
+              REAL PROOF · 실사용 증거
+            </p>
+            <h2 className="text-3xl sm:text-5xl font-black leading-tight">
+              블로그라이터로 쓴 글,<br />
+              <span className="text-[#3B5CFF]">네이버 1페이지</span>에 올라갑니다
+            </h2>
+            <p className="mt-6 text-base sm:text-lg text-gray-600 max-w-2xl mx-auto">
+              실제 키워드 검색 결과 캡처. 광고 한 푼 없이 블로그라이터가 작성한 글이 상위 노출된 사례입니다.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+            {PROOF_CASES.map((proof) => (
+              <div
+                key={proof.keyword}
+                className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-shadow border border-gray-100"
+              >
+                <div className="relative aspect-[3/4] bg-white">
+                  <Image
+                    src={proof.src}
+                    alt={`${proof.keyword} 네이버 상위노출 증거`}
+                    fill
+                    className="object-contain"
+                    sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
+                  />
+                </div>
+                <div className="p-3 text-center border-t border-gray-100">
+                  <p className="text-xs text-gray-500 mb-0.5">검색 키워드</p>
+                  <p className="text-sm font-bold text-gray-900">{proof.keyword}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <p className="mt-10 text-center text-xs sm:text-sm text-gray-500">
+            ※ 위 캡처는 실제 사용자가 블로그라이터로 작성하여 네이버에 발행한 글의 노출 결과입니다.
+          </p>
         </div>
       </section>
 
