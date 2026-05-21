@@ -10,14 +10,14 @@ export const metadata: Metadata = {
   icons: {
     icon: "/favicon.svg",
   },
-  metadataBase: new URL("https://blogwriter.co.kr"),
+  metadataBase: new URL("https://www.blogwriter.co.kr"),
   verification: {
     google: "Db0YQ9mAEnv3OZacJVtCfzQRWLXGp6k1OT4ft55PUKo",
   },
   openGraph: {
     title: "블로그 라이터",
     description: "뷰티샵 원장님을 위한 AI 블로그 글쓰기",
-    url: "https://blogwriter.co.kr",
+    url: "https://www.blogwriter.co.kr",
     siteName: "블로그라이터",
     locale: "ko_KR",
     type: "website",

@@ -4,6 +4,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = 'https://www.blogwriter.co.kr';
   const now = new Date();
 
+  // 색인 대상: 콘텐츠가 충분한 공개 페이지만
+  // login/signup은 색인 대상에서 제외 (콘텐츠 빈약)
   return [
     {
       url: baseUrl,
@@ -22,18 +24,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
       lastModified: now,
       changeFrequency: 'monthly',
       priority: 0.9,
-    },
-    {
-      url: `${baseUrl}/signup`,
-      lastModified: now,
-      changeFrequency: 'yearly',
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/login`,
-      lastModified: now,
-      changeFrequency: 'yearly',
-      priority: 0.7,
     },
     {
       url: `${baseUrl}/terms`,
