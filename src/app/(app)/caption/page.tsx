@@ -23,6 +23,34 @@ export default function CaptionPage() {
   const [result, setResult] = useState('');
   const [error, setError] = useState('');
   const [copied, setCopied] = useState(false);
+  const [translations, setTranslations] = useState<Record<string, string>>({});
+  const [activeLanguage, setActiveLanguage] = useState<'ko' | 'en' | 'ja' | 'zh'>('ko');
+  const [translating, setTranslating] = useState<string | null>(null);
+
+  const handleTranslate = async (lang: 'en' | 'ja' | 'zh') => {
+    if (translations[lang]) {
+      setActiveLanguage(lang);
+      return;
+    }
+    setTranslating(lang);
+    try {
+      const res = await fetch('/api/translate-caption', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: result, language: lang }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || '번역 실패');
+      setTranslations((prev) => ({ ...prev, [lang]: data.content }));
+      setActiveLanguage(lang);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : '번역 오류');
+    } finally {
+      setTranslating(null);
+    }
+  };
+
+  const displayText = activeLanguage === 'ko' ? result : translations[activeLanguage] || '';
 
   const handleGenerate = async () => {
     if (!style || !businessCategory || !topic.trim()) return;
@@ -62,7 +90,7 @@ export default function CaptionPage() {
   };
 
   const handleCopy = async () => {
-    await navigator.clipboard.writeText(result);
+    await navigator.clipboard.writeText(displayText);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -75,6 +103,8 @@ export default function CaptionPage() {
     setDetail('');
     setResult('');
     setError('');
+    setTranslations({});
+    setActiveLanguage('ko');
   };
 
   return (
@@ -238,8 +268,46 @@ export default function CaptionPage() {
               {copied ? '✓ 복사됨' : '복사하기'}
             </button>
           </div>
+
+          {/* 언어 선택 탭 */}
+          <div className="flex gap-2 flex-wrap">
+            <button
+              onClick={() => setActiveLanguage('ko')}
+              className={`text-xs font-bold px-4 py-2 rounded-full transition-all ${
+                activeLanguage === 'ko'
+                  ? 'bg-black text-white'
+                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              }`}
+            >
+              🇰🇷 한국어
+            </button>
+            {(['en', 'ja', 'zh'] as const).map((lang) => {
+              const labels = { en: '🇺🇸 English', ja: '🇯🇵 日本語', zh: '🇨🇳 中文' };
+              const isActive = activeLanguage === lang;
+              const isLoading = translating === lang;
+              const isReady = !!translations[lang];
+              return (
+                <button
+                  key={lang}
+                  onClick={() => handleTranslate(lang)}
+                  disabled={isLoading}
+                  className={`text-xs font-bold px-4 py-2 rounded-full transition-all disabled:opacity-50 ${
+                    isActive
+                      ? 'bg-black text-white'
+                      : isReady
+                      ? 'bg-blue-50 text-[#3B5CFF] hover:bg-blue-100'
+                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  }`}
+                >
+                  {isLoading ? '번역 중...' : labels[lang]}
+                  {isReady && !isActive && ' ✓'}
+                </button>
+              );
+            })}
+          </div>
+
           <div className="bg-gray-50 rounded-2xl p-5 whitespace-pre-wrap text-sm leading-relaxed border border-gray-200">
-            {result}
+            {displayText || result}
           </div>
           <div className="grid grid-cols-2 gap-2">
             <button
