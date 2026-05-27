@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { BUSINESS_CATEGORIES } from '@/data/constants';
 
 type CaptionStyle = 'knowhow' | 'customer' | 'confidence' | 'philosophy' | 'daily';
@@ -15,7 +14,6 @@ const STYLES: { id: CaptionStyle; name: string; icon: string; description: strin
 ];
 
 export default function CaptionPage() {
-  const router = useRouter();
   const [step, setStep] = useState(1);
   const [style, setStyle] = useState<CaptionStyle | null>(null);
   const [businessCategory, setBusinessCategory] = useState<string | null>(null);
@@ -82,15 +80,7 @@ export default function CaptionPage() {
   return (
     <div>
       <div className="mb-6">
-        <div className="flex items-center justify-between mb-2">
-          <h1 className="text-xl font-black text-black">인스타 캡션 만들기</h1>
-          <button
-            onClick={() => router.push('/write')}
-            className="text-xs text-gray-500 hover:text-black"
-          >
-            블로그 글쓰기로 →
-          </button>
-        </div>
+        <h1 className="text-xl font-black text-black mb-2">인스타 캡션 만들기</h1>
         <p className="text-sm text-gray-500">
           뷰티샵 원장님 무드의 신뢰감 있는 인스타 캡션을 만들어드려요
         </p>
