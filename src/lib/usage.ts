@@ -7,7 +7,8 @@ import { syncUserToSheet } from '@/lib/google-sheets';
 // ============================================
 const UNLIMITED_FOR_ALL = false;
 
-const FREE_TOTAL_LIMIT = 3; // 최초 3회만 무료
+const FREE_TOTAL_LIMIT = 3; // 블로그: 최초 3회만 무료
+const FREE_CAPTION_LIMIT = 5; // 인스타 캡션: 최초 5회만 무료
 
 // 관리자 이메일 - 무제한 사용 가능
 const ADMIN_EMAILS = ['wldms706@naver.com', 'mwm2020@nate.com', 'gkdisk9@nate.com', 'etang12330@gmail.com'];
@@ -134,6 +135,73 @@ export async function checkAndIncrementUsage(userId: string): Promise<{
   return {
     allowed: true,
     remaining: FREE_TOTAL_LIMIT - newTotalUsage,
+    plan: 'free',
+  };
+}
+
+// 인스타 캡션 전용 카운트 (블로그와 별도)
+export async function checkAndIncrementCaptionUsage(userId: string): Promise<{
+  allowed: boolean;
+  remaining: number;
+  plan: string;
+}> {
+  const supabase = await createServerSupabase();
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('email, plan, caption_usage')
+    .eq('id', userId)
+    .single();
+
+  if (!profile) {
+    return { allowed: false, remaining: 0, plan: 'free' };
+  }
+
+  const currentCaptionUsage = profile.caption_usage || 0;
+
+  // 관리자 또는 유료 유저는 무제한
+  const isAdmin = profile.email && ADMIN_EMAILS.includes(profile.email);
+  let isPaid = profile.plan === 'paid' || (profile.plan && profile.plan.startsWith('pro_'));
+
+  // 이중 방어: plan이 free인데 유효한 구독이 있으면 paid로 자동 복구
+  if (!isPaid && !isAdmin) {
+    const now = new Date().toISOString();
+    const { data: validSub } = await supabase
+      .from('subscriptions')
+      .select('id')
+      .eq('user_id', userId)
+      .or(`status.eq.active,and(status.eq.cancelled,next_billing_at.gt.${now})`)
+      .limit(1)
+      .maybeSingle();
+
+    if (validSub) {
+      await supabase.from('profiles').update({ plan: 'paid' }).eq('id', userId);
+      isPaid = true;
+    }
+  }
+
+  if (isAdmin || isPaid) {
+    await supabase
+      .from('profiles')
+      .update({ caption_usage: currentCaptionUsage + 1 })
+      .eq('id', userId);
+    return { allowed: true, remaining: -1, plan: 'paid' };
+  }
+
+  // 무료 유저: 최초 5회만 무료
+  if (currentCaptionUsage >= FREE_CAPTION_LIMIT) {
+    return { allowed: false, remaining: 0, plan: 'free' };
+  }
+
+  const newUsage = currentCaptionUsage + 1;
+  await supabase
+    .from('profiles')
+    .update({ caption_usage: newUsage })
+    .eq('id', userId);
+
+  return {
+    allowed: true,
+    remaining: FREE_CAPTION_LIMIT - newUsage,
     plan: 'free',
   };
 }

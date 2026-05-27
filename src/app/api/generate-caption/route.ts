@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import { checkAndIncrementUsage } from '@/lib/usage';
+import { checkAndIncrementCaptionUsage } from '@/lib/usage';
 import { buildCaptionPrompt, CaptionStyle } from '@/lib/prompts/caption-prompts';
 import { filterMedicalTerms, filterForeignWords } from '@/lib/prompts/filters';
 
@@ -25,10 +25,10 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: '로그인이 필요합니다.' }, { status: 401 });
   }
 
-  const usage = await checkAndIncrementUsage(user.id);
+  const usage = await checkAndIncrementCaptionUsage(user.id);
   if (!usage.allowed) {
     return NextResponse.json(
-      { error: '무료 체험(3회)을 모두 사용했습니다. 구독하시면 무제한으로 이용할 수 있습니다.', remaining: 0 },
+      { error: '무료 인스타 캡션(5회)을 모두 사용했습니다. 구독하시면 무제한으로 이용할 수 있습니다.', remaining: 0 },
       { status: 403 },
     );
   }
