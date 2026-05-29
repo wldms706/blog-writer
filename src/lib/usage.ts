@@ -149,7 +149,7 @@ export async function checkAndIncrementCaptionUsage(userId: string): Promise<{
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('email, plan, caption_usage')
+    .select('email, plan, caption_usage, caption_bonus')
     .eq('id', userId)
     .single();
 
@@ -158,6 +158,7 @@ export async function checkAndIncrementCaptionUsage(userId: string): Promise<{
   }
 
   const currentCaptionUsage = profile.caption_usage || 0;
+  const captionLimit = FREE_CAPTION_LIMIT + (profile.caption_bonus || 0);
 
   // 관리자 또는 유료 유저는 무제한
   const isAdmin = profile.email && ADMIN_EMAILS.includes(profile.email);
@@ -188,8 +189,8 @@ export async function checkAndIncrementCaptionUsage(userId: string): Promise<{
     return { allowed: true, remaining: -1, plan: 'paid' };
   }
 
-  // 무료 유저: 최초 5회만 무료
-  if (currentCaptionUsage >= FREE_CAPTION_LIMIT) {
+  // 무료 유저: 기본 5회 + 쿠폰 보너스
+  if (currentCaptionUsage >= captionLimit) {
     return { allowed: false, remaining: 0, plan: 'free' };
   }
 
@@ -201,7 +202,7 @@ export async function checkAndIncrementCaptionUsage(userId: string): Promise<{
 
   return {
     allowed: true,
-    remaining: FREE_CAPTION_LIMIT - newUsage,
+    remaining: captionLimit - newUsage,
     plan: 'free',
   };
 }

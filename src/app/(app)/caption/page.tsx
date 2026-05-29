@@ -107,6 +107,33 @@ export default function CaptionPage() {
     setActiveLanguage('ko');
   };
 
+  const [couponCode, setCouponCode] = useState('');
+  const [couponMsg, setCouponMsg] = useState('');
+  const [couponApplying, setCouponApplying] = useState(false);
+
+  const handleApplyCoupon = async () => {
+    if (!couponCode.trim()) return;
+    setCouponApplying(true);
+    setCouponMsg('');
+    try {
+      const res = await fetch('/api/apply-caption-coupon', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code: couponCode.trim() }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setCouponMsg(data.error || '쿠폰 적용 실패');
+      } else {
+        setCouponMsg(`🎉 적용 완료! 인스타 캡션 무료 ${data.totalFree}회로 늘었어요`);
+      }
+    } catch {
+      setCouponMsg('오류가 발생했습니다');
+    } finally {
+      setCouponApplying(false);
+    }
+  };
+
   return (
     <div>
       <div className="mb-6">
@@ -137,6 +164,32 @@ export default function CaptionPage() {
                 </button>
               ))}
             </div>
+          </div>
+
+          {/* 쿠폰 입력 */}
+          <div className="mt-6 rounded-2xl bg-[#3B5CFF]/5 border border-[#3B5CFF]/20 p-4">
+            <p className="text-xs font-bold text-[#3B5CFF] mb-2">🎟️ 쿠폰 있으세요? (인스타 무료 횟수 추가)</p>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={couponCode}
+                onChange={(e) => setCouponCode(e.target.value)}
+                placeholder="쿠폰 코드 입력"
+                className="flex-1 rounded-xl border-2 border-gray-200 px-3 py-2 text-sm outline-none focus:border-[#3B5CFF]"
+              />
+              <button
+                onClick={handleApplyCoupon}
+                disabled={couponApplying || !couponCode.trim()}
+                className="rounded-xl bg-[#3B5CFF] px-4 py-2 text-sm font-bold text-white hover:bg-[#2A45E0] disabled:opacity-30"
+              >
+                {couponApplying ? '적용 중...' : '적용'}
+              </button>
+            </div>
+            {couponMsg && (
+              <p className={`text-xs mt-2 ${couponMsg.includes('🎉') ? 'text-green-600' : 'text-red-500'}`}>
+                {couponMsg}
+              </p>
+            )}
           </div>
         </div>
       )}
