@@ -209,35 +209,56 @@ export default function LandingPage() {
           <p className="text-white/50 text-center mb-12">
             업종에 맞는 플랜을 선택하세요
           </p>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {/* 무료 */}
             <div className="bg-white/10 border border-white/20 p-6 rounded-2xl flex flex-col">
               <p className="text-white/60 text-sm font-medium mb-2">무료</p>
               <p className="text-3xl font-black text-white mb-1">0원</p>
-              <p className="text-white/40 text-xs mb-4">최초 3회 무료 글쓰기</p>
+              <p className="text-white/40 text-xs mb-4">체험용</p>
               <ul className="space-y-2 text-sm text-white/70 flex-1">
-                <li>• 모든 업종 체험 가능</li>
-                <li>• 기본 글 구조 5종</li>
+                <li>• 블로그 글 3회</li>
+                <li>• 인스타 캡션 5회</li>
               </ul>
               <Link href="/signup" className="mt-6 block text-center border border-white/30 text-white rounded-full py-2.5 text-sm font-bold hover:bg-white/10 transition-all">
-                무료로 시작하기
+                무료로 시작
               </Link>
             </div>
+
+            {/* 인스타 단독 */}
+            <div className="bg-white/10 border border-white/20 p-6 rounded-2xl flex flex-col relative">
+              <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-yellow-400 text-black text-xs font-black px-3 py-1 rounded-full">NEW</span>
+              <p className="text-white/60 text-sm font-medium mb-2">인스타 캡션 단독</p>
+              <p className="text-sm text-white/40 line-through mb-1">4,900원</p>
+              <p className="text-3xl font-black text-white mb-1">2,900원<span className="text-base font-normal text-white/50">/월</span></p>
+              <p className="text-yellow-400 text-xs font-bold mb-4">카페 한 잔 가격</p>
+              <ul className="space-y-2 text-sm text-white/70 flex-1">
+                <li>• 인스타 캡션 무제한</li>
+                <li>• 5가지 스타일</li>
+                <li>• 다국어 번역 (영/일/중)</li>
+              </ul>
+              <Link href="/subscribe" className="mt-6 block text-center bg-white/20 text-white rounded-full py-2.5 text-sm font-bold hover:bg-white/30 transition-all">
+                구독하기
+              </Link>
+            </div>
+
+            {/* 프로 일반 */}
             <div className="bg-white/10 border border-white/20 p-6 rounded-2xl flex flex-col">
               <p className="text-white/60 text-sm font-medium mb-2">프로 (일반)</p>
               <p className="text-sm text-white/40 line-through mb-1">15,900원</p>
               <p className="text-3xl font-black text-white mb-1">9,900원<span className="text-base font-normal text-white/50">/월</span></p>
               <p className="text-yellow-400 text-xs font-bold mb-4">한 달간 할인 중</p>
               <ul className="space-y-2 text-sm text-white/70 flex-1">
-                <li>• 반영구 제외 업종 가능</li>
-                <li>• 모든 글 구조 사용</li>
-                <li>• 무제한 히스토리</li>
+                <li>• 블로그 글 무제한</li>
+                <li>• 인스타 캡션 무제한</li>
                 <li>• SEO 최적화</li>
+                <li>• 무제한 히스토리</li>
               </ul>
-              <p className="mt-4 text-xs text-white/40">업종추천 → 헤어, 왁싱, 속눈썹, 네일, 피부</p>
-              <Link href="/subscribe" className="mt-3 block text-center bg-[#3B5CFF] text-white rounded-full py-2.5 text-sm font-bold hover:bg-[#2A45E0] transition-all">
+              <Link href="/subscribe" className="mt-6 block text-center bg-[#3B5CFF] text-white rounded-full py-2.5 text-sm font-bold hover:bg-[#2A45E0] transition-all">
                 구독하기
               </Link>
             </div>
+
+            {/* 프로 반영구 */}
             <div className="bg-white border-2 border-white p-6 rounded-2xl relative flex flex-col">
               <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#3B5CFF] text-white text-xs font-black px-3 py-1 rounded-full">반영구 업종</span>
               <p className="text-[#3B5CFF]/60 text-sm font-medium mb-2">프로 (반영구)</p>
@@ -245,10 +266,10 @@ export default function LandingPage() {
               <p className="text-3xl font-black text-[#3B5CFF] mb-1">12,900원<span className="text-base font-normal text-[#3B5CFF]/50">/월</span></p>
               <p className="text-yellow-500 text-xs font-bold mb-4">한 달간 할인 중</p>
               <ul className="space-y-2 text-sm text-gray-600 flex-1">
-                <li>• 반영구 포함 외 타업종 글 가능</li>
-                <li>• 반영구 특화 글 구조</li>
+                <li>• 블로그 글 무제한</li>
+                <li>• 인스타 캡션 무제한</li>
+                <li>• 반영구 특화 구조</li>
                 <li>• 규제 표현 자동 차단</li>
-                <li>• SEO 최적화</li>
               </ul>
               <Link href="/subscribe" className="mt-6 block text-center bg-[#3B5CFF] text-white rounded-full py-2.5 text-sm font-bold hover:bg-[#2A45E0] transition-all">
                 구독하기
