@@ -160,6 +160,25 @@ export async function checkAndIncrementCaptionUsage(userId: string): Promise<{
   const currentCaptionUsage = profile.caption_usage || 0;
   const captionLimit = FREE_CAPTION_LIMIT + (profile.caption_bonus || 0);
 
+  // 캡션 단독 구독 체크 (caption_only 플랜)
+  const now2 = new Date().toISOString();
+  const { data: captionSub } = await supabase
+    .from('subscriptions')
+    .select('id, plan_id')
+    .eq('user_id', userId)
+    .or(`status.eq.active,and(status.eq.cancelled,next_billing_at.gt.${now2})`)
+    .in('plan_id', ['caption_only', 'pro_permanent', 'pro_general'])
+    .limit(1)
+    .maybeSingle();
+
+  if (captionSub) {
+    await supabase
+      .from('profiles')
+      .update({ caption_usage: currentCaptionUsage + 1 })
+      .eq('id', userId);
+    return { allowed: true, remaining: -1, plan: 'paid' };
+  }
+
   // 관리자 또는 유료 유저는 무제한
   const isAdmin = profile.email && ADMIN_EMAILS.includes(profile.email);
   let isPaid = profile.plan === 'paid' || (profile.plan && profile.plan.startsWith('pro_'));

@@ -7,6 +7,7 @@ const TOSS_SECRET_KEY = process.env.TOSS_SECRET_KEY || '';
 const PLANS: Record<string, { name: string; price: number; type: string }> = {
   pro_permanent: { name: '프로 (반영구)', price: 12900, type: 'permanent' },
   pro_general: { name: '프로 (일반)', price: 9900, type: 'general' },
+  caption_only: { name: '인스타 캡션', price: 2900, type: 'caption' },
 };
 
 // 재시도 헬퍼 (최대 3회)
@@ -153,17 +154,22 @@ export async function POST(request: NextRequest) {
     }
 
     // 프로필 업데이트 (재시도 포함)
+    // 캡션 단독 구독은 profile.plan을 paid로 만들지 않음 (블로그까지 무제한 되는 걸 막기 위함)
+    // 캡션 단독은 subscriptions 테이블만 활용
     let profileSaved = false;
+    const shouldUpdateProfilePlan = planId !== 'caption_only';
     try {
-      await retryOperation(async () => {
-        const { error } = await supabase
-          .from('profiles')
-          .update({
-            plan: 'paid',
-          })
-          .eq('id', user.id);
-        if (error) throw error;
-      });
+      if (shouldUpdateProfilePlan) {
+        await retryOperation(async () => {
+          const { error } = await supabase
+            .from('profiles')
+            .update({
+              plan: 'paid',
+            })
+            .eq('id', user.id);
+          if (error) throw error;
+        });
+      }
       profileSaved = true;
     } catch (error) {
       console.error('[결제 치명적 오류] 프로필 업데이트 3회 실패:', {
