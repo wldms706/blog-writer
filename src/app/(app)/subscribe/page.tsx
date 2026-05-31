@@ -83,11 +83,6 @@ export default function SubscribePage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [user, setUser] = useState<{ id: string; email: string } | null>(null);
-  const [couponCode, setCouponCode] = useState('');
-  const [couponPhone, setCouponPhone] = useState('');
-  const [couponApplied, setCouponApplied] = useState(false);
-  const [couponError, setCouponError] = useState('');
-  const [couponChecking, setCouponChecking] = useState(false);
   const [promoData, setPromoData] = useState<{ remaining: number; isPromoOpen: boolean; prices: Record<string, number>; originalPrices: Record<string, number> } | null>(null);
 
   useEffect(() => {
@@ -117,56 +112,7 @@ export default function SubscribePage() {
     };
   });
 
-  // API 개별 연동 방식 결제
-  const handleApplyCoupon = async () => {
-    const code = couponCode.trim().toUpperCase();
-    const phone = couponPhone.trim().replace(/-/g, '');
-    if (!code || !phone) {
-      setCouponError('쿠폰 코드와 휴대폰 번호를 모두 입력해주세요.');
-      return;
-    }
-    const coupon = VALID_COUPONS[code];
-    if (!coupon) {
-      setCouponApplied(false);
-      setCouponError('유효하지 않은 쿠폰 코드입니다.');
-      return;
-    }
-    // DB에서 번호 확인
-    setCouponChecking(true);
-    setCouponError('');
-    try {
-      const supabase = createClient();
-      const { data, error } = await supabase
-        .from('coupon_phones')
-        .select('id, used')
-        .eq('phone', phone)
-        .eq('coupon_code', code)
-        .single();
-
-      if (error || !data) {
-        setCouponApplied(false);
-        setCouponError('등록되지 않은 번호입니다. 쿠폰 대상자가 아닙니다.');
-      } else if (data.used) {
-        setCouponApplied(false);
-        setCouponError('이미 사용된 쿠폰입니다.');
-      } else {
-        setCouponApplied(true);
-        setCouponError('');
-      }
-    } catch {
-      setCouponError('쿠폰 확인 중 오류가 발생했습니다.');
-    } finally {
-      setCouponChecking(false);
-    }
-  };
-
-  const appliedCoupon = couponApplied ? VALID_COUPONS[couponCode.trim().toUpperCase()] : null;
-
-  const getDisplayPrice = (price: number) => {
-    if (appliedCoupon?.firstMonthFree) return 0;
-    if (appliedCoupon?.discountPercent) return Math.round(price * (1 - appliedCoupon.discountPercent / 100));
-    return price;
-  };
+  const getDisplayPrice = (price: number) => price;
 
   const handlePayment = async () => {
     if (!selectedPlan || !user || !clientKey) return;
@@ -179,12 +125,10 @@ export default function SubscribePage() {
       const customerKey = `customer_${user.id}`;
       const payment = tossPayments.payment({ customerKey });
 
-      const couponParam = couponApplied ? `&coupon=${couponCode.trim().toUpperCase()}&couponPhone=${couponPhone.trim().replace(/-/g, '')}` : '';
-
       // 자동결제(빌링) 카드 등록 요청
       await payment.requestBillingAuth({
         method: 'CARD',
-        successUrl: `${window.location.origin}/subscribe/success?planId=${selectedPlan.id}${couponParam}`,
+        successUrl: `${window.location.origin}/subscribe/success?planId=${selectedPlan.id}`,
         failUrl: `${window.location.origin}/subscribe/fail`,
         customerEmail: user.email,
         customerName: user.email.split('@')[0],
@@ -284,40 +228,6 @@ export default function SubscribePage() {
             </div>
           )}
 
-          {/* 쿠폰 입력 */}
-          <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">쿠폰 코드</label>
-            <div className="flex gap-2 mb-2">
-              <input
-                type="text"
-                value={couponCode}
-                onChange={(e) => { setCouponCode(e.target.value); setCouponApplied(false); setCouponError(''); }}
-                placeholder="쿠폰 코드"
-                className="flex-1 px-3 py-2.5 rounded-xl border border-gray-200 text-sm outline-none focus:border-[#3B5CFF]"
-              />
-              <input
-                type="tel"
-                value={couponPhone}
-                onChange={(e) => { setCouponPhone(e.target.value); setCouponApplied(false); setCouponError(''); }}
-                placeholder="휴대폰 번호 (- 없이)"
-                className="flex-1 px-3 py-2.5 rounded-xl border border-gray-200 text-sm outline-none focus:border-[#3B5CFF]"
-              />
-              <button
-                onClick={handleApplyCoupon}
-                disabled={couponChecking}
-                className="px-4 py-2.5 rounded-xl bg-gray-900 text-white text-sm font-medium hover:bg-gray-800 disabled:opacity-50"
-              >
-                {couponChecking ? '확인중...' : '적용'}
-              </button>
-            </div>
-            {couponError && <p className="text-xs text-red-500 mt-1">{couponError}</p>}
-            {couponApplied && appliedCoupon && (
-              <div className="mt-2 p-3 rounded-lg bg-green-50 border border-green-200">
-                <p className="text-sm text-green-700 font-medium">쿠폰 적용됨: {appliedCoupon.description}</p>
-              </div>
-            )}
-          </div>
-
           <div className="mb-4 rounded-lg bg-gray-50 p-4">
             <div className="flex justify-between items-center">
               <div>
@@ -325,18 +235,9 @@ export default function SubscribePage() {
                 <p className="text-sm text-gray-500">월 정기 구독</p>
               </div>
               <div className="text-right">
-                {appliedCoupon && (
-                  <p className="text-sm text-gray-400 line-through">{selectedPlan.price.toLocaleString()}원</p>
-                )}
                 <p className="text-xl font-bold text-gray-900">
-                  {getDisplayPrice(selectedPlan.price) === 0 ? '첫 달 무료' : `${getDisplayPrice(selectedPlan.price).toLocaleString()}원`}
+                  {getDisplayPrice(selectedPlan.price).toLocaleString()}원
                 </p>
-                {appliedCoupon && !appliedCoupon.firstMonthFree && (
-                  <p className="text-xs text-green-600">10% 할인 적용</p>
-                )}
-                {appliedCoupon?.firstMonthFree && (
-                  <p className="text-xs text-green-600">다음 달부터 {Math.round(selectedPlan.price * 0.9).toLocaleString()}원/월</p>
-                )}
               </div>
             </div>
           </div>
@@ -350,7 +251,7 @@ export default function SubscribePage() {
                 : 'bg-gray-200 text-gray-400 cursor-not-allowed',
             ].join(' ')}
           >
-            {isLoading ? '결제 페이지로 이동 중...' : appliedCoupon?.firstMonthFree ? '무료로 시작하기' : `${getDisplayPrice(selectedPlan.price).toLocaleString()}원 결제하기`}
+            {isLoading ? '결제 페이지로 이동 중...' : `${getDisplayPrice(selectedPlan.price).toLocaleString()}원 결제하기`}
           </button>
           {!user && <p className="mt-2 text-center text-sm text-gray-500">로그인이 필요합니다</p>}
         </div>
