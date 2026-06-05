@@ -160,18 +160,11 @@ export async function checkAndIncrementCaptionUsage(userId: string): Promise<{
   const currentCaptionUsage = profile.caption_usage || 0;
   const captionLimit = FREE_CAPTION_LIMIT + (profile.caption_bonus || 0);
 
-  // 캡션 단독 구독 체크 (caption_only 플랜)
-  const now2 = new Date().toISOString();
-  const { data: captionSub } = await supabase
-    .from('subscriptions')
-    .select('id, plan_id')
-    .eq('user_id', userId)
-    .or(`status.eq.active,and(status.eq.cancelled,next_billing_at.gt.${now2})`)
-    .in('plan_id', ['caption_only', 'pro_permanent', 'pro_general'])
-    .limit(1)
-    .maybeSingle();
+  // 1순위: 관리자 또는 paid 유저 (블로그 구독자) → 무제한
+  const isAdmin = profile.email && ADMIN_EMAILS.includes(profile.email);
+  const isPaid = profile.plan === 'paid' || (profile.plan && profile.plan.startsWith('pro_'));
 
-  if (captionSub) {
+  if (isAdmin || isPaid) {
     await supabase
       .from('profiles')
       .update({ caption_usage: currentCaptionUsage + 1 })
@@ -179,28 +172,27 @@ export async function checkAndIncrementCaptionUsage(userId: string): Promise<{
     return { allowed: true, remaining: -1, plan: 'paid' };
   }
 
-  // 관리자 또는 유료 유저는 무제한
-  const isAdmin = profile.email && ADMIN_EMAILS.includes(profile.email);
-  let isPaid = profile.plan === 'paid' || (profile.plan && profile.plan.startsWith('pro_'));
+  // 2순위: subscriptions 테이블에 유효한 구독이 있으면 무제한
+  // (블로그/캡션 단독 모두 포함)
+  const nowIso = new Date().toISOString();
+  const { data: allSubs } = await supabase
+    .from('subscriptions')
+    .select('plan_id, status, next_billing_at')
+    .eq('user_id', userId);
 
-  // 이중 방어: plan이 free인데 유효한 구독이 있으면 paid로 자동 복구
-  if (!isPaid && !isAdmin) {
-    const now = new Date().toISOString();
-    const { data: validSub } = await supabase
-      .from('subscriptions')
-      .select('id')
-      .eq('user_id', userId)
-      .or(`status.eq.active,and(status.eq.cancelled,next_billing_at.gt.${now})`)
-      .limit(1)
-      .maybeSingle();
+  const hasValidSub = (allSubs || []).some(sub => {
+    const validPlanId = ['caption_only', 'pro_permanent', 'pro_general'].includes(sub.plan_id);
+    if (!validPlanId) return false;
+    if (sub.status === 'active') return true;
+    if (sub.status === 'cancelled' && sub.next_billing_at && sub.next_billing_at > nowIso) return true;
+    return false;
+  });
 
-    if (validSub) {
+  if (hasValidSub) {
+    // plan을 paid로 자동 복구 (다음번에 빠르게 처리되도록)
+    if (!isPaid) {
       await supabase.from('profiles').update({ plan: 'paid' }).eq('id', userId);
-      isPaid = true;
     }
-  }
-
-  if (isAdmin || isPaid) {
     await supabase
       .from('profiles')
       .update({ caption_usage: currentCaptionUsage + 1 })
