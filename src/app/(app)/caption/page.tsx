@@ -72,7 +72,7 @@ export default function CaptionPage() {
 
       const data = await res.json();
       if (res.status === 403) {
-        setError('무료 3회를 모두 사용했어요. 구독하시면 무제한이에요!');
+        setError('무료 5회를 모두 사용했어요. 구독하시면 무제한이에요!');
         setGenerating(false);
         return;
       }
