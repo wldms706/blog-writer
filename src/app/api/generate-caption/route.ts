@@ -25,12 +25,42 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: '로그인이 필요합니다.' }, { status: 401 });
   }
 
-  const usage = await checkAndIncrementCaptionUsage(user.id);
-  if (!usage.allowed) {
-    return NextResponse.json(
-      { error: '무료 인스타 캡션(5회)을 모두 사용했습니다. 구독하시면 무제한으로 이용할 수 있습니다.', remaining: 0 },
-      { status: 403 },
-    );
+  // 🔐 안전장치: API 라우트에서 직접 어드민/유료 체크 (usage.ts 의존 X)
+  const ADMIN_EMAILS_DIRECT = ['wldms706@naver.com', 'mwm2020@nate.com', 'gkdisk9@nate.com', 'etang12330@gmail.com'];
+  const isDirectAdmin = user.email && ADMIN_EMAILS_DIRECT.includes(user.email);
+
+  let isDirectPaid = false;
+  if (!isDirectAdmin) {
+    const { data: directProfile } = await supabase
+      .from('profiles')
+      .select('plan')
+      .eq('id', user.id)
+      .single();
+    isDirectPaid = directProfile?.plan === 'paid' || (directProfile?.plan && directProfile.plan.startsWith('pro_')) || false;
+
+    // 구독 직접 확인
+    if (!isDirectPaid) {
+      const { data: directSubs } = await supabase
+        .from('subscriptions')
+        .select('plan_id, status, next_billing_at')
+        .eq('user_id', user.id);
+      const nowIsoDirect = new Date().toISOString();
+      isDirectPaid = (directSubs || []).some(s =>
+        ['caption_only', 'pro_permanent', 'pro_general'].includes(s.plan_id) &&
+        (s.status === 'active' || (s.status === 'cancelled' && s.next_billing_at && s.next_billing_at > nowIsoDirect))
+      );
+    }
+  }
+
+  // 어드민/유료/유효구독자는 무조건 통과
+  if (!isDirectAdmin && !isDirectPaid) {
+    const usage = await checkAndIncrementCaptionUsage(user.id);
+    if (!usage.allowed) {
+      return NextResponse.json(
+        { error: '무료 인스타 캡션(5회)을 모두 사용했습니다. 구독하시면 무제한으로 이용할 수 있습니다.', remaining: 0 },
+        { status: 403 },
+      );
+    }
   }
 
   try {
