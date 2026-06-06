@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { createClient } from '@/lib/supabase/client';
 import { BUSINESS_CATEGORIES } from '@/data/constants';
 
 type CaptionStyle = 'knowhow' | 'customer' | 'confidence' | 'philosophy' | 'daily';
@@ -26,6 +27,63 @@ export default function CaptionPage() {
   const [translations, setTranslations] = useState<Record<string, string>>({});
   const [activeLanguage, setActiveLanguage] = useState<'ko' | 'en' | 'ja' | 'zh'>('ko');
   const [translating, setTranslating] = useState<string | null>(null);
+  const [myPlan, setMyPlan] = useState<'free' | 'paid' | 'loading'>('loading');
+  const [captionLeft, setCaptionLeft] = useState<number | null>(null);
+
+  // 본인 plan 조회 (어드민/유료/무료 구분)
+  useEffect(() => {
+    async function loadPlan() {
+      try {
+        const supabase = createClient();
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) { setMyPlan('free'); return; }
+
+        const ADMIN_EMAILS = ['wldms706@naver.com', 'mwm2020@nate.com', 'gkdisk9@nate.com', 'etang12330@gmail.com'];
+        if (user.email && ADMIN_EMAILS.includes(user.email)) {
+          setMyPlan('paid');
+          return;
+        }
+
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('plan, caption_usage, caption_bonus')
+          .eq('id', user.id)
+          .single();
+
+        const isPaid = profile?.plan === 'paid' || (profile?.plan && profile.plan.startsWith('pro_'));
+
+        if (isPaid) {
+          setMyPlan('paid');
+          return;
+        }
+
+        // 구독 직접 체크 (caption_only도 포함)
+        const now = new Date().toISOString();
+        const { data: subs } = await supabase
+          .from('subscriptions')
+          .select('plan_id, status, next_billing_at')
+          .eq('user_id', user.id);
+
+        const hasValidSub = (subs || []).some(s =>
+          ['caption_only', 'pro_permanent', 'pro_general'].includes(s.plan_id) &&
+          (s.status === 'active' || (s.status === 'cancelled' && s.next_billing_at && s.next_billing_at > now))
+        );
+
+        if (hasValidSub) {
+          setMyPlan('paid');
+          return;
+        }
+
+        setMyPlan('free');
+        const used = profile?.caption_usage || 0;
+        const limit = 5 + (profile?.caption_bonus || 0);
+        setCaptionLeft(Math.max(0, limit - used));
+      } catch {
+        setMyPlan('free');
+      }
+    }
+    loadPlan();
+  }, []);
 
   const handleTranslate = async (lang: 'en' | 'ja' | 'zh') => {
     if (translations[lang]) {
@@ -137,9 +195,23 @@ export default function CaptionPage() {
   return (
     <div>
       <div className="mb-6">
-        <h1 className="text-xl font-black text-black mb-2">인스타 캡션 만들기</h1>
+        <div className="flex items-center gap-2 mb-2 flex-wrap">
+          <h1 className="text-xl font-black text-black">인스타 캡션 만들기</h1>
+          {myPlan === 'paid' && (
+            <span className="inline-flex items-center gap-1 bg-[#3B5CFF] text-white text-xs font-black px-3 py-1 rounded-full">
+              ✨ 무제한
+            </span>
+          )}
+          {myPlan === 'free' && captionLeft !== null && (
+            <span className="inline-flex items-center bg-gray-100 text-gray-600 text-xs font-bold px-3 py-1 rounded-full">
+              무료 {captionLeft}회 남음
+            </span>
+          )}
+        </div>
         <p className="text-sm text-gray-500">
-          뷰티샵 원장님 무드의 신뢰감 있는 인스타 캡션을 만들어드려요
+          {myPlan === 'paid'
+            ? '구독 중이라 캡션을 무제한으로 만들 수 있어요'
+            : '뷰티샵 원장님 무드의 신뢰감 있는 인스타 캡션을 만들어드려요'}
         </p>
       </div>
 
@@ -166,7 +238,8 @@ export default function CaptionPage() {
             </div>
           </div>
 
-          {/* 쿠폰 입력 */}
+          {/* 쿠폰 입력 (무료 유저에게만 표시) */}
+          {myPlan === 'free' && (
           <div className="mt-6 rounded-2xl bg-[#3B5CFF]/5 border border-[#3B5CFF]/20 p-4">
             <p className="text-xs font-bold text-[#3B5CFF] mb-2">🎟️ 쿠폰 있으세요? (인스타 무료 횟수 추가)</p>
             <div className="flex gap-2">
@@ -191,6 +264,7 @@ export default function CaptionPage() {
               </p>
             )}
           </div>
+          )}
         </div>
       )}
 
