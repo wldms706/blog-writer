@@ -44,6 +44,9 @@ export default function SettingsPage() {
   });
   const [subscription, setSubscription] = useState<Subscription | null>(null);
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
+  const [cancelReason, setCancelReason] = useState('');
+  const [cancelReasonOther, setCancelReasonOther] = useState('');
+  const [cancelling, setCancelling] = useState(false);
   const [showClearConfirm, setShowClearConfirm] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -495,29 +498,95 @@ export default function SettingsPage() {
                   구독 취소하기
                 </button>
               ) : (
-                <div className="rounded-lg bg-red-50 p-3">
-                  <p className="mb-2 text-xs text-red-700">
-                    구독을 취소하시겠습니까? 다음 결제일부터 서비스가 중단됩니다.
-                  </p>
-                  <div className="flex gap-2">
+                <div className="rounded-lg bg-red-50 p-4 space-y-3">
+                  <div>
+                    <p className="text-sm font-bold text-red-700 mb-1">정말 구독을 취소하시겠어요?</p>
+                    <p className="text-xs text-red-600">
+                      취소해도 다음 결제일까지는 정상 이용 가능해요.
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold text-gray-700 mb-2">취소 사유를 알려주세요 <span className="text-red-500">*</span></p>
+                    <div className="space-y-1.5">
+                      {[
+                        '효과를 잘 모르겠어요',
+                        '가격이 부담돼요',
+                        '자주 사용하지 않아요',
+                        '글 품질이 만족스럽지 않아요',
+                        '네이버 상위노출이 안 돼요',
+                        '잠시 쉬려고요',
+                        '다른 서비스를 이용하게 됐어요',
+                        '기타',
+                      ].map((reason) => (
+                        <label
+                          key={reason}
+                          className={`flex items-center gap-2 p-2 rounded-lg cursor-pointer text-xs ${
+                            cancelReason === reason
+                              ? 'bg-red-100 border border-red-300'
+                              : 'bg-white border border-gray-200 hover:border-red-200'
+                          }`}
+                        >
+                          <input
+                            type="radio"
+                            name="cancelReason"
+                            value={reason}
+                            checked={cancelReason === reason}
+                            onChange={(e) => setCancelReason(e.target.value)}
+                            className="accent-red-500"
+                          />
+                          <span className="text-gray-700">{reason}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                  {cancelReason === '기타' && (
+                    <textarea
+                      value={cancelReasonOther}
+                      onChange={(e) => setCancelReasonOther(e.target.value)}
+                      placeholder="자세한 이유를 알려주세요 (선택)"
+                      rows={2}
+                      className="w-full rounded-lg border border-gray-200 p-2 text-xs outline-none focus:border-red-300 resize-none"
+                    />
+                  )}
+                  <div className="flex gap-2 pt-1">
                     <button
                       onClick={async () => {
-                        const res = await fetch('/api/payments/cancel', { method: 'POST' });
+                        if (!cancelReason) {
+                          showToast('취소 사유를 선택해주세요');
+                          return;
+                        }
+                        setCancelling(true);
+                        const finalReason = cancelReason === '기타' && cancelReasonOther.trim()
+                          ? `기타: ${cancelReasonOther.trim()}`
+                          : cancelReason;
+                        const res = await fetch('/api/payments/cancel', {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({ reason: finalReason }),
+                        });
+                        setCancelling(false);
                         if (res.ok) {
                           setSubscription({ ...subscription, status: 'cancelled' });
                           setShowCancelConfirm(false);
+                          setCancelReason('');
+                          setCancelReasonOther('');
                           showToast('구독이 취소되었습니다');
                         } else {
                           showToast('구독 취소에 실패했습니다');
                         }
                       }}
-                      className="rounded-lg bg-red-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-red-700"
+                      disabled={cancelling || !cancelReason}
+                      className="rounded-lg bg-red-600 px-4 py-2 text-xs font-bold text-white hover:bg-red-700 disabled:opacity-30 disabled:cursor-not-allowed"
                     >
-                      취소 확인
+                      {cancelling ? '처리 중...' : '취소 확인'}
                     </button>
                     <button
-                      onClick={() => setShowCancelConfirm(false)}
-                      className="rounded-lg bg-white px-3 py-1.5 text-xs text-gray-600 hover:bg-gray-50"
+                      onClick={() => {
+                        setShowCancelConfirm(false);
+                        setCancelReason('');
+                        setCancelReasonOther('');
+                      }}
+                      className="rounded-lg bg-white border border-gray-200 px-4 py-2 text-xs font-medium text-gray-700 hover:bg-gray-50"
                     >
                       돌아가기
                     </button>

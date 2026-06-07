@@ -1,12 +1,23 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 
-export async function POST() {
+export async function POST(request: NextRequest) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
   if (!user) {
     return NextResponse.json({ error: '로그인이 필요합니다.' }, { status: 401 });
+  }
+
+  // 취소 사유 받기
+  let cancelReason: string | null = null;
+  try {
+    const body = await request.json();
+    if (typeof body?.reason === 'string') {
+      cancelReason = body.reason.trim().slice(0, 500);
+    }
+  } catch {
+    // body 없어도 OK
   }
 
   try {
@@ -18,6 +29,7 @@ export async function POST() {
         status: 'cancelled',
         cancelled_at: new Date().toISOString(),
         billing_key: null,
+        cancel_reason: cancelReason,
       })
       .eq('user_id', user.id);
 
