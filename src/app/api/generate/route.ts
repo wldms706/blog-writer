@@ -16,7 +16,6 @@ import {
   filterMedicalTerms,
   filterForeignWords,
   filterListBullets,
-  filterFirstPerson,
   filterBannedWords,
 } from '@/lib/prompts';
 // analyzeTopBlogs 제거 — 타샵 상호/내용이 복사되는 문제 발생
@@ -86,6 +85,26 @@ export async function POST(request: NextRequest) {
     const safeCustomPurpose = sanitize(customPurpose);
     const safeBusinessCategory = sanitize(businessCategory);
     const safeTreatmentInfo = sanitize(treatmentInfo);
+
+    // 원장님 스토리/철학 가져오기 (글에 자연스럽게 녹임)
+    const { data: profileForStory } = await supabase
+      .from('profiles')
+      .select('story_motivation, story_priority, story_difference, story_message, story_reward')
+      .eq('id', user.id)
+      .single();
+
+    const storyParts: string[] = [];
+    if (profileForStory?.story_motivation?.trim()) storyParts.push(`이 일을 시작한 계기: ${profileForStory.story_motivation.trim()}`);
+    if (profileForStory?.story_priority?.trim()) storyParts.push(`가장 중요하게 생각하는 가치: ${profileForStory.story_priority.trim()}`);
+    if (profileForStory?.story_difference?.trim()) storyParts.push(`다른 샵과 다른 점: ${profileForStory.story_difference.trim()}`);
+    if (profileForStory?.story_message?.trim()) storyParts.push(`고객에게 전하고 싶은 말: ${profileForStory.story_message.trim()}`);
+    if (profileForStory?.story_reward?.trim()) storyParts.push(`가장 보람을 느끼는 순간: ${profileForStory.story_reward.trim()}`);
+
+    const ownerStoryContext = storyParts.length > 0
+      ? `\n\n## 원장님의 신념/철학 (글에 자연스럽게 1~2가지만 녹여 표현하세요)
+중요: 직접 인용 금지. 자연스러운 어투로 살짝 녹여서, 글 전체의 톤과 메시지에 스며들게 하세요.
+${storyParts.map(s => `- ${s}`).join('\n')}\n`
+      : '';
 
     // 규제 업종 여부 확인
     const isRegulatedBusiness = safeBusinessCategory === 'semi-permanent' || safeBusinessCategory === '반영구' || REGULATED_KEYWORDS.some(k => safeKeyword.includes(k));
@@ -476,7 +495,7 @@ ${isLargeKeyword(safeKeyword) ? `
 
     const currentYear = new Date().getFullYear();
 
-    const fullPrompt = systemPrompt + `\n\n⚠️ 현재 연도: ${currentYear}년
+    const fullPrompt = systemPrompt + ownerStoryContext + `\n\n⚠️ 현재 연도: ${currentYear}년
 - 트렌드, 유행, 시기를 언급할 때 반드시 ${currentYear}년 기준으로 작성하세요
 - 과거 연도(2024년, 2025년 등)의 트렌드를 현재인 것처럼 쓰지 마세요
 
@@ -536,9 +555,8 @@ ${isLargeKeyword(safeKeyword) ? `
     filteredText = filterForeignWords(filteredText);
     filteredText = filterListBullets(filteredText, isRegulatedBusiness);
     filteredText = filterBannedWords(filteredText);
-    if (isRegulatedBusiness) {
-      filteredText = filterFirstPerson(filteredText);
-    }
+    // 반영구 대법원 무죄 판결 이후 1인칭 허용 (네이버 정책은 별개라 영업조만 주의)
+    // filterFirstPerson 제거 — 1인칭("저는", "제가") 자연스럽게 사용 가능
 
     return NextResponse.json({ content: filteredText });
   } catch (error) {
