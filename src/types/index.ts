@@ -34,7 +34,7 @@ export type SafetyCondition = {
 };
 
 export type ContentType = 'seo' | 'branding';
-export type SeoStyle = 'review' | 'expert';
+export type SeoStyle = 'review' | 'expert' | 'human';
 export type BrandingType = 'recruit' | 'philosophy';
 export type TonePreset = 'warm' | 'professional' | 'conversational';
 

@@ -11,6 +11,12 @@ interface StepContentTypeProps {
 
 const CONTENT_OPTIONS = [
   {
+    id: 'seo-human',
+    icon: '🔥',
+    name: '상위노출 - 리얼 휴먼 톤 (NEW)',
+    description: 'AI 티 안 나는 진짜 사람 글 (두서없고 솔직한 톤)',
+  },
+  {
     id: 'seo-review',
     icon: '📝',
     name: '상위노출 - 체험 후기형',
@@ -32,6 +38,7 @@ const CONTENT_OPTIONS = [
 
 function getSelectedId(contentType: ContentType, seoStyle: SeoStyle): string {
   if (contentType === 'branding') return 'branding';
+  if (seoStyle === 'human') return 'seo-human';
   return seoStyle === 'review' ? 'seo-review' : 'seo-expert';
 }
 
@@ -41,6 +48,8 @@ export default function StepContentType({ selected, seoStyle, onSelect }: StepCo
   const handleSelect = (id: string) => {
     if (id === 'branding') {
       onSelect('branding');
+    } else if (id === 'seo-human') {
+      onSelect('seo', 'human');
     } else if (id === 'seo-review') {
       onSelect('seo', 'review');
     } else {
@@ -76,6 +85,7 @@ export default function StepContentType({ selected, seoStyle, onSelect }: StepCo
       {selectedId && (
         <div className="mt-6 text-center animate-fade-in">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#3B5CFF] text-white font-bold text-sm">
+            {selectedId === 'seo-human' && <span>🔥 AI 티 안 나게 진짜 사람이 쓴 것 같은 글을 작성합니다</span>}
             {selectedId === 'seo-review' && <span>방문 후기처럼 자연스러운 스토리텔링 글을 작성합니다</span>}
             {selectedId === 'seo-expert' && <span>원장님의 전문 지식을 전달하는 정보형 글을 작성합니다</span>}
             {selectedId === 'branding' && <span>샵의 브랜드 가치를 전달하는 글을 작성합니다</span>}
