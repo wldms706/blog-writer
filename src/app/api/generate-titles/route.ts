@@ -176,6 +176,7 @@ ${usedTitlesText}
     } else {
       // SEO 글 제목 생성 프롬프트
       const isReviewStyle = seoStyle === 'review';
+      const isHumanStyle = seoStyle === 'human';
 
       prompt = `당신은 네이버 블로그 클릭률 극대화 제목 전문가입니다.
 사람의 뇌는 지루한 걸 싫어합니다. 수백 개의 블로그 글 중 선택받으려면, 뇌에 충격을 주는 제목이 필요합니다.
@@ -183,7 +184,27 @@ ${usedTitlesText}
 키워드: ${safeKeyword}
 업종: ${safeBusinessCategory}
 글 주제: ${safeTopic}
-글 스타일: ${isReviewStyle ? '체험 후기형 (고객이 직접 방문한 후기)' : '전문가 정보형 (원장이 전문 지식 전달)'}
+글 스타일: ${isHumanStyle ? '리얼 휴먼 톤 (AI 티 안 나는 진짜 사람 글)' : isReviewStyle ? '체험 후기형 (고객이 직접 방문한 후기)' : '전문가 정보형 (원장이 전문 지식 전달)'}
+
+${isHumanStyle ? `## 리얼 휴먼 톤 제목 특별 규칙
+이 글은 진짜 사람이 두서없이 쓴 블로그 글입니다. 제목도 사람 같은 느낌이 살아야 합니다.
+
+✅ 좋은 휴먼 톤 제목 예시:
+- "${safeKeyword} 진짜 욕 나오는 이야기 좀 할게요"
+- "${safeKeyword} 했는데 어제 친구가..."
+- "솔직히 ${safeKeyword} 이거 별로예요 (라고 말하긴 좀 그런데)"
+- "${safeKeyword} 13년 한 사람의 푸념 좀 들어주세요"
+- "암튼 ${safeKeyword} 이거 결론 못 내겠음"
+- "${safeKeyword} 받고 왔는데 어떡하지"
+
+❌ 금지된 정연한 제목:
+- "${safeKeyword} 잘하는 곳 고르는 5가지 방법"
+- "${safeKeyword}, 신중하게 선택해야 하는 이유"
+- "${safeKeyword} 전문가가 추천하는 ~"
+
+키워드: 제목 안에 자연스럽게 들어가되, 어색하면 분리해서 사용
+톤: 푸념, 두서없음, 솔직함, "..." "ㅋㅋ" "라고 해야 하나" 같은 망설임
+` : ''}
 
 ${isReviewStyle ? `## 체험 후기형 제목 특별 규칙
 이 글은 고객이 직접 방문해서 쓴 후기입니다. 제목도 후기/방문 톤이어야 합니다.
