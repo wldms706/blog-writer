@@ -543,7 +543,7 @@ ${isLargeKeyword(safeKeyword) ? `
         'anthropic-version': '2023-06-01',
       },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
+        model: 'claude-sonnet-4-6',
         max_tokens: 8192,
         temperature: 1,
         system: `당신은 뷰티샵 블로그 전문 작가입니다. 반드시 지켜야 할 절대 규칙:
