@@ -269,7 +269,7 @@ export default function LandingPage() {
                 <li>• 블로그 글 무제한</li>
                 <li>• 인스타 캡션 무제한</li>
                 <li>• 반영구 특화 구조</li>
-                <li>• 규제 표현 자동 차단</li>
+                <li>• 네이버 안전 글쓰기 자동 적용</li>
               </ul>
               <Link href="/subscribe" className="mt-6 block text-center bg-[#3B5CFF] text-white rounded-full py-2.5 text-sm font-bold hover:bg-[#2A45E0] transition-all">
                 구독하기

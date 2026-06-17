@@ -47,7 +47,7 @@ const plans: Plan[] = [
       { text: '무제한 블로그 글 생성', included: true },
       { text: '인스타 캡션 무제한 (포함)', included: true },
       { text: '반영구 특화 글 구조 10종+', included: true },
-      { text: '규제 표현 자동 차단', included: true },
+      { text: '네이버 안전 글쓰기 자동 적용', included: true },
       { text: 'SEO 최적화 글쓰기', included: true },
       { text: '무제한 히스토리', included: true },
     ],

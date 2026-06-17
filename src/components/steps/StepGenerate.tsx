@@ -538,22 +538,6 @@ export default function StepGenerate({ onReset, formData, isRegulated = false }:
           </div>
         </div>
 
-        {/* 사진 업로드 안내 (반영구 업종만) */}
-        {isRegulated && (
-        <div className="card p-4 bg-orange-50 border border-orange-200">
-          <div className="flex items-start gap-3">
-            <svg className="w-5 h-5 text-orange-500 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
-            </svg>
-            <div>
-              <p className="text-sm font-bold text-orange-800">사진에 글씨를 넣지 마세요</p>
-              <p className="text-xs text-orange-700 mt-0.5">
-                이미지에 텍스트·로고·상호명이 포함된 사진은 네이버에서 광고성 글로 판단해 저품질 또는 비공개 처리될 수 있습니다.
-              </p>
-            </div>
-          </div>
-        </div>
-        )}
 
         {/* 블로그 링크 제출 */}
         {historyId && (

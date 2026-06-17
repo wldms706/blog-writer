@@ -45,11 +45,6 @@ export default function StepPosition({ formData }: StepPositionProps) {
               <span className="text-gray-400 text-sm">업종</span>
               <span className="font-medium text-black flex items-center gap-2">
                 {business?.icon} {business?.name}
-                {hasRegulation && (
-                  <span className="text-xs px-2 py-0.5 rounded-full bg-orange-500 text-white font-bold">
-                    규제 업종
-                  </span>
-                )}
               </span>
             </div>
             <div className="flex items-center justify-between py-2 border-b border-gray-200">

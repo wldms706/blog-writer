@@ -82,7 +82,7 @@ export default function LandingPage() {
               <p className="text-gray-400 text-xs mb-4">무제한 생성</p>
               <ul className="space-y-2 text-sm text-gray-600">
                 <li>• 반영구 특화 글 구조</li>
-                <li>• 규제 표현 자동 차단</li>
+                <li>• 네이버 안전 글쓰기 자동 적용</li>
                 <li>• SEO 최적화</li>
               </ul>
             </div>
