@@ -47,6 +47,10 @@ export default function SettingsPage() {
   const [cancelReason, setCancelReason] = useState('');
   const [cancelReasonOther, setCancelReasonOther] = useState('');
   const [cancelling, setCancelling] = useState(false);
+  const [showUpgradeConfirm, setShowUpgradeConfirm] = useState(false);
+  const [upgradeInfo, setUpgradeInfo] = useState<{ amount: number; remainingDays: number } | null>(null);
+  const [upgradeLoading, setUpgradeLoading] = useState(false);
+  const [upgrading, setUpgrading] = useState(false);
   const [showClearConfirm, setShowClearConfirm] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -523,6 +527,89 @@ export default function SettingsPage() {
                 </div>
               </div>
 
+              {/* 업그레이드 (일반 → 반영구) */}
+              {subscription.plan_id === 'pro_general' && !showUpgradeConfirm && (
+                <button
+                  onClick={async () => {
+                    setUpgradeLoading(true);
+                    try {
+                      const res = await fetch('/api/payments/upgrade');
+                      const data = await res.json();
+                      if (!res.ok) {
+                        showToast(data.error || '정보를 불러오지 못했어요');
+                        return;
+                      }
+                      setUpgradeInfo({ amount: data.amount, remainingDays: data.remainingDays });
+                      setShowUpgradeConfirm(true);
+                    } finally {
+                      setUpgradeLoading(false);
+                    }
+                  }}
+                  disabled={upgradeLoading}
+                  className="w-full rounded-lg bg-[#3B5CFF] py-2.5 text-xs font-bold text-white hover:bg-[#2A45E0] disabled:opacity-50"
+                >
+                  {upgradeLoading ? '계산 중...' : '⭐ 프로 (반영구)로 업그레이드'}
+                </button>
+              )}
+
+              {subscription.plan_id === 'pro_general' && showUpgradeConfirm && upgradeInfo && (
+                <div className="rounded-lg bg-blue-50 p-4 space-y-3 border border-blue-200">
+                  <div>
+                    <p className="text-sm font-bold text-blue-900 mb-2">프로 (반영구)로 업그레이드</p>
+                    <div className="space-y-1 text-xs text-blue-800">
+                      <p>• 현재: 프로 (일반) ₩9,900/월</p>
+                      <p>• 변경 후: 프로 (반영구) ₩12,900/월</p>
+                      <p>• 남은 일수: {upgradeInfo.remainingDays}일</p>
+                      <p className="pt-1 font-bold">
+                        {upgradeInfo.amount > 0
+                          ? `→ 오늘 차액 ${upgradeInfo.amount.toLocaleString()}원 결제`
+                          : '→ 남은 기간이 짧아 차액 결제 없이 승격됩니다'}
+                      </p>
+                      <p className="text-blue-600">다음 결제일부터 ₩12,900/월로 자동 결제</p>
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={async () => {
+                        setUpgrading(true);
+                        try {
+                          const res = await fetch('/api/payments/upgrade', { method: 'POST' });
+                          const data = await res.json();
+                          if (res.ok) {
+                            setSubscription({
+                              ...subscription,
+                              plan_id: 'pro_permanent',
+                              plan_name: '프로 (반영구)',
+                              price: 12900,
+                            });
+                            showToast(data.message || '업그레이드 완료!');
+                            setShowUpgradeConfirm(false);
+                            setUpgradeInfo(null);
+                          } else {
+                            showToast(data.error || '업그레이드 실패');
+                          }
+                        } finally {
+                          setUpgrading(false);
+                        }
+                      }}
+                      disabled={upgrading}
+                      className="flex-1 rounded-lg bg-[#3B5CFF] py-2 text-xs font-bold text-white hover:bg-[#2A45E0] disabled:opacity-50"
+                    >
+                      {upgrading ? '결제 중...' : '결제하고 업그레이드'}
+                    </button>
+                    <button
+                      onClick={() => {
+                        setShowUpgradeConfirm(false);
+                        setUpgradeInfo(null);
+                      }}
+                      className="rounded-lg bg-white border border-gray-200 px-4 py-2 text-xs font-medium text-gray-700 hover:bg-gray-50"
+                    >
+                      취소
+                    </button>
+                  </div>
+                </div>
+              )}
+
               {!showCancelConfirm ? (
                 <button
                   onClick={() => setShowCancelConfirm(true)}
@@ -645,6 +732,94 @@ export default function SettingsPage() {
                   </p>
                 )}
               </div>
+
+              {/* 취소했지만 만료 전 + 일반 플랜 → 재활성화 + 업그레이드 옵션 */}
+              {subscription.plan_id === 'pro_general' &&
+                subscription.next_billing_at &&
+                new Date(subscription.next_billing_at) > new Date() &&
+                !showUpgradeConfirm && (
+                <button
+                  onClick={async () => {
+                    setUpgradeLoading(true);
+                    try {
+                      const res = await fetch('/api/payments/upgrade');
+                      const data = await res.json();
+                      if (!res.ok) {
+                        showToast(data.error || '정보를 불러오지 못했어요');
+                        return;
+                      }
+                      setUpgradeInfo({ amount: data.amount, remainingDays: data.remainingDays });
+                      setShowUpgradeConfirm(true);
+                    } finally {
+                      setUpgradeLoading(false);
+                    }
+                  }}
+                  disabled={upgradeLoading}
+                  className="w-full rounded-lg bg-[#3B5CFF] py-2.5 text-xs font-bold text-white hover:bg-[#2A45E0] disabled:opacity-50"
+                >
+                  {upgradeLoading ? '계산 중...' : '⭐ 재활성화 + 프로 (반영구)로 업그레이드'}
+                </button>
+              )}
+
+              {subscription.plan_id === 'pro_general' && showUpgradeConfirm && upgradeInfo && (
+                <div className="rounded-lg bg-blue-50 p-4 space-y-3 border border-blue-200">
+                  <div>
+                    <p className="text-sm font-bold text-blue-900 mb-2">재활성화 + 프로 (반영구) 업그레이드</p>
+                    <div className="space-y-1 text-xs text-blue-800">
+                      <p>• 취소 상태 → 즉시 재활성화</p>
+                      <p>• 프로 (일반) → 프로 (반영구)로 변경</p>
+                      <p>• 남은 일수: {upgradeInfo.remainingDays}일</p>
+                      <p className="pt-1 font-bold">
+                        {upgradeInfo.amount > 0
+                          ? `→ 오늘 차액 ${upgradeInfo.amount.toLocaleString()}원 결제`
+                          : '→ 남은 기간이 짧아 차액 결제 없이 처리됩니다'}
+                      </p>
+                      <p className="text-blue-600">다음 결제일부터 ₩12,900/월로 자동 결제</p>
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={async () => {
+                        setUpgrading(true);
+                        try {
+                          const res = await fetch('/api/payments/upgrade', { method: 'POST' });
+                          const data = await res.json();
+                          if (res.ok) {
+                            setSubscription({
+                              ...subscription,
+                              status: 'active',
+                              plan_id: 'pro_permanent',
+                              plan_name: '프로 (반영구)',
+                              price: 12900,
+                            });
+                            showToast(data.message || '업그레이드 완료!');
+                            setShowUpgradeConfirm(false);
+                            setUpgradeInfo(null);
+                          } else {
+                            showToast(data.error || '업그레이드 실패');
+                          }
+                        } finally {
+                          setUpgrading(false);
+                        }
+                      }}
+                      disabled={upgrading}
+                      className="flex-1 rounded-lg bg-[#3B5CFF] py-2 text-xs font-bold text-white hover:bg-[#2A45E0] disabled:opacity-50"
+                    >
+                      {upgrading ? '결제 중...' : '결제하고 업그레이드'}
+                    </button>
+                    <button
+                      onClick={() => {
+                        setShowUpgradeConfirm(false);
+                        setUpgradeInfo(null);
+                      }}
+                      className="rounded-lg bg-white border border-gray-200 px-4 py-2 text-xs font-medium text-gray-700 hover:bg-gray-50"
+                    >
+                      취소
+                    </button>
+                  </div>
+                </div>
+              )}
+
               <Link
                 href="/subscribe"
                 className="block w-full rounded-full bg-[#3B5CFF] py-2.5 text-center text-xs font-bold text-white hover:bg-[#2A45E0]"

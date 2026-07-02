@@ -24,7 +24,7 @@ const plans: Plan[] = [
     period: '',
     description: '서비스를 먼저 체험해보세요',
     features: [
-      { text: '1일 3회 글 생성', included: true },
+      { text: '계정당 3회 무료 체험', included: true },
       { text: '기본 글 구조 5종', included: true },
       { text: '히스토리 저장 (최근 10개)', included: true },
       { text: '무제한 글 생성', included: false },

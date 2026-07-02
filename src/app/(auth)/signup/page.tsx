@@ -105,7 +105,7 @@ export default function SignupPage() {
         )}
 
         <p className="mt-4 text-center text-[11px] text-white/40">
-          가입 시 무료 플랜(하루 3회 생성)이 적용됩니다
+          가입 시 무료 플랜(계정당 3회 체험)이 적용됩니다
         </p>
       </div>
 

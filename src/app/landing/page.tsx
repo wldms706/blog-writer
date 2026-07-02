@@ -41,7 +41,7 @@ export default function LandingPage() {
           </div>
 
           <p className="mt-6 text-xs text-white/30">
-            가입 즉시 하루 3회 무료 생성
+            가입 시 계정당 3회 무료 체험
           </p>
         </div>
       </main>
@@ -57,7 +57,7 @@ export default function LandingPage() {
             <div className="bg-white/10 backdrop-blur-sm border border-white/20 p-6 rounded-2xl">
               <p className="text-white/60 text-sm font-medium mb-2">무료</p>
               <p className="text-3xl font-black text-white mb-1">0원</p>
-              <p className="text-white/40 text-xs mb-4">하루 3회 생성</p>
+              <p className="text-white/40 text-xs mb-4">계정당 3회 체험</p>
               <ul className="space-y-2 text-sm text-white/70">
                 <li>• 기본 글 구조 5종</li>
                 <li>• 히스토리 최근 10개</li>

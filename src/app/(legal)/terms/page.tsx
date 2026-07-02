@@ -46,7 +46,7 @@ export default function TermsPage() {
             <h2 className="text-lg font-semibold text-slate-900 mb-3">제4조 (서비스 이용)</h2>
             <ol className="list-decimal list-inside space-y-2">
               <li>서비스는 회원가입 후 이용 가능합니다.</li>
-              <li>무료 플랜은 1일 3회 글 생성이 가능합니다.</li>
+              <li>무료 플랜은 계정당 3회 무료 체험이 가능합니다.</li>
               <li>유료 플랜(프로)은 월 구독 결제 후 무제한 글 생성이 가능합니다.</li>
             </ol>
           </section>
