@@ -46,7 +46,7 @@ export default function CaptionPage() {
 
         const { data: profile } = await supabase
           .from('profiles')
-          .select('plan, caption_usage, caption_bonus')
+          .select('plan, caption_usage')
           .eq('id', user.id)
           .single();
 
@@ -76,7 +76,7 @@ export default function CaptionPage() {
 
         setMyPlan('free');
         const used = profile?.caption_usage || 0;
-        const limit = 5 + (profile?.caption_bonus || 0);
+        const limit = 5; // caption_bonus 컬럼 없어서 일단 5회 고정
         setCaptionLeft(Math.max(0, limit - used));
       } catch {
         setMyPlan('free');
