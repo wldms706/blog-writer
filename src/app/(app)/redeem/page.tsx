@@ -1,15 +1,63 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 
-export default function RedeemCouponPage() {
+function RedeemContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [code, setCode] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState<{ message: string; expiresAt: string } | null>(null);
+
+  // 쿠폰 정보 (등록 마감 카운트다운용)
+  const [couponInfo, setCouponInfo] = useState<{ remaining: number; deadline: string | null } | null>(null);
+  const [countdown, setCountdown] = useState<string>("");
+
+  // URL 파라미터로 코드 자동 입력
+  useEffect(() => {
+    const urlCode = searchParams.get("code");
+    if (urlCode) {
+      setCode(urlCode.toUpperCase());
+      // 쿠폰 정보 조회 (마감 카운트다운용)
+      fetch(`/api/redeem-coupon?code=${encodeURIComponent(urlCode)}`)
+        .then(r => r.json())
+        .then(data => {
+          if (!data.error) {
+            setCouponInfo({ remaining: data.remaining, deadline: data.deadline });
+          }
+        })
+        .catch(() => {});
+    }
+  }, [searchParams]);
+
+  // 카운트다운 업데이트
+  useEffect(() => {
+    if (!couponInfo?.deadline) return;
+
+    const updateCountdown = () => {
+      const now = new Date().getTime();
+      const target = new Date(couponInfo.deadline!).getTime();
+      const diff = target - now;
+
+      if (diff <= 0) {
+        setCountdown("마감됨");
+        return;
+      }
+
+      const hours = Math.floor(diff / (1000 * 60 * 60));
+      const minutes = Math.floor((diff / (1000 * 60)) % 60);
+      const seconds = Math.floor((diff / 1000) % 60);
+
+      setCountdown(`${hours}시간 ${minutes}분 ${seconds}초`);
+    };
+
+    updateCountdown();
+    const interval = setInterval(updateCountdown, 1000);
+    return () => clearInterval(interval);
+  }, [couponInfo]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -60,42 +108,19 @@ export default function RedeemCouponPage() {
           border: "1px solid #EBEBEB",
           borderRadius: 20,
           padding: "40px 28px",
-          textAlign: "center",
           boxShadow: "0 12px 40px rgba(0,0,0,0.06)",
+          textAlign: "center",
         }}>
-          <div style={{
-            width: 80, height: 80,
-            background: "linear-gradient(135deg, #10B981 0%, #059669 100%)",
-            borderRadius: "50%",
-            display: "inline-flex",
-            alignItems: "center",
-            justifyContent: "center",
-            color: "#fff",
-            fontSize: "2.4rem",
-            marginBottom: 20,
-          }}>
-            ✓
-          </div>
-          <h1 style={{ fontSize: "1.4rem", fontWeight: 900, marginBottom: 12, color: "#1a1a1a" }}>
-            등록 완료! 🎉
+          <div style={{ fontSize: "3rem", lineHeight: 1, marginBottom: 16 }}>🎉</div>
+          <h1 style={{ fontSize: "1.4rem", fontWeight: 900, marginBottom: 12 }}>
+            활성화 완료!
           </h1>
-          <p style={{ fontSize: "0.95rem", color: "#666", lineHeight: 1.8, marginBottom: 24 }}>
+          <p style={{ fontSize: "0.9rem", color: "#666", lineHeight: 1.7, marginBottom: 8 }}>
             {success.message}
           </p>
-          <div style={{
-            background: "#F0F4FF",
-            border: "1px solid #C8D6FF",
-            borderRadius: 12,
-            padding: "14px 18px",
-            marginBottom: 24,
-            fontSize: "0.85rem",
-            color: "#2A5FFF",
-            fontWeight: 700,
-          }}>
-            ⏰ 만료: {new Date(success.expiresAt).toLocaleDateString("ko-KR", {
-              year: "numeric", month: "long", day: "numeric", hour: "2-digit", minute: "2-digit",
-            })}
-          </div>
+          <p style={{ fontSize: "0.85rem", color: "#888", marginBottom: 24 }}>
+            만료일: {new Date(success.expiresAt).toLocaleDateString("ko-KR")}
+          </p>
           <button
             type="button"
             onClick={() => router.push("/write")}
@@ -147,17 +172,39 @@ export default function RedeemCouponPage() {
             쿠폰 코드 등록
           </h1>
           <p style={{ fontSize: "0.88rem", color: "#666", lineHeight: 1.7, wordBreak: "keep-all" }}>
-            EAZY 릴스 강의 등을 구매하시고 발급받은<br />
-            쿠폰 코드를 입력하면 <strong style={{ color: "#1a1a1a" }}>PRO 이용권</strong>이 활성화돼요.
+            강의/이벤트 참여 시 발급받은 쿠폰 코드를 입력하면<br />
+            <strong style={{ color: "#1a1a1a" }}>PRO 이용권</strong>이 활성화돼요.
           </p>
         </div>
+
+        {/* 카운트다운 (URL에 코드 있을 때만) */}
+        {couponInfo && couponInfo.deadline && (
+          <div style={{
+            background: "linear-gradient(135deg, #FF4444 0%, #FF6B6B 100%)",
+            color: "#fff",
+            borderRadius: 14,
+            padding: "16px 18px",
+            marginBottom: 20,
+            textAlign: "center",
+          }}>
+            <p style={{ fontSize: "0.72rem", fontWeight: 700, opacity: 0.9, letterSpacing: "1px", marginBottom: 6 }}>
+              ⏰ 등록 마감까지
+            </p>
+            <p style={{ fontSize: "1.4rem", fontWeight: 900, lineHeight: 1.2, fontFamily: "ui-monospace, SFMono-Regular, monospace" }}>
+              {countdown || "..."}
+            </p>
+            <p style={{ fontSize: "0.75rem", opacity: 0.9, marginTop: 6 }}>
+              남은 자리: <strong>{couponInfo.remaining}개</strong>
+            </p>
+          </div>
+        )}
 
         <form onSubmit={handleSubmit}>
           <input
             type="text"
             value={code}
             onChange={(e) => { setCode(e.target.value); setError(""); }}
-            placeholder="예: RL-XK4H-M2P9"
+            placeholder="쿠폰 코드 입력"
             autoComplete="off"
             autoCapitalize="characters"
             style={{
@@ -213,5 +260,13 @@ export default function RedeemCouponPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function RedeemCouponPage() {
+  return (
+    <Suspense fallback={<div style={{ minHeight: "80vh" }} />}>
+      <RedeemContent />
+    </Suspense>
   );
 }
