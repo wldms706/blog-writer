@@ -84,6 +84,9 @@ export default function SubscribePage() {
   const [error, setError] = useState<string | null>(null);
   const [user, setUser] = useState<{ id: string; email: string } | null>(null);
   const [promoData, setPromoData] = useState<{ remaining: number; isPromoOpen: boolean; prices: Record<string, number>; originalPrices: Record<string, number> } | null>(null);
+  const [couponCode, setCouponCode] = useState('');
+  const [couponLoading, setCouponLoading] = useState(false);
+  const [couponMsg, setCouponMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
   useEffect(() => {
     const getUser = async () => {
@@ -113,6 +116,30 @@ export default function SubscribePage() {
   });
 
   const getDisplayPrice = (price: number) => price;
+
+  const handleApplyCoupon = async () => {
+    if (!couponCode.trim()) return;
+    setCouponLoading(true);
+    setCouponMsg(null);
+    try {
+      const res = await fetch('/api/redeem-coupon', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code: couponCode.trim() }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setCouponMsg({ type: 'error', text: data.error || '쿠폰 등록에 실패했어요.' });
+      } else {
+        setCouponMsg({ type: 'success', text: '🎉 이용권 활성화 완료! 잠시 후 이동합니다...' });
+        setTimeout(() => { window.location.href = '/write'; }, 1500);
+      }
+    } catch {
+      setCouponMsg({ type: 'error', text: '네트워크 오류가 발생했어요.' });
+    } finally {
+      setCouponLoading(false);
+    }
+  };
 
   const handlePayment = async () => {
     if (!selectedPlan || !user || !clientKey) return;
@@ -241,6 +268,38 @@ export default function SubscribePage() {
               </div>
             </div>
           </div>
+
+          {/* 쿠폰 입력 */}
+          <div className="mb-4 rounded-lg border border-[#3B5CFF]/30 bg-[#3B5CFF]/5 p-4">
+            <p className="mb-2 text-sm font-bold text-[#3B5CFF]">🎁 쿠폰 코드가 있으신가요?</p>
+            <p className="mb-3 text-xs text-gray-600">강의/이벤트 참여로 받은 쿠폰이 있다면 결제 없이 바로 활성화돼요.</p>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={couponCode}
+                onChange={(e) => { setCouponCode(e.target.value.toUpperCase()); setCouponMsg(null); }}
+                placeholder="예: 0727SPPA"
+                autoCapitalize="characters"
+                className="flex-1 rounded-lg border border-gray-200 px-3 py-2 text-sm outline-none focus:border-[#3B5CFF]"
+              />
+              <button
+                onClick={handleApplyCoupon}
+                disabled={couponLoading || !couponCode.trim() || !user}
+                className="rounded-lg bg-[#3B5CFF] px-4 py-2 text-sm font-bold text-white hover:bg-[#2A45E0] disabled:opacity-30 disabled:cursor-not-allowed"
+              >
+                {couponLoading ? '확인 중...' : '쿠폰 적용'}
+              </button>
+            </div>
+            {couponMsg && (
+              <p className={`mt-2 text-xs font-bold ${couponMsg.type === 'success' ? 'text-green-600' : 'text-red-500'}`}>
+                {couponMsg.text}
+              </p>
+            )}
+            {!user && (
+              <p className="mt-2 text-xs text-gray-500">로그인 후 쿠폰 등록 가능해요</p>
+            )}
+          </div>
+
           <button
             onClick={handlePayment}
             disabled={isLoading || !user}
