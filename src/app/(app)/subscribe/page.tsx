@@ -278,7 +278,7 @@ export default function SubscribePage() {
                 type="text"
                 value={couponCode}
                 onChange={(e) => { setCouponCode(e.target.value.toUpperCase()); setCouponMsg(null); }}
-                placeholder="예: 0727SPPA"
+                placeholder="쿠폰 코드 입력"
                 autoCapitalize="characters"
                 className="flex-1 rounded-lg border border-gray-200 px-3 py-2 text-sm outline-none focus:border-[#3B5CFF]"
               />
