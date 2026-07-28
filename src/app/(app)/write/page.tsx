@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useCallback, useMemo, useEffect } from 'react';
+import Link from 'next/link';
 import StepProgress from '@/components/StepProgress';
 import WeeklyStreak from '@/components/WeeklyStreak';
 import StepContentType from '@/components/steps/StepContentType';
@@ -342,6 +343,23 @@ export default function Home() {
 
   return (
     <div>
+      {/* 무료 유저에게만 쿠폰 배너 노출 */}
+      {!userPlanType && currentStep === 1 && (
+        <Link
+          href="/redeem"
+          className="mb-4 flex items-center justify-between rounded-2xl bg-gradient-to-r from-[#3B5CFF] to-[#5B82FF] px-4 py-3 text-white shadow-md hover:shadow-lg transition-all"
+        >
+          <div className="flex items-center gap-3">
+            <span className="text-2xl">🎁</span>
+            <div>
+              <p className="text-sm font-black">쿠폰 있으신가요?</p>
+              <p className="text-xs text-white/80">강의/이벤트 쿠폰으로 30일 무료 이용권 받기</p>
+            </div>
+          </div>
+          <span className="text-sm font-bold">등록하기 →</span>
+        </Link>
+      )}
+
       {/* Weekly Streak */}
       {currentStep === 1 && <WeeklyStreak />}
 

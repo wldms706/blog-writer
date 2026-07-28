@@ -54,6 +54,9 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
             <Link href="/settings" className="rounded-full px-3 sm:px-4 py-1.5 text-xs sm:text-sm text-white/70 hover:text-white hover:bg-white/10 transition-colors">
               설정
             </Link>
+            <Link href="/redeem" className="rounded-full bg-[#3B5CFF] px-3 sm:px-4 py-1.5 text-xs sm:text-sm font-bold text-white hover:bg-[#2A45E0] transition-colors">
+              🎁 쿠폰
+            </Link>
             <div className="hidden sm:block h-8 w-px bg-white/20" />
             {user && (
               <span className="hidden text-xs text-white/40 md:block">{displayName}</span>
