@@ -43,7 +43,9 @@ export async function GET(request: NextRequest) {
     .select('*')
     .eq('status', 'active')
     .not('billing_key', 'is', null)
-    .lte('next_billing_at', now);
+    .lte('next_billing_at', now)
+    // 3회 이상 실패한 건은 제외 (상태 변경이 실패해도 무한 재시도되지 않도록)
+    .or('retry_count.is.null,retry_count.lt.3');
 
   if (error) {
     console.error('[빌링 크론] 구독 조회 실패:', error);
@@ -104,25 +106,35 @@ export async function GET(request: NextRequest) {
         // 실패: 재시도 카운트 증가
         const retryCount = (sub.retry_count || 0) + 1;
 
-        const updateData: Record<string, unknown> = {
-          retry_count: retryCount,
-          updated_at: new Date().toISOString(),
-        };
+        // 재시도 카운트는 상태 변경과 분리해서 먼저 기록한다.
+        // 한 번의 UPDATE 로 묶으면 상태 변경이 거부될 때 카운트까지 롤백되어
+        // 같은 건을 매일 무한 재시도하게 된다.
+        const { error: retryErr } = await supabase
+          .from('subscriptions')
+          .update({ retry_count: retryCount, updated_at: new Date().toISOString() })
+          .eq('id', sub.id);
+
+        if (retryErr) {
+          console.error(`[빌링 크론] retry_count 기록 실패: user=${sub.user_id}`, retryErr);
+        }
 
         // 3회 연속 실패 시 구독 일시정지
         if (retryCount >= 3) {
-          updateData.status = 'payment_failed';
           // 프로필도 무료로 변경
           await supabase
             .from('profiles')
             .update({ plan: 'free' })
             .eq('id', sub.user_id);
-        }
 
-        await supabase
-          .from('subscriptions')
-          .update(updateData)
-          .eq('id', sub.id);
+          const { error: statusErr } = await supabase
+            .from('subscriptions')
+            .update({ status: 'payment_failed' })
+            .eq('id', sub.id);
+
+          if (statusErr) {
+            console.error(`[빌링 크론] 상태 변경 실패: user=${sub.user_id}`, statusErr);
+          }
+        }
 
         failCount++;
         console.error(`[빌링 크론] 결제 실패: user=${sub.user_id}, error=${data.message}, retry=${retryCount}`);
