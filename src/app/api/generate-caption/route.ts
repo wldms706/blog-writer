@@ -46,7 +46,7 @@ export async function POST(request: NextRequest) {
         .eq('user_id', user.id);
       const nowIsoDirect = new Date().toISOString();
       isDirectPaid = (directSubs || []).some(s =>
-        ['caption_only', 'pro_permanent', 'pro_general'].includes(s.plan_id) &&
+        ['caption_only', 'pro_permanent', 'pro_general', 'pro_reels'].includes(s.plan_id) &&
         (s.status === 'active' || (s.status === 'cancelled' && s.next_billing_at && s.next_billing_at > nowIsoDirect))
       );
     }

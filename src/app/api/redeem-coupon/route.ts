@@ -89,6 +89,34 @@ export async function POST(request: NextRequest) {
     // 사용 처리
     const now = new Date();
     const expiresAt = new Date(now.getTime() + (coupon.duration_days || 30) * 24 * 60 * 60 * 1000);
+    const targetPlan = coupon.target_plan || 'pro_permanent';
+
+    // ── 권한 부여를 먼저 한다 ──
+    // 쿠폰을 먼저 소각하면, 권한 부여가 실패했을 때 쿠폰만 날아가고 재등록도 막혀
+    // 사용자가 빠져나올 수 없는 상태가 된다(실제 발생: 2026-07 릴스 쿠폰 3건).
+    //
+    // profiles.plan 은 'free' | 'paid' 만 허용된다(profiles_plan_check).
+    // 과거 코드는 여기에 'pro_reels' / 'pro_permanent' 를 넣어 UPDATE 가 통째로 거부됐고,
+    // 결과를 확인하지 않아 사용자에게는 성공으로 표시됐다.
+    // 결제 경로(payments/confirm, upgrade, usage.ts)와 동일하게 'paid' 를 쓰고,
+    // 세부 플랜은 plan_type 에 보존한다.
+    const { error: grantErr } = await admin
+      .from('profiles')
+      .update({
+        plan: 'paid',
+        plan_type: targetPlan,
+        coupon_used: true,
+        coupon_code: inputCode,
+      })
+      .eq('id', user.id);
+
+    if (grantErr) {
+      console.error('쿠폰 권한 부여 실패 (쿠폰은 소각하지 않음):', grantErr);
+      return NextResponse.json(
+        { error: '이용권 활성화에 실패했어요. 쿠폰은 그대로 남아있으니 다시 시도해주세요.' },
+        { status: 500 },
+      );
+    }
 
     if (isSharedCode) {
       // 공용 쿠폰: coupon_redemptions에 기록 + used_count 증가
@@ -127,37 +155,49 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // profiles.plan 업데이트 → 유료 활성화
-    const targetPlan = coupon.target_plan || 'pro_permanent';
-    await admin
-      .from('profiles')
-      .update({
-        plan: targetPlan,
-        coupon_used: true,
-        coupon_code: inputCode,
-      })
-      .eq('id', user.id);
+    // subscriptions 테이블에도 임시 구독 기록 (만료 관리용)
+    // user_id 에 UNIQUE 제약이 있어 단순 insert 는 기존 구독이 있는 사용자에게 실패한다.
+    // supabase-js 는 throw 하지 않고 { error } 를 반환하므로 try/catch 로는 잡히지 않는다.
+    const planName = targetPlan === 'pro_permanent' ? '프로 (반영구) - 쿠폰'
+                   : targetPlan === 'pro_general' ? '프로 (일반) - 쿠폰'
+                   : `${targetPlan} - 쿠폰`;
+    const subRow = {
+      user_id: user.id,
+      status: 'active',
+      plan_id: targetPlan,
+      plan_name: planName,
+      plan_type: targetPlan === 'pro_permanent' ? 'permanent' : 'general',
+      price: 0,
+      started_at: now.toISOString(),
+      next_billing_at: expiresAt.toISOString(),
+      payment_key: 'coupon_grant',
+      order_id: `coupon_${inputCode}_${user.id}`,
+      customer_key: `coupon_${user.id}`,
+    };
 
-    // subscriptions 테이블에도 임시 구독 삽입 (만료 관리용)
-    try {
-      const planName = targetPlan === 'pro_permanent' ? '프로 (반영구) - 쿠폰'
-                     : targetPlan === 'pro_general' ? '프로 (일반) - 쿠폰'
-                     : `${targetPlan} - 쿠폰`;
-      await admin.from('subscriptions').insert({
-        user_id: user.id,
-        status: 'active',
-        plan_id: targetPlan,
-        plan_name: planName,
-        plan_type: targetPlan === 'pro_permanent' ? 'permanent' : 'general',
-        price: 0,
-        started_at: now.toISOString(),
-        next_billing_at: expiresAt.toISOString(),
-        payment_key: 'coupon_grant',
-        order_id: `coupon_${inputCode}_${user.id}`,
-        customer_key: `coupon_${user.id}`,
-      });
-    } catch (subErr) {
-      console.warn('subscriptions 삽입 실패 (무시 가능):', subErr);
+    const { data: existingSub } = await admin
+      .from('subscriptions')
+      .select('id, status, price, next_billing_at')
+      .eq('user_id', user.id)
+      .maybeSingle();
+
+    const hasLiveSub = existingSub && (
+      existingSub.status === 'active' ||
+      (existingSub.next_billing_at && new Date(existingSub.next_billing_at) > now)
+    );
+
+    if (hasLiveSub && existingSub.price > 0) {
+      // 유료 결제 중인 구독은 덮어쓰지 않는다 (빌링키가 날아가 결제가 끊긴다)
+      console.warn(`쿠폰 등록: 유료 구독 유지, 구독 행 미변경 user=${user.id}`);
+    } else {
+      const { error: subErr } = existingSub
+        ? await admin.from('subscriptions').update(subRow).eq('id', existingSub.id)
+        : await admin.from('subscriptions').insert(subRow);
+
+      if (subErr) {
+        // 권한(profiles.plan)은 이미 부여됐으므로 이용에는 지장이 없다. 만료 관리만 누락된다.
+        console.error('쿠폰 구독 기록 실패 (권한은 부여됨):', subErr);
+      }
     }
 
     return NextResponse.json({
