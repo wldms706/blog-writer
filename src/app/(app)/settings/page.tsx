@@ -36,6 +36,8 @@ export default function SettingsPage() {
     shopHours: '',
     shopPhone: '',
     shopParking: '',
+    phone: '',
+    marketingAgreed: false,
     storyMotivation: '',
     storyPriority: '',
     storyMessage: '',
@@ -307,6 +309,41 @@ export default function SettingsPage() {
               저장된 정보가 글 작성 시 자동으로 적용됩니다
             </p>
           )}
+        </div>
+
+        {/* 알림 받을 번호 */}
+        <div className="rounded-2xl border border-gray-200 p-5">
+          <label className="mb-1 block text-sm font-bold text-black">알림 받을 번호 📱</label>
+          <p className="mb-4 text-xs text-gray-500">
+            매장 대표번호와 별개로, 원장님이 직접 받으실 번호예요
+          </p>
+          <input
+            type="tel"
+            inputMode="numeric"
+            value={profile.phone}
+            onChange={(e) => setProfile({ ...profile, phone: e.target.value })}
+            onBlur={() => handleSaveProfile({ phone: profile.phone.replace(/\D/g, '') })}
+            placeholder="010-1234-5678"
+            className="w-full rounded-xl border-2 border-gray-200 px-3 py-2.5 text-sm outline-none focus:border-[#3B5CFF]"
+          />
+          <p className="mt-1.5 text-xs text-gray-400">
+            결제 실패, 이용권 만료 같은 중요 안내는 이 번호로 발송됩니다
+          </p>
+
+          <label className="mt-3 flex items-start gap-2 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={profile.marketingAgreed}
+              onChange={(e) => {
+                setProfile({ ...profile, marketingAgreed: e.target.checked });
+                handleSaveProfile({ marketingAgreed: e.target.checked });
+              }}
+              className="mt-0.5 h-4 w-4 rounded border-gray-300 accent-[#3B5CFF]"
+            />
+            <span className="text-xs text-gray-500">
+              글쓰기 리마인드, 혜택 안내 문자 받기 (선택)
+            </span>
+          </label>
         </div>
 
         {/* 원장님 스토리 */}

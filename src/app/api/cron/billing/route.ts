@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { nanoid } from 'nanoid';
+import { sendSms, pickMobile, templates } from '@/lib/sms';
 
 const TOSS_SECRET_KEY = process.env.TOSS_SECRET_KEY || '';
 const CRON_SECRET = process.env.CRON_SECRET || '';
@@ -133,6 +134,28 @@ export async function GET(request: NextRequest) {
 
           if (statusErr) {
             console.error(`[빌링 크론] 상태 변경 실패: user=${sub.user_id}`, statusErr);
+          }
+        }
+
+        // 결제 실패 문자 (정보성 — 수신동의 불필요)
+        // 첫 실패와 최종 해지 시점에만 보낸다. 매일 보내면 스팸이 된다.
+        if (retryCount === 1 || retryCount >= 3) {
+          const { data: prof } = await supabase
+            .from('profiles')
+            .select('name, phone, shop_phone')
+            .eq('id', sub.user_id)
+            .maybeSingle();
+
+          const to = prof ? pickMobile(prof) : null;
+          if (to) {
+            await sendSms({
+              userId: sub.user_id,
+              to,
+              kind: 'payment_failed',
+              subject: '자동결제 실패 안내',
+              text: templates.paymentFailed(prof!.name || '원장님', sub.card_number?.slice(-4) || '****'),
+              dedupeHours: 48,
+            });
           }
         }
 

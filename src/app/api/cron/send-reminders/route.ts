@@ -1,151 +1,118 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
+import { sendSms, pickMobile, templates, SMS_ENABLED } from '@/lib/sms';
 
-// 미접속 알림 기준: 3일
+// 미접속 알림 기준
 const INACTIVE_DAYS = 3;
-// 최대 알림 제한 (하루)
-const MAX_REMINDERS_PER_RUN = 50;
-
-type ReminderType = 'paid' | 'free';
-
-/**
- * 카카오톡 알림 발송 placeholder
- * 유료/무료에 따라 다른 메시지 발송
- *
- * 유료: "원장님! 블로그 글쓰셔야죠 ,,ㅜㅜ 3일 넘게 안 쓰셨어요!"
- * 무료: "원장님, 구독하시면 매일 블로그 글을 쓸 수 있어요!"
- */
-async function sendKakaoReminder(user: {
-  id: string;
-  name: string;
-  phone: string | null;
-  last_active_at: string;
-  type: ReminderType;
-}) {
-  // TODO: 실제 카카오 알림톡 API 연동
-  //
-  // 템플릿 2개 필요:
-  // 1. KAKAO_TEMPLATE_INACTIVE_PAID   — 유료 유저용
-  //    "#{고객명}님! 블로그 글쓰셔야죠 ,,ㅜㅜ #{미접속일}일 넘게 안 쓰셨어요!
-  //     지금 바로 새 글을 작성해보세요 👉 https://blogwriter.co.kr/write"
-  //
-  // 2. KAKAO_TEMPLATE_INACTIVE_FREE   — 무료 유저용
-  //    "#{고객명}님, 블로그 글쓰기 잊지 않으셨죠?
-  //     구독하시면 매일 더 많은 글을 작성할 수 있어요!
-  //     👉 https://blogwriter.co.kr/pricing"
-  //
-  // 예시 (Solapi):
-  // const templateId = user.type === 'paid'
-  //   ? process.env.KAKAO_TEMPLATE_INACTIVE_PAID
-  //   : process.env.KAKAO_TEMPLATE_INACTIVE_FREE;
-  //
-  // await fetch('https://api.solapi.com/messages/v4/send', {
-  //   method: 'POST',
-  //   headers: {
-  //     'Authorization': `Bearer ${process.env.SOLAPI_API_KEY}`,
-  //     'Content-Type': 'application/json',
-  //   },
-  //   body: JSON.stringify({
-  //     message: {
-  //       to: user.phone,
-  //       from: process.env.SOLAPI_SENDER_NUMBER,
-  //       kakaoOptions: {
-  //         pfId: process.env.KAKAO_CHANNEL_ID,
-  //         templateId,
-  //         variables: {
-  //           '#{고객명}': user.name,
-  //           '#{미접속일}': `${INACTIVE_DAYS}`,
-  //         },
-  //       },
-  //     },
-  //   }),
-  // });
-
-  const label = user.type === 'paid' ? '유료' : '무료';
-  console.log(`[REMINDER][${label}] ${user.name} (${user.phone || '번호없음'}) — 마지막 접속: ${user.last_active_at}`);
-  return true;
-}
+// 이용권 만료 며칠 전에 알릴지
+const EXPIRY_NOTICE_DAYS = 3;
+// 한 번 실행에서 보낼 최대 건수 (비용 안전장치)
+const MAX_PER_RUN = 50;
+// 같은 사람에게 같은 종류를 다시 보내기까지의 최소 간격
+const DEDUPE_HOURS = 24 * 7;
 
 export async function GET(request: NextRequest) {
-  // Vercel Cron 인증 확인
   const authHeader = request.headers.get('authorization');
   if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
   const supabase = createAdminClient();
+  const now = new Date();
+  const result = {
+    sms_enabled: SMS_ENABLED,
+    coupon_expiring: { sent: 0, no_phone: 0, skipped: 0 },
+    inactive: { sent: 0, no_phone: 0, no_consent: 0, skipped: 0 },
+  };
 
   try {
-    // 3일 이상 미접속 유저 조회
-    const cutoffDate = new Date(Date.now() - INACTIVE_DAYS * 24 * 60 * 60 * 1000).toISOString();
+    // ── 1. 이용권 만료 임박 (정보성 — 수신동의 불필요) ──────────────
+    // 쿠폰으로 받은 이용권과 해지 예약 구독만 대상이다.
+    // 유료 자동결제 구독의 next_billing_at 은 만료가 아니라 갱신일이므로 제외한다.
+    const windowStart = new Date(now.getTime() + (EXPIRY_NOTICE_DAYS - 1) * 86400_000);
+    const windowEnd = new Date(now.getTime() + (EXPIRY_NOTICE_DAYS + 1) * 86400_000);
 
-    const { data: inactiveUsers, error } = await supabase
-      .from('profiles')
-      .select('id, name, phone, last_active_at')
-      .lt('last_active_at', cutoffDate)
-      .not('name', 'is', null)
-      .limit(MAX_REMINDERS_PER_RUN);
-
-    if (error) {
-      console.error('Inactive users query error:', error);
-      return NextResponse.json({ error: 'Query failed' }, { status: 500 });
-    }
-
-    if (!inactiveUsers || inactiveUsers.length === 0) {
-      return NextResponse.json({
-        message: 'No inactive users found',
-        checked_at: new Date().toISOString(),
-      });
-    }
-
-    // 유료 구독 유저 ID 목록 조회 (활성 구독)
-    const userIds = inactiveUsers.map(u => u.id);
-    const { data: activeSubscriptions } = await supabase
+    const { data: expiring } = await supabase
       .from('subscriptions')
-      .select('user_id')
-      .in('user_id', userIds)
-      .eq('status', 'active');
+      .select('user_id, plan_id, next_billing_at, status, payment_key')
+      .in('status', ['active', 'cancelled'])
+      .gte('next_billing_at', windowStart.toISOString())
+      .lte('next_billing_at', windowEnd.toISOString())
+      .limit(MAX_PER_RUN);
 
-    const paidUserIds = new Set(
-      (activeSubscriptions || []).map(s => s.user_id)
-    );
+    for (const sub of expiring || []) {
+      const isGrant = sub.payment_key === 'coupon_grant';
+      const isCancelled = sub.status === 'cancelled';
+      if (!isGrant && !isCancelled) continue; // 자동갱신 구독은 알릴 필요 없음
 
-    // 알림 발송
-    let paidCount = 0;
-    let freeCount = 0;
-    let skippedCount = 0;
+      const { data: p } = await supabase
+        .from('profiles')
+        .select('name, phone, shop_phone')
+        .eq('id', sub.user_id)
+        .maybeSingle();
+      if (!p) continue;
 
-    for (const user of inactiveUsers) {
-      const isPaid = paidUserIds.has(user.id);
-      const reminderUser = { ...user, type: (isPaid ? 'paid' : 'free') as ReminderType };
+      const to = pickMobile(p);
+      if (!to) { result.coupon_expiring.no_phone++; continue; }
 
-      if (!user.phone) {
-        skippedCount++;
-        // 번호 없어도 로그는 남김
-        await sendKakaoReminder(reminderUser);
-        continue;
-      }
+      const until = new Date(sub.next_billing_at).toLocaleDateString('ko-KR');
+      const days = Math.max(1, Math.round((new Date(sub.next_billing_at).getTime() - now.getTime()) / 86400_000));
 
-      const sent = await sendKakaoReminder(reminderUser);
-      if (sent) {
-        if (isPaid) paidCount++;
-        else freeCount++;
-      }
-
-      // API rate limit 방지
-      await new Promise(resolve => setTimeout(resolve, 100));
+      const r = await sendSms({
+        userId: sub.user_id,
+        to,
+        kind: 'coupon_expiring',
+        subject: '이용권 만료 안내',
+        text: templates.couponExpiring(p.name || '원장님', days, until),
+        dedupeHours: DEDUPE_HOURS,
+      });
+      if (r.ok) result.coupon_expiring.sent++;
+      else result.coupon_expiring.skipped++;
     }
 
-    return NextResponse.json({
-      message: 'Reminders processed',
-      total_inactive: inactiveUsers.length,
-      sent_paid: paidCount,
-      sent_free: freeCount,
-      skipped_no_phone: skippedCount,
-      checked_at: new Date().toISOString(),
-    });
+    // ── 2. 미접속 리마인드 (광고성 — 수신동의 필수) ────────────────
+    const cutoff = new Date(now.getTime() - INACTIVE_DAYS * 86400_000).toISOString();
+
+    const { data: inactive } = await supabase
+      .from('profiles')
+      .select('id, name, phone, shop_phone, last_active_at, marketing_agreed')
+      .lt('last_active_at', cutoff)
+      .not('name', 'is', null)
+      .limit(MAX_PER_RUN);
+
+    const ids = (inactive || []).map(u => u.id);
+    const { data: activeSubs } = ids.length
+      ? await supabase.from('subscriptions').select('user_id').in('user_id', ids).eq('status', 'active')
+      : { data: [] };
+    const paidIds = new Set((activeSubs || []).map(s => s.user_id));
+
+    for (const u of inactive || []) {
+      // 광고성이므로 사전 수신동의가 없으면 보내지 않는다 (정보통신망법 제50조)
+      if (!u.marketing_agreed) { result.inactive.no_consent++; continue; }
+
+      const to = pickMobile(u);
+      if (!to) { result.inactive.no_phone++; continue; }
+
+      const days = Math.max(
+        INACTIVE_DAYS,
+        Math.round((now.getTime() - new Date(u.last_active_at).getTime()) / 86400_000),
+      );
+
+      const r = await sendSms({
+        userId: u.id,
+        to,
+        kind: 'inactive',
+        subject: '블로그라이터',
+        text: templates.inactive(u.name || '원장님', days, paidIds.has(u.id)),
+        dedupeHours: DEDUPE_HOURS,
+      });
+      if (r.ok) result.inactive.sent++;
+      else result.inactive.skipped++;
+    }
+
+    return NextResponse.json({ message: '리마인더 처리 완료', ...result, checked_at: now.toISOString() });
   } catch (err) {
-    console.error('Send reminders cron error:', err);
+    console.error('리마인더 크론 오류:', err);
     return NextResponse.json({ error: 'Internal error' }, { status: 500 });
   }
 }

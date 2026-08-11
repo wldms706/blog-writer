@@ -40,6 +40,10 @@ export type UserProfile = {
   shopHours: string;
   shopPhone: string;
   shopParking: string;
+  /** 알림 수신용 개인 휴대폰 번호 (매장 대표번호 shopPhone 과 다름) */
+  phone: string;
+  /** 광고성 문자 수신동의 (정보통신망법 제50조) */
+  marketingAgreed: boolean;
   plan_type?: string | null;
   // 원장님 스토리 Q&A
   storyMotivation: string;    // 이 일을 시작하게 된 계기
@@ -198,6 +202,8 @@ const defaultProfile: UserProfile = {
   shopHours: '',
   shopPhone: '',
   shopParking: '',
+  phone: '',
+  marketingAgreed: false,
   storyMotivation: '',
   storyPriority: '',
   storyMessage: '',
@@ -209,7 +215,7 @@ export async function getProfile(userId: string): Promise<UserProfile> {
   const supabase = createClient();
   const { data, error } = await supabase
     .from('profiles')
-    .select('name, business_name, location_city, location_district, location_neighborhood, blog_url, blog_index_level, blog_index_checked_at, shop_address, shop_hours, shop_phone, shop_parking, plan_type, story_motivation, story_priority, story_message, story_difference, story_reward')
+    .select('name, business_name, location_city, location_district, location_neighborhood, blog_url, blog_index_level, blog_index_checked_at, shop_address, shop_hours, shop_phone, shop_parking, phone, marketing_agreed, plan_type, story_motivation, story_priority, story_message, story_difference, story_reward')
     .eq('id', userId)
     .single();
 
@@ -230,6 +236,8 @@ export async function getProfile(userId: string): Promise<UserProfile> {
     shopHours: data.shop_hours || '',
     shopPhone: data.shop_phone || '',
     shopParking: data.shop_parking || '',
+    phone: data.phone || '',
+    marketingAgreed: Boolean(data.marketing_agreed),
     plan_type: data.plan_type || null,
     storyMotivation: data.story_motivation || '',
     storyPriority: data.story_priority || '',
@@ -276,6 +284,11 @@ export async function saveProfile(userId: string, profile: Partial<UserProfile>)
     if (profile.shopHours !== undefined) insertData.shop_hours = profile.shopHours;
     if (profile.shopPhone !== undefined) insertData.shop_phone = profile.shopPhone;
     if (profile.shopParking !== undefined) insertData.shop_parking = profile.shopParking;
+    if (profile.phone !== undefined) insertData.phone = profile.phone;
+    if (profile.marketingAgreed !== undefined) {
+      insertData.marketing_agreed = profile.marketingAgreed;
+      insertData.marketing_agreed_at = profile.marketingAgreed ? new Date().toISOString() : null;
+    }
     if (profile.storyMotivation !== undefined) insertData.story_motivation = profile.storyMotivation;
     if (profile.storyPriority !== undefined) insertData.story_priority = profile.storyPriority;
     if (profile.storyMessage !== undefined) insertData.story_message = profile.storyMessage;
@@ -307,6 +320,11 @@ export async function saveProfile(userId: string, profile: Partial<UserProfile>)
   if (profile.shopHours !== undefined) updateData.shop_hours = profile.shopHours;
   if (profile.shopPhone !== undefined) updateData.shop_phone = profile.shopPhone;
   if (profile.shopParking !== undefined) updateData.shop_parking = profile.shopParking;
+  if (profile.phone !== undefined) updateData.phone = profile.phone;
+  if (profile.marketingAgreed !== undefined) {
+    updateData.marketing_agreed = profile.marketingAgreed;
+    updateData.marketing_agreed_at = profile.marketingAgreed ? new Date().toISOString() : null;
+  }
   if (profile.storyMotivation !== undefined) updateData.story_motivation = profile.storyMotivation;
   if (profile.storyPriority !== undefined) updateData.story_priority = profile.storyPriority;
   if (profile.storyMessage !== undefined) updateData.story_message = profile.storyMessage;
