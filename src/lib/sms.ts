@@ -164,7 +164,8 @@ export async function sendSms(params: {
 // ── 메시지 문안 ──────────────────────────────────────────────
 // 광고성(inactive, welcome)에는 (광고) 표기와 무료 수신거부 안내가 들어간다.
 
-const UNSUBSCRIBE = '무료수신거부 080-000-0000'; // TODO: 솔라피에서 발급받은 수신거부번호로 교체
+// 광고성 문자에 반드시 표기해야 하는 무료 수신거부번호 (솔라피 발급)
+const UNSUBSCRIBE = '무료수신거부 080-500-4233';
 
 export const templates = {
   paymentFailed: (name: string, cardLast4: string) =>
