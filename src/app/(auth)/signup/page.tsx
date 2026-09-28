@@ -47,7 +47,8 @@ export default function SignupPage() {
     }
   };
 
-  const handleKakaoLogin = async () => {
+  // switchAccount: 카카오에 남아있는 로그인 세션을 무시하고 계정을 다시 입력받음
+  const handleKakaoLogin = async (switchAccount = false) => {
     setSocialLoading(true);
     setError('');
 
@@ -55,6 +56,7 @@ export default function SignupPage() {
       provider: 'kakao',
       options: {
         redirectTo: `${window.location.origin}/auth/callback`,
+        ...(switchAccount && { queryParams: { prompt: 'login' } }),
       },
     });
 
@@ -73,7 +75,7 @@ export default function SignupPage() {
           {/* 카카오 로그인 */}
           <button
             type="button"
-            onClick={handleKakaoLogin}
+            onClick={() => handleKakaoLogin()}
             disabled={socialLoading}
             className="flex w-full items-center justify-center gap-2 rounded-full bg-[#FEE500] py-3 text-sm font-bold text-[#000000]/85 hover:bg-[#FDD835] disabled:opacity-50 transition-colors"
           >
@@ -81,6 +83,14 @@ export default function SignupPage() {
               <path fillRule="evenodd" clipRule="evenodd" d="M9 0.5C4.029 0.5 0 3.591 0 7.415c0 2.487 1.679 4.665 4.196 5.876-.136.479-.876 3.078-.907 3.291 0 0-.018.152.08.21.098.058.214.013.214.013.282-.04 3.269-2.14 3.783-2.5.538.076 1.093.116 1.634.116 4.971 0 9-3.091 9-6.915S13.971 0.5 9 0.5" fill="#000000"/>
             </svg>
             {socialLoading ? '가입 중...' : '카카오로 시작하기'}
+          </button>
+          <button
+            type="button"
+            onClick={() => handleKakaoLogin(true)}
+            disabled={socialLoading}
+            className="w-full text-center text-xs text-white/60 underline hover:text-white/80 disabled:opacity-50"
+          >
+            다른 카카오 계정으로 가입
           </button>
 
           {/* Google 로그인 */}
