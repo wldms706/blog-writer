@@ -107,43 +107,43 @@ export function filterListBullets(text: string, keepNumberedHeaders: boolean = f
 
 export function filterFirstPerson(text: string): string {
   let filtered = text;
-  filtered = filtered.replace(/저희는\s*/g, '');
-  filtered = filtered.replace(/저희\s*쪽에서는\s*/g, '');
-  filtered = filtered.replace(/저희가\s*/g, '');
-  filtered = filtered.replace(/저희의\s*/g, '');
-  filtered = filtered.replace(/저희\s*/g, '');
-  filtered = filtered.replace(/제가\s*/g, '');
-  filtered = filtered.replace(/저는\s*/g, '');
-  filtered = filtered.replace(/우리\s*샵/g, '');
+  filtered = filtered.replace(/저희는[^\S\r\n]*/g, '');
+  filtered = filtered.replace(/저희[^\S\r\n]*쪽에서는[^\S\r\n]*/g, '');
+  filtered = filtered.replace(/저희가[^\S\r\n]*/g, '');
+  filtered = filtered.replace(/저희의[^\S\r\n]*/g, '');
+  filtered = filtered.replace(/저희[^\S\r\n]*/g, '');
+  filtered = filtered.replace(/제가[^\S\r\n]*/g, '');
+  filtered = filtered.replace(/저는[^\S\r\n]*/g, '');
+  filtered = filtered.replace(/우리[^\S\r\n]*샵/g, '');
   filtered = filtered.replace(/  +/g, ' ');
   return filtered;
 }
 
 // 금지 단어/표현 삭제 필터
 const BANNED_WORDS_TO_REMOVE = [
-  /만족스러운\s*/g, /만족도가\s*/g, /만족스러웠/g, /대만족/g,
-  /감동받았/g, /감동을\s*/g, /감동이/g, /감탄/g,
-  /효능\s*/g, /최초\s*/g, /최저\s*/g, /1위\s*/g,
-  /무료\s*/g, /공짜\s*/g, /저렴한\s*곳/g, /신용\s*/g, /가입\s*/g,
+  /만족스러운[^\S\r\n]*/g, /만족도가[^\S\r\n]*/g, /만족스러웠/g, /대만족/g,
+  /감동받았/g, /감동을[^\S\r\n]*/g, /감동이/g, /감탄/g,
+  /효능[^\S\r\n]*/g, /최초[^\S\r\n]*/g, /최저[^\S\r\n]*/g, /1위[^\S\r\n]*/g,
+  /무료[^\S\r\n]*/g, /공짜[^\S\r\n]*/g, /저렴한[^\S\r\n]*곳/g, /신용[^\S\r\n]*/g, /가입[^\S\r\n]*/g,
 ];
 
 const BANNED_SENTENCES = [
-  /[^.!?\n]*예약하세요[^.!?\n]*[.!?]?\s*/g,
-  /[^.!?\n]*문의주세요[^.!?\n]*[.!?]?\s*/g,
-  /[^.!?\n]*방문해보세요[^.!?\n]*[.!?]?\s*/g,
-  /[^.!?\n]*상담받으세요[^.!?\n]*[.!?]?\s*/g,
-  /[^.!?\n]*찾아와주세요[^.!?\n]*[.!?]?\s*/g,
+  /[^.!?\n]*예약하세요[^.!?\n]*[.!?]?[^\S\r\n]*/g,
+  /[^.!?\n]*문의주세요[^.!?\n]*[.!?]?[^\S\r\n]*/g,
+  /[^.!?\n]*방문해보세요[^.!?\n]*[.!?]?[^\S\r\n]*/g,
+  /[^.!?\n]*상담받으세요[^.!?\n]*[.!?]?[^\S\r\n]*/g,
+  /[^.!?\n]*찾아와주세요[^.!?\n]*[.!?]?[^\S\r\n]*/g,
 ];
 
 const PROMO_WORD_REPLACEMENTS: [RegExp, string][] = [
   [/완벽하게/g, '깔끔하게'], [/완벽한/g, '깔끔한'],
   [/최고의/g, '괜찮은'], [/최고예요/g, '좋았어요'],
   [/최고입니다/g, '좋습니다'], [/최고였/g, '좋았'],
-  [/최고\s*/g, '좋은 '],
-  [/최대의\s*/g, ''], [/최대\s+/g, ''],
+  [/최고[^\S\r\n]*/g, '좋은 '],
+  [/최대의[^\S\r\n]*/g, ''], [/최대[^\S\r\n]+/g, ''],
   [/강추/g, '괜찮은'], [/대박/g, '진짜 좋'],
-  [/제일\s/g, '꽤 '], [/가장\s/g, '꽤 '],
-  [/완전\s/g, '정말 '], [/엄청\s*/g, '꽤 '],
+  [/제일[^\S\r\n]/g, '꽤 '], [/가장[^\S\r\n]/g, '꽤 '],
+  [/완전[^\S\r\n]/g, '정말 '], [/엄청[^\S\r\n]*/g, '꽤 '],
   [/효과적/g, '도움이 되는'], [/효과가/g, '변화가'],
   [/효과를/g, '변화를'], [/효과/g, '변화'],
   [/추천드립니다/g, '좋습니다'], [/추천합니다/g, '좋습니다'],

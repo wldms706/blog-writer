@@ -57,7 +57,8 @@ export async function POST(request: NextRequest) {
 4. 마크다운(##, **, ---, 리스트 기호) 절대 금지. 순수 텍스트만.
 5. [편집가이드: ...] 형태는 그대로 유지하세요.
 6. 한국어만 사용. 영어 금지.
-${isRegulatedBusiness ? '7. 1인칭(저는, 제가, 저희) 절대 금지.' : ''}
+7. 원본 문단 구분과 빈 줄을 유지하세요. 제목 다음, 소제목 앞뒤, 문단 사이에는 빈 줄을 하나 넣으세요 (줄바꿈 두 번).
+${isRegulatedBusiness ? '8. 1인칭(저는, 제가, 저희) 절대 금지.' : ''}
 
 ## 사용자 수정 요청
 ${safeInstruction}
