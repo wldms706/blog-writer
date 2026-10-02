@@ -48,16 +48,12 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: '로그인이 필요합니다.' }, { status: 401 });
   }
 
-  // 사용량 체크
-  const usage = await checkAndIncrementUsage(user.id);
-  if (!usage.allowed) {
-    return NextResponse.json(
-      { error: '무료 체험(3회)을 모두 사용했습니다. 구독하시면 무제한으로 이용할 수 있습니다.', remaining: 0 },
-      { status: 403 },
-    );
-  }
-
   try {
+    // Failed requests and failed model calls do not consume a free article.
+    const usage = await checkAndIncrementUsage(user.id, false);
+    if (!usage.allowed) {
+      return NextResponse.json({ error: '무료 체험(3회)을 모두 사용했습니다. 구독하시면 무제한으로 이용할 수 있습니다.', remaining: 0 }, { status: 403 });
+    }
     const {
       keyword,
       businessCategory,
@@ -573,6 +569,9 @@ ${isLargeKeyword(safeKeyword) ? `
     }
 
     const data = await response.json();
+    if (data.stop_reason === 'max_tokens') {
+      return NextResponse.json({ error: '글이 끝까지 생성되지 않았습니다. 다시 시도해주세요.' }, { status: 502 });
+    }
     const generatedText = data.content?.[0]?.text || '';
 
     if (!generatedText) {
@@ -588,6 +587,13 @@ ${isLargeKeyword(safeKeyword) ? `
     // 반영구 대법원 무죄 판결 이후 1인칭 허용 (네이버 정책은 별개라 영업조만 주의)
     // filterFirstPerson 제거 — 1인칭("저는", "제가") 자연스럽게 사용 가능
 
+    if (!filteredText.trim()) {
+      return NextResponse.json({ error: '생성된 본문이 비어있습니다. 다시 시도해주세요.' }, { status: 500 });
+    }
+    const recorded = await checkAndIncrementUsage(user.id, true);
+    if (!recorded.allowed) {
+      return NextResponse.json({ error: '무료 체험(3회)을 모두 사용했습니다.', remaining: 0 }, { status: 403 });
+    }
     return NextResponse.json({ content: filteredText });
   } catch (error) {
     console.error('Generate error:', error);

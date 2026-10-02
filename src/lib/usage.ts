@@ -1,142 +1,34 @@
 import { createClient as createServerSupabase } from '@/lib/supabase/server';
 import { syncUserToSheet } from '@/lib/google-sheets';
 
-// ============================================
-// 🔧 LAUNCH TOGGLE: true = 모든 유저 무제한
-// 3/26 런칭 시 false로 변경하세요!
-// ============================================
-const UNLIMITED_FOR_ALL = false;
+import { createAdminClient } from '@/lib/supabase/admin';
 
-const FREE_TOTAL_LIMIT = 3; // 블로그: 최초 3회만 무료
-const FREE_CAPTION_LIMIT = 5; // 인스타 캡션: 최초 5회만 무료
-
-// 관리자 이메일 - 무제한 사용 가능
+const FREE_CAPTION_LIMIT = 5;
 const ADMIN_EMAILS = ['wldms706@naver.com', 'mwm2020@nate.com', 'gkdisk9@nate.com', 'etang12330@gmail.com'];
 
-export async function checkAndIncrementUsage(userId: string): Promise<{
-  allowed: boolean;
-  remaining: number;
-  plan: string;
-}> {
-  const supabase = await createServerSupabase();
-  const today = new Date().toISOString().split('T')[0];
+type BlogUsage = { allowed: boolean; remaining: number; plan: string };
 
-  // 프로필 조회
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('email, name, business_name, plan, daily_usage, total_usage, last_usage_date, created_at, coupon_used, coupon_code')
-    .eq('id', userId)
-    .single();
-
-  if (!profile) {
-    return { allowed: false, remaining: 0, plan: 'free' };
-  }
-
-  // 날짜가 바뀌면 일일 사용량 리셋
-  const currentDailyUsage = profile.last_usage_date === today ? (profile.daily_usage || 0) : 0;
-  const currentTotalUsage = profile.total_usage || 0;
-
-  // LAUNCH TOGGLE: 모든 유저 무제한 (사용량은 계속 추적)
-  if (UNLIMITED_FOR_ALL) {
-    const newDailyUsage = currentDailyUsage + 1;
-    const newTotalUsage = currentTotalUsage + 1;
-
-    await supabase
-      .from('profiles')
-      .update({ daily_usage: newDailyUsage, total_usage: newTotalUsage, last_usage_date: today })
-      .eq('id', userId);
-
-    return { allowed: true, remaining: -1, plan: profile.plan || 'free' };
-  }
-
-  // 관리자 또는 유료 유저는 무제한
-  const isAdmin = profile.email && ADMIN_EMAILS.includes(profile.email);
-  let isPaid = profile.plan === 'paid' || (profile.plan && profile.plan.startsWith('pro_'));
-
-  // 이중 방어: plan이 free인데 유효한 구독이 있으면 paid로 자동 복구
-  // active 구독 또는 취소했지만 아직 만료 안 된(next_billing_at이 미래) 구독 포함
-  if (!isPaid && !isAdmin) {
-    const now = new Date().toISOString();
-    const { data: validSub } = await supabase
-      .from('subscriptions')
-      .select('id')
-      .eq('user_id', userId)
-      .or(`status.eq.active,and(status.eq.cancelled,next_billing_at.gt.${now})`)
-      .limit(1)
-      .maybeSingle();
-
-    if (validSub) {
-      await supabase.from('profiles').update({ plan: 'paid' }).eq('id', userId);
-      isPaid = true;
-    }
-  }
-
-  if (isAdmin || isPaid) {
-    const newDailyUsage = currentDailyUsage + 1;
-    const newTotalUsage = currentTotalUsage + 1;
-
-    await supabase
-      .from('profiles')
-      .update({
-        daily_usage: newDailyUsage,
-        total_usage: newTotalUsage,
-        last_usage_date: today,
-      })
-      .eq('id', userId);
-
-    syncUserToSheet({
-      userId,
-      email: profile.email || '',
-      name: profile.name || '',
-      businessName: profile.business_name || '',
-      planType: profile.plan || 'paid',
-      dailyUsage: newDailyUsage,
-      totalUsage: newTotalUsage,
-      lastAccessDate: today,
-      signupDate: profile.created_at?.split('T')[0] || '',
-      couponUsed: profile.coupon_used || false,
-      couponCode: profile.coupon_code || '',
+// Preflight only checks access. Consume only after a complete, nonempty article exists.
+export async function checkAndIncrementUsage(userId: string, consume = true): Promise<BlogUsage> {
+  const admin = createAdminClient();
+  const { data, error } = await admin.rpc('blog_usage_atomic', {
+    p_user_id: userId,
+    p_consume: consume,
+  });
+  if (error || !data) throw new Error('사용량 확인에 실패했습니다. 다시 시도해주세요.');
+  const result = data as BlogUsage;
+  if (consume && result.allowed) {
+    const { data: profile } = await admin.from('profiles')
+      .select('email, name, business_name, daily_usage, total_usage, last_usage_date, created_at, coupon_used, coupon_code')
+      .eq('id', userId).maybeSingle();
+    if (profile) syncUserToSheet({
+      userId, email: profile.email || '', name: profile.name || '', businessName: profile.business_name || '',
+      planType: result.plan, dailyUsage: profile.daily_usage || 0, totalUsage: profile.total_usage || 0,
+      lastAccessDate: profile.last_usage_date || '', signupDate: profile.created_at?.split('T')[0] || '',
+      couponUsed: profile.coupon_used || false, couponCode: profile.coupon_code || '',
     }).catch(() => {});
-
-    return { allowed: true, remaining: -1, plan: 'paid' };
   }
-
-  // 무료 유저: 최초 3회만 무료 (총 사용량 기준, 리셋 없음)
-  if (currentTotalUsage >= FREE_TOTAL_LIMIT) {
-    return { allowed: false, remaining: 0, plan: 'free' };
-  }
-
-  const newDailyUsage = currentDailyUsage + 1;
-  const newTotalUsage = currentTotalUsage + 1;
-
-  await supabase
-    .from('profiles')
-    .update({
-      daily_usage: newDailyUsage,
-      total_usage: newTotalUsage,
-      last_usage_date: today,
-    })
-    .eq('id', userId);
-
-  syncUserToSheet({
-    userId,
-    email: profile.email || '',
-    name: profile.name || '',
-    businessName: profile.business_name || '',
-    planType: 'free',
-    dailyUsage: newDailyUsage,
-    totalUsage: newTotalUsage,
-    lastAccessDate: today,
-    signupDate: profile.created_at?.split('T')[0] || '',
-    couponUsed: profile.coupon_used || false,
-    couponCode: profile.coupon_code || '',
-  }).catch(() => {});
-
-  return {
-    allowed: true,
-    remaining: FREE_TOTAL_LIMIT - newTotalUsage,
-    plan: 'free',
-  };
+  return result;
 }
 
 // 인스타 캡션 전용 카운트 (블로그와 별도)

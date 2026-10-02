@@ -225,6 +225,7 @@ export default function StepGenerate({ onReset, formData, isRegulated = false }:
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           originalContent: content,
+          historyId,
           instruction,
           keyword: formData.keyword,
           businessCategory: business?.name || formData.businessCategory,
@@ -239,6 +240,9 @@ export default function StepGenerate({ onReset, formData, isRegulated = false }:
 
       if (data.content) {
         setContent(data.content);
+        if (!data.historySaved) {
+          alert('글 수정은 완료됐지만 저장 이력에 반영하지 못했습니다. 수정한 글을 복사해 보관해주세요.');
+        }
       }
     } catch (err) {
       console.error('Revise error:', err);

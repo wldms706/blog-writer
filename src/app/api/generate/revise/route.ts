@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const { originalContent, instruction, keyword, businessCategory } = await request.json();
+    const { originalContent, instruction, keyword, businessCategory, historyId } = await request.json();
 
     if (!originalContent || !instruction) {
       return NextResponse.json({ error: '원본 글과 수정 지시가 필요합니다.' }, { status: 400 });
@@ -91,6 +91,9 @@ ${originalContent}
     }
 
     const data = await response.json();
+    if (data.stop_reason === 'max_tokens') {
+      return NextResponse.json({ error: '글 수정이 끝까지 완료되지 않았습니다. 다시 시도해주세요.' }, { status: 502 });
+    }
     const generatedText = data.content?.[0]?.text || '';
 
     if (!generatedText) {
@@ -106,7 +109,18 @@ ${originalContent}
       filteredText = filterFirstPerson(filteredText);
     }
 
-    return NextResponse.json({ content: filteredText });
+    if (!filteredText.trim()) {
+      return NextResponse.json({ error: '수정된 본문이 비어있습니다.' }, { status: 500 });
+    }
+    let historySaved = false;
+    if (typeof historyId === 'string' && historyId) {
+      const { data: saved, error: saveError } = await supabase.from('histories')
+        .update({ content: filteredText }).eq('id', historyId).eq('user_id', user.id)
+        .select('id').maybeSingle();
+      historySaved = !saveError && Boolean(saved);
+      if (!historySaved) console.error('수정 글 이력 저장 실패:', saveError);
+    }
+    return NextResponse.json({ content: filteredText, historySaved });
   } catch (error) {
     console.error('Revise error:', error);
     return NextResponse.json({ error: '서버 오류가 발생했습니다.' }, { status: 500 });
