@@ -23,11 +23,11 @@ export async function GET(request: NextRequest) {
   const supabase = createAdminClient();
   const now = new Date().toISOString();
 
-  // 취소된 구독 중 만료일이 지난 것 → free로 전환
+  // 해지 예약 및 쿠폰 이용권의 만료 처리 (자동결제 구독은 제외)
   const { data: expiredSubs } = await supabase
     .from('subscriptions')
     .select('id, user_id')
-    .eq('status', 'cancelled')
+    .or('status.eq.cancelled,and(status.eq.active,payment_key.eq.coupon_grant,price.eq.0)')
     .lte('next_billing_at', now);
 
   if (expiredSubs && expiredSubs.length > 0) {
@@ -43,6 +43,7 @@ export async function GET(request: NextRequest) {
     .from('subscriptions')
     .select('*')
     .eq('status', 'active')
+    .gt('price', 0)
     .not('billing_key', 'is', null)
     .lte('next_billing_at', now)
     // 3회 이상 실패한 건은 제외 (상태 변경이 실패해도 무한 재시도되지 않도록)

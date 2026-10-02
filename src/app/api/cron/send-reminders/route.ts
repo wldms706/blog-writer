@@ -76,6 +76,7 @@ export async function GET(request: NextRequest) {
     const { data: inactive } = await supabase
       .from('profiles')
       .select('id, name, phone, shop_phone, last_active_at, marketing_agreed')
+      .eq('marketing_agreed', true)
       .lt('last_active_at', cutoff)
       .not('name', 'is', null)
       .limit(MAX_PER_RUN);

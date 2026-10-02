@@ -83,6 +83,7 @@ export default function StepGenerate({ onReset, formData, isRegulated = false }:
   useEffect(() => {
     let cancelled = false;
 
+    let messageInterval: ReturnType<typeof setInterval> | undefined;
     async function generate() {
       try {
         // Phase 1: 생성 중 UX 메시지 순환
@@ -93,7 +94,7 @@ export default function StepGenerate({ onReset, formData, isRegulated = false }:
           UX_MESSAGES.repeatOver,
         ];
         let msgIdx = 0;
-        const messageInterval = setInterval(() => {
+        messageInterval = setInterval(() => {
           msgIdx = (msgIdx + 1) % uxMessages.length;
           if (!cancelled) setCurrentMessage(uxMessages[msgIdx]);
         }, 1500);
@@ -182,6 +183,8 @@ export default function StepGenerate({ onReset, formData, isRegulated = false }:
         console.error('Generate error:', err);
         setErrorMessage(err instanceof Error ? err.message : '알 수 없는 오류가 발생했습니다.');
         setPhase('error');
+      } finally {
+        clearInterval(messageInterval);
       }
     }
 
@@ -189,6 +192,7 @@ export default function StepGenerate({ onReset, formData, isRegulated = false }:
 
     return () => {
       cancelled = true;
+      clearInterval(messageInterval);
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [formData.keyword, formData.businessCategory, formData.topic, formData.purpose, formData.readerState, formData.contentType, formData.brandingType, retryCount]);
