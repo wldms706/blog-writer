@@ -152,6 +152,11 @@ const PROMO_WORD_REPLACEMENTS: [RegExp, string][] = [
 
 export function filterBannedWords(text: string): string {
   let filtered = text;
+  // 캐릭터 비유를 중립적인 표현으로 바꾸되 문단 구분은 보존합니다.
+  filtered = filtered.replace(/짱구[^\S\r\n]*(?:같은|같은 듯한)/g, '부자연스러운');
+  filtered = filtered.replace(/짱구(?:처럼|같이)/g, '부자연스럽게');
+  filtered = filtered.replace(/짱구[^\S\r\n]*눈썹/g, '과하게 진한 눈썹');
+  filtered = filtered.replace(/짱구/g, '부자연스러운 모습');
   filtered = filtered.replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F1E0}-\u{1F1FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{FE00}-\u{FE0F}\u{1F900}-\u{1F9FF}\u{200D}\u{20E3}\u{E0020}-\u{E007F}]/gu, '');
   for (const pattern of BANNED_WORDS_TO_REMOVE) {
     filtered = filtered.replace(pattern, '');

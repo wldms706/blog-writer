@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import {
+  TREATMENT_CONTEXT_RULES,
   filterMedicalTerms,
   filterForeignWords,
   filterListBullets,
@@ -59,6 +60,8 @@ export async function POST(request: NextRequest) {
 6. 한국어만 사용. 영어 금지.
 7. 원본 문단 구분과 빈 줄을 유지하세요. 제목 다음, 소제목 앞뒤, 문단 사이에는 빈 줄을 하나 넣으세요 (줄바꿈 두 번).
 ${isRegulatedBusiness ? '8. 1인칭(저는, 제가, 저희) 절대 금지.' : ''}
+
+${TREATMENT_CONTEXT_RULES}
 
 ## 사용자 수정 요청
 ${safeInstruction}

@@ -14,6 +14,7 @@ import {
   isLargeKeyword,
   getRandomDiversityKit,
   getExperienceDiversityKit,
+  TREATMENT_CONTEXT_RULES,
   filterMedicalTerms,
   filterForeignWords,
   filterListBullets,
@@ -547,7 +548,8 @@ ${isLargeKeyword(safeKeyword) ? `
 2. 글을 짧게 끝내지 마세요. 각 섹션을 3문단 이상 충실하게 작성하세요.
 3. 마크다운 금지. 순수 텍스트만 출력하세요.
 4. 제목 다음, 소제목 앞뒤, 문단 사이에는 반드시 빈 줄을 하나 넣으세요 (줄바꿈 두 번). 각 문단은 2~3문장으로 나누고, 긴 본문을 한 문단으로 이어 쓰지 마세요. 편집가이드는 독립된 줄로 쓰세요.
-5. 현재 연도: ${currentYear}년`,
+5. 현재 연도: ${currentYear}년
+${TREATMENT_CONTEXT_RULES}`,
         messages: [
           { role: 'user', content: fullPrompt },
         ],

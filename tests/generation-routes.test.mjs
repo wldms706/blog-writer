@@ -5,6 +5,7 @@ import vm from 'node:vm';
 import ts from 'typescript';
 
 const prompts = {
+  TREATMENT_CONTEXT_RULES: "시술별 표현 규칙",
   REGULATED_KEYWORDS: [], BRANDING_TYPE_NAMES: {}, TONE_PROMPT_OVERRIDES: {},
   BRANDING_GENERAL_PROMPT: '', BRANDING_REGULATED_PROMPT: '',
   filterMedicalTerms: t=>t, filterForeignWords:t=>t, filterListBullets:t=>t,
