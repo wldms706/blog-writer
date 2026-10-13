@@ -20,13 +20,13 @@ const CONTENT_OPTIONS = [
     id: 'seo-review',
     icon: '📝',
     name: '상위노출 - 체험 후기형',
-    description: '고객이 직접 방문한 것처럼 쓰는 후기 스타일',
+    description: '고객 시점의 방문 후기. 원장님의 시술 경험 글은 전문가 정보형을 선택하세요.',
   },
   {
     id: 'seo-expert',
     icon: '💡',
     name: '상위노출 - 전문가 정보형',
-    description: '원장님이 전문 지식을 전달하는 스타일',
+    description: '원장님 시점으로 시술 경험과 정보를 전달하는 글 (기본 선택)',
   },
   {
     id: 'branding',

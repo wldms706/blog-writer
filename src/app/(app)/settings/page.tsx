@@ -659,7 +659,7 @@ export default function SettingsPage() {
                   <div>
                     <p className="text-sm font-bold text-red-700 mb-1">정말 구독을 취소하시겠어요?</p>
                     <p className="text-xs text-red-600">
-                      취소해도 다음 결제일까지는 정상 이용 가능해요.
+                      취소해도 다음 결제일까지는 정상 이용 가능해요. 회원 정보와 저장한 글은 유지됩니다.
                     </p>
                   </div>
                   <div>

@@ -1,3 +1,4 @@
+import { resolveArticleStyle } from '@/lib/prompts/article-perspective';
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 
@@ -32,7 +33,7 @@ export async function POST(request: NextRequest) {
       purpose,
       readerState,
       contentType = 'seo',
-      seoStyle = 'review',
+      seoStyle = 'expert',
       brandingType,
       brandingInfo,
     } = await request.json();
@@ -244,6 +245,11 @@ ${isReviewStyle ? `## 체험 후기형 제목 특별 규칙
 - 전문가/원장 톤 금지 ("원장이 말하는", "전문가가 추천하는" 등)
 ` : ''}
 
+## 제목과 본문 시점 일치 — 아래 심리 기법 예시보다 우선
+- 선택한 글 스타일의 화자를 모든 제목에서 유지하세요.
+- 고객 후기형에서는 고객이 직접 받은 경험만 다루세요. 원장 경력, 여러 고객을 작업한 경험을 제목으로 제안하지 마세요.
+- 입력에 없는 작업 건수, 고객 수, 경력, 성공률, 비교 방문 횟수를 꾸며내지 마세요. 숫자는 본문에서 설명할 체크 항목 개수에만 사용하세요.
+
 ## 핵심 규칙: 7개의 제목은 반드시 서로 다른 심리 기법을 사용해야 합니다!
 
 ### 제목 1 — 상식 파괴형
@@ -266,9 +272,9 @@ ${isReviewStyle ? `## 체험 후기형 제목 특별 규칙
 구체적 숫자와 경험/전문성의 간접증명을 결합하여 신뢰와 호기심을 동시에 주는 제목.
 - 추상적 표현 대신 구체적 숫자 사용 (경력, 건수, 비교 횟수 등)
 - 전문가/경험자의 간접증명으로 권위감 부여
-- 예: "${safeKeyword} 500건 해본 원장이 말하는 진짜 차이"
-- 예: "8년차 ${safeBusinessCategory} 원장이 ${safeKeyword} 고를 때 보는 딱 한 가지"
-- 예: "${safeKeyword} 5곳 비교해보고 알게 된 사실"
+- 예: "${safeKeyword} 받기 전 확인할 3가지"
+- 예: "${safeKeyword} 고를 때 보는 기준"
+- 예: "${safeKeyword} 받기 전 비교할 3가지"
 
 ### 제목 4 — 자아 흠집형
 독자의 자존심을 살짝 건드려서 "뭐라고?" 하는 반응을 유도. 기분 나빠짐 → 글에서 해소 → 동기부여의 3단계 구조.
@@ -311,8 +317,8 @@ ${isReviewStyle ? `실제로 다녀온 사람이 쓴 솔직한 후기 느낌의 
 
 ## 기법 조합 원칙 (중요!):
 - 위 5가지 스타일은 기본 골격이지만, 하나의 제목 안에 여러 기법을 조합하면 클릭력이 극대화됩니다
-- 예: 상식 파괴 + 숫자 = "8년차 원장이 ${safeKeyword}은 안 하는 게 낫다고 말하는 이유"
-- 예: 손실 회피 + 간접증명 = "${safeKeyword} 300건 해본 원장이 절대 추천 안 하는 유형"
+- 예: 상식 파괴 + 숫자 = "${safeKeyword} 선택 전에 확인할 기준"
+- 예: 손실 회피 + 간접증명 = "${safeKeyword} 받기 전 확인할 3가지"
 - 각 제목에 2~3개 기법이 자연스럽게 녹아들도록 작성
 
 ## 절대 금지:
@@ -375,7 +381,11 @@ ${usedTitlesText}
         const result = JSON.parse(jsonMatch[0]);
         if (result.titles && Array.isArray(result.titles)) {
           // "솔직히"가 포함된 제목 필터링 - 대체 표현으로 자동 치환
-          const filteredTitles = result.titles.map((t: { title: string; style: string }) => {
+          const filteredTitles = result.titles.map((t: { title: string; style: string }, index: number) => {
+            if (contentType === 'seo' && seoStyle === 'review' && resolveArticleStyle('review', t.title) !== 'review') {
+              const reviewTitles = ['받기 전 확인한 점', '방문하면서 궁금했던 점', '상담부터 관리까지의 과정', '선택 전에 살펴본 기준', '관리 후 기억해둘 점', '내 눈매에 맞는 디자인 고민', '처음 방문하기 전 알아둘 점'];
+              return { ...t, title: `${safeKeyword} ${reviewTitles[index % reviewTitles.length]}` };
+            }
             if (t.title.includes('솔직히')) {
               return {
                 ...t,
@@ -398,7 +408,7 @@ ${usedTitlesText}
       return NextResponse.json({
         titles: [
           { title: `${safeKeyword} 원장인데 ${safeKeyword}은 추천 안 합니다`, style: '상식 파괴형' },
-          { title: `${safeKeyword} 10년차가 아직도 떨리는 순간`, style: '숫자+간접증명형' },
+          { title: `${safeKeyword} 작업할 때 신중해지는 순간`, style: '숫자+간접증명형' },
           { title: `사실 ${safeKeyword} 처음 시작할 때 자신 없었습니다`, style: '솔직/고백형' },
           { title: `좋은 ${safeKeyword} 원장과 나쁜 원장의 결정적 차이`, style: '손실 회피형' },
           { title: `아직도 ${safeKeyword}을 가격으로만 고르세요?`, style: '자아 흠집+공감형' },
@@ -410,7 +420,7 @@ ${usedTitlesText}
       titles: [
         { title: `${safeKeyword} 잘한다는 곳, 절대 가지 마세요`, style: '상식 파괴형' },
         { title: `${safeKeyword} 고를 때 이것 모르면 돈 날립니다`, style: '손실 회피형' },
-        { title: `${safeKeyword} 500건 해본 원장이 말하는 진짜 차이`, style: '숫자+간접증명형' },
+        { title: `${safeKeyword} 받기 전 확인할 3가지`, style: '숫자+간접증명형' },
         { title: `아직도 ${safeKeyword}을 가격으로 고르세요?`, style: '자아 흠집형' },
         { title: `${safeKeyword} 가격이 제일 걱정이잖아요`, style: '솔직/공감형' },
       ],

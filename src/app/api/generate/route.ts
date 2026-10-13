@@ -1,3 +1,4 @@
+import { resolveArticleStyle, getTitleAlignmentRules } from '@/lib/prompts/article-perspective';
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { checkAndIncrementUsage } from '@/lib/usage';
@@ -63,7 +64,7 @@ export async function POST(request: NextRequest) {
       readerState,
       selectedTitle,
       contentType = 'seo',
-      seoStyle = 'review',
+      seoStyle = 'expert',
       brandingType,
       brandingInfo,
       treatmentInfo,
@@ -273,8 +274,9 @@ ${safeSelectedTitle ? `제목은 "${safeSelectedTitle}"을 그대로 사용하�
       // - 후기형(review): 손님 체험 후기 (규제/비규제 무관)
       // - 전문가형(expert) + 규제: 전문 정보 전달 (기존 반영구 규칙 적용)
       // - 전문가형(expert) + 비규제: 원장 시점 정보 공유
-      const useHumanStyle = seoStyle === 'human';
-      const useExperienceStyle = seoStyle === 'review';
+      const effectiveStyle = resolveArticleStyle(seoStyle, safeSelectedTitle);
+      const useHumanStyle = effectiveStyle === 'human';
+      const useExperienceStyle = effectiveStyle === 'review';
       systemPrompt = useHumanStyle
         ? `${SEO_HUMAN_PROMPT}${toneOverride}`
         : useExperienceStyle
@@ -549,7 +551,8 @@ ${isLargeKeyword(safeKeyword) ? `
 3. 마크다운 금지. 순수 텍스트만 출력하세요.
 4. 제목 다음, 소제목 앞뒤, 문단 사이에는 반드시 빈 줄을 하나 넣으세요 (줄바꿈 두 번). 각 문단은 2~3문장으로 나누고, 긴 본문을 한 문단으로 이어 쓰지 마세요. 편집가이드는 독립된 줄로 쓰세요.
 5. 현재 연도: ${currentYear}년
-${TREATMENT_CONTEXT_RULES}`,
+${TREATMENT_CONTEXT_RULES}
+${getTitleAlignmentRules(safeSelectedTitle)}`,
         messages: [
           { role: 'user', content: fullPrompt },
         ],

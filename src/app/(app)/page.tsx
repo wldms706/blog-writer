@@ -25,7 +25,7 @@ const initialBrandingInfo: BrandingInfo = {
 
 const initialFormData: FormData = {
   contentType: 'seo',
-  seoStyle: 'review',
+  seoStyle: 'expert',
   businessCategory: null,
   keyword: '',
   topic: null,
@@ -105,7 +105,7 @@ export default function Home() {
       // 일반 업종 브랜딩: 브랜딩정보 다음에 톤 선택 추가
       return ['contentType', 'business', 'brandingType', 'keyword', 'brandingInfo', 'tone', 'title', 'generate'];
     }
-  }, [formData.contentType, isRegulated]);
+  }, [formData.contentType, formData.seoStyle, isRegulated]);
 
   const totalSteps = steps.length;
   const currentStepId = steps[currentStep - 1];
@@ -162,7 +162,7 @@ export default function Home() {
     setFormData(prev => ({
       ...initialFormData,
       contentType: type,
-      seoStyle: seoStyle || 'review',
+      seoStyle: seoStyle || 'expert',
       shopAddress: prev.shopAddress,
       shopHours: prev.shopHours,
       shopPhone: prev.shopPhone,

@@ -27,7 +27,7 @@ const initialBrandingInfo: BrandingInfo = {
 
 const initialFormData: FormData = {
   contentType: 'seo',
-  seoStyle: 'review',
+  seoStyle: 'expert',
   businessCategory: null,
   keyword: '',
   topic: null,
@@ -154,7 +154,7 @@ export default function Home() {
       }
       return ['contentType', 'business', 'brandingType', ...(isRecruit ? ['recruitTopic'] : ['keyword']), 'brandingInfo', 'tone', 'title', 'generate'] as StepId[];
     }
-  }, [formData.contentType, formData.brandingType, isRegulated]);
+  }, [formData.contentType, formData.seoStyle, formData.brandingType, isRegulated]);
 
   const totalSteps = steps.length;
   const currentStepId = steps[currentStep - 1];
@@ -215,7 +215,7 @@ export default function Home() {
     setFormData(prev => ({
       ...initialFormData,
       contentType: type,
-      seoStyle: seoStyle || 'review',
+      seoStyle: seoStyle || 'expert',
       shopAddress: prev.shopAddress,
       shopHours: prev.shopHours,
       shopPhone: prev.shopPhone,

@@ -1,3 +1,4 @@
+import { getTitleAlignmentRules } from '@/lib/prompts/article-perspective';
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import {
@@ -62,6 +63,7 @@ export async function POST(request: NextRequest) {
 ${isRegulatedBusiness ? '8. 1인칭(저는, 제가, 저희) 절대 금지.' : ''}
 
 ${TREATMENT_CONTEXT_RULES}
+${getTitleAlignmentRules(sanitize(originalContent.split(/\r?\n/)[0]))}
 
 ## 사용자 수정 요청
 ${safeInstruction}
