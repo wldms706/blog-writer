@@ -3,6 +3,7 @@
 import { useState, useCallback, useMemo, useEffect } from 'react';
 import Link from 'next/link';
 import StepProgress from '@/components/StepProgress';
+import WritingStarter, { type WritingSeed } from '@/components/WritingStarter';
 import WeeklyStreak from '@/components/WeeklyStreak';
 import StepContentType from '@/components/steps/StepContentType';
 import StepBusiness from '@/components/steps/StepBusiness';
@@ -224,15 +225,24 @@ export default function Home() {
   };
 
 
+  const startRecommended = (seed: WritingSeed) => {
+    if (userPlanType === 'pro_general' && seed.businessCategory === 'semi-permanent') { setCurrentStep(2); return; }
+    setFormData(prev => ({ ...prev, ...seed, contentType: 'seo', seoStyle: 'expert', selectedTitle: '', purpose: null, readerState: null, customPurpose: '', brandingType: null, additionalContext: '' }));
+    setCurrentStep(3);
+  };
+
   const renderStep = () => {
     switch (currentStepId) {
       case 'contentType':
         return (
+          <>
+          <WritingStarter onSelect={startRecommended} userPlanType={userPlanType} />
           <StepContentType
             selected={formData.contentType}
             seoStyle={formData.seoStyle}
             onSelect={handleContentTypeChange}
           />
+          </>
         );
       case 'business':
         return (
@@ -278,7 +288,7 @@ export default function Home() {
           />
         );
       case 'generate':
-        return <StepGenerate onReset={handleReset} formData={formData} isRegulated={isRegulated} />;
+        return <StepGenerate onReset={handleReset} formData={formData} isRegulated={isRegulated} onNextTopic={(topic) => startRecommended({businessCategory: formData.businessCategory!, keyword: formData.keyword, topic})} />;
       case 'brandingType':
         return (
           <StepBrandingType

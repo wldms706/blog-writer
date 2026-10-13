@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { getAllHistory, deleteHistory, updateBlogUrl, type HistoryItem } from '@/lib/storage';
 import { BUSINESS_CATEGORIES } from '@/data/constants';
+import { isNaverPostUrl } from '@/lib/article-workflow';
 import { createClient } from '@/lib/supabase/client';
 
 const countCharsWithoutSpaces = (text: string) => text.replace(/\s/g, '').length;
@@ -15,6 +16,7 @@ export default function HistoryPage() {
   const [loading, setLoading] = useState(true);
   const [blogUrlInput, setBlogUrlInput] = useState('');
   const [blogUrlSubmitting, setBlogUrlSubmitting] = useState(false);
+  const [blogUrlError, setBlogUrlError] = useState('');
 
   useEffect(() => {
     async function load() {
@@ -43,13 +45,17 @@ export default function HistoryPage() {
 
   const handleBlogUrlSubmit = async (id: string) => {
     if (!blogUrlInput.trim()) return;
+    setBlogUrlError('');
+    if (!isNaverPostUrl(blogUrlInput)) { setBlogUrlError('네이버 블로그 홈이 아닌, 발행한 글의 주소를 입력해주세요.'); return; }
     setBlogUrlSubmitting(true);
-    const success = await updateBlogUrl(id, blogUrlInput.trim());
-    setBlogUrlSubmitting(false);
-    if (success) {
-      setItems((prev) => prev.map((item) => item.id === id ? { ...item, blogUrl: blogUrlInput.trim() } : item));
-      setBlogUrlInput('');
-    }
+    try {
+      const success = await updateBlogUrl(id, blogUrlInput.trim());
+      if (success) {
+        setItems(prev => prev.map(item => item.id === id ? { ...item, blogUrl: blogUrlInput.trim(), naverRank: null, naverBlogRank: null, rankCheckedAt: null } : item));
+        setBlogUrlInput('');
+      } else setBlogUrlError('링크를 저장하지 못했어요. 다시 시도해주세요.');
+    } catch { setBlogUrlError('연결을 확인하고 다시 시도해주세요.'); }
+    finally { setBlogUrlSubmitting(false); }
   };
 
   const selected = items.find((i) => i.id === selectedId);
@@ -89,6 +95,19 @@ export default function HistoryPage() {
         <h2 className="text-xl font-black text-black">히스토리</h2>
         <span className="text-xs text-gray-500">{items.length}개의 글</span>
       </div>
+
+      {blogUrlError && <p role="alert" className="text-sm text-red-600 mb-3">{blogUrlError}</p>}
+      {!selected && (
+        <section className="rounded-2xl border border-gray-200 p-4 mb-4">
+          <h3 className="font-semibold text-black text-sm">작성부터 발행까지</h3>
+          <div className="grid grid-cols-3 gap-3 mt-3 text-center">
+            <div><p className="text-xl font-bold text-black">{items.length}</p><p className="text-xs text-gray-500">작성한 글</p></div>
+            <div><p className="text-xl font-bold text-black">{items.filter(item => item.blogUrl).length}</p><p className="text-xs text-gray-500">발행 링크 등록</p></div>
+            <div><p className="text-xl font-bold text-black">{items.filter(item => item.rankCheckedAt).length}</p><p className="text-xs text-gray-500">순위 조회 완료</p></div>
+          </div>
+          <p className="text-xs text-gray-500 mt-3">발행한 글을 선택해 링크를 등록해주세요. 순위는 검색 노출 참고값이며 방문·예약 수를 뜻하지 않습니다.</p>
+        </section>
+      )}
 
       {!selected ? (
         <div className="space-y-3">

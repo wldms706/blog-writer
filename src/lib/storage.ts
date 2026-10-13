@@ -125,7 +125,7 @@ export async function getAllHistory(userId: string): Promise<HistoryItem[]> {
 
 export async function updateBlogUrl(id: string, blogUrl: string): Promise<boolean> {
   const supabase = createClient();
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from('histories')
     .update({
       blog_url: blogUrl,
@@ -134,13 +134,13 @@ export async function updateBlogUrl(id: string, blogUrl: string): Promise<boolea
       naver_blog_rank: null,   // 블로그 탭 순위도 리셋
       rank_checked_at: null,   // 재확인 대기
     })
-    .eq('id', id);
+    .eq('id', id).select('id').maybeSingle();
 
   if (error) {
     console.error('Update blog URL error:', error);
     return false;
   }
-  return true;
+  return Boolean(data);
 }
 
 export async function deleteHistory(id: string) {

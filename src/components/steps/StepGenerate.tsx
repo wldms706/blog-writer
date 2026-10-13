@@ -6,9 +6,11 @@ import { FormData } from '@/types';
 import { saveHistory, updateBlogUrl } from '@/lib/storage';
 import { createClient } from '@/lib/supabase/client';
 import Link from 'next/link';
+import { getNextTopics, getPublishableText, isNaverPostUrl } from '@/lib/article-workflow';
 
 interface StepGenerateProps {
   onReset: () => void;
+  onNextTopic?: (topic: string) => void;
   formData: FormData;
   isRegulated?: boolean;
 }
@@ -52,20 +54,25 @@ const highlightKeyword = (text: string, keyword: string) => {
   });
 };
 
-export default function StepGenerate({ onReset, formData, isRegulated = false }: StepGenerateProps) {
+export default function StepGenerate({ onReset, onNextTopic, formData, isRegulated = false }: StepGenerateProps) {
   const [phase, setPhase] = useState<'generating' | 'autofix' | 'complete' | 'error'>('generating');
   const [currentMessage, setCurrentMessage] = useState(UX_MESSAGES.generating);
   const [errorMessage, setErrorMessage] = useState('');
   const [content, setContent] = useState('');
   const [copied, setCopied] = useState(false);
+  const [publishCopied, setPublishCopied] = useState(false);
+  const [copyError, setCopyError] = useState('');
   const [retryCount, setRetryCount] = useState(0);
   const [historyId, setHistoryId] = useState<string | null>(null);
   const [blogUrl, setBlogUrl] = useState('');
   const [blogUrlSubmitted, setBlogUrlSubmitted] = useState(false);
   const [blogUrlSubmitting, setBlogUrlSubmitting] = useState(false);
+  const [blogUrlError, setBlogUrlError] = useState('');
   const [reviseInput, setReviseInput] = useState('');
   const [isRevising, setIsRevising] = useState(false);
   const [reviseHistory, setReviseHistory] = useState<string[]>([]);
+
+  useEffect(() => { setPublishCopied(false); setCopied(false); }, [content]);
 
   const business = BUSINESS_CATEGORIES.find((b) => b.id === formData.businessCategory);
   const topic = TOPIC_CATEGORIES.find((t) => t.id === formData.topic);
@@ -203,12 +210,25 @@ export default function StepGenerate({ onReset, formData, isRegulated = false }:
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const handlePublishCopy = async () => {
+    setCopyError('');
+    try {
+      await navigator.clipboard.writeText(getPublishableText(content));
+      setPublishCopied(true);
+    } catch { setCopyError('복사하지 못했어요. 아래 본문을 직접 선택해 복사해주세요.'); }
+  };
+
   const handleBlogUrlSubmit = async () => {
     if (!historyId || !blogUrl.trim()) return;
+    setBlogUrlError('');
+    if (!isNaverPostUrl(blogUrl)) { setBlogUrlError('네이버 블로그 홈이 아닌, 발행한 글의 주소를 입력해주세요.'); return; }
     setBlogUrlSubmitting(true);
-    const success = await updateBlogUrl(historyId, blogUrl.trim());
-    setBlogUrlSubmitting(false);
-    if (success) setBlogUrlSubmitted(true);
+    try {
+      const success = await updateBlogUrl(historyId, blogUrl.trim());
+      if (success) setBlogUrlSubmitted(true);
+      else setBlogUrlError('링크를 저장하지 못했어요. 다시 시도해주세요.');
+    } catch { setBlogUrlError('연결을 확인하고 다시 시도해주세요.'); }
+    finally { setBlogUrlSubmitting(false); }
   };
 
   const handleRevise = async (directInstruction?: string) => {
@@ -459,6 +479,18 @@ export default function StepGenerate({ onReset, formData, isRegulated = false }:
           </p>
         </div>
 
+        <section className="card p-5">
+          <h4 className="font-semibold text-black">이제 블로그에 발행해보세요</h4>
+          <ol className="mt-3 space-y-2 text-sm text-gray-600 list-decimal pl-5">
+            <li>제목과 본문이 같은 이야기를 하는지, 내 시술 정보가 정확한지 확인해요.</li>
+            <li>직접 촬영한 사진을 넣고, 편집가이드에 맞게 글을 꾸며요.</li>
+            <li>발행 후 아래에 링크를 등록하면 히스토리에서 검색 순위를 확인할 수 있어요.</li>
+          </ol>
+          <button type="button" onClick={handlePublishCopy} className="btn-primary mt-4">{publishCopied ? '편집가이드 없이 복사했어요' : '발행용 본문 복사'}</button>
+          <p className="text-xs text-gray-500 mt-2">편집가이드 문구만 제외하고 복사합니다. 사진과 실제 시술 정보는 발행 전에 확인해주세요.</p>
+          {copyError && <p role="alert" className="text-sm text-red-600 mt-2">{copyError}</p>}
+        </section>
+
         {/* 안전 뱃지 - 간결하게 */}
         <div className="card p-4 bg-black text-white border-none">
           <div className="flex items-center gap-3">
@@ -468,9 +500,9 @@ export default function StepGenerate({ onReset, formData, isRegulated = false }:
               </svg>
             </div>
             <div>
-              <h4 className="font-semibold text-white text-sm">안전한 글</h4>
+              <h4 className="font-semibold text-white text-sm">발행 전 마지막 확인</h4>
               <p className="text-white/70 text-xs">
-                내부 기준을 충족한 블로그 글입니다
+                내 시술 정보와 표현이 정확한지 확인해주세요
               </p>
             </div>
           </div>
@@ -547,6 +579,7 @@ export default function StepGenerate({ onReset, formData, isRegulated = false }:
         </div>
 
 
+        {blogUrlError && <p role="alert" className="text-sm text-red-600">{blogUrlError}</p>}
         {/* 블로그 링크 제출 */}
         {historyId && (
           <div className="card p-5">
@@ -562,7 +595,7 @@ export default function StepGenerate({ onReset, formData, isRegulated = false }:
                   <a href={blogUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-[#3B5CFF] truncate block hover:underline">
                     {blogUrl}
                   </a>
-                  <p className="text-xs text-gray-500 mt-1">네이버 검색 순위가 자동으로 확인됩니다</p>
+                  <p className="text-xs text-gray-500 mt-1">검색에 반영되기까지 시간이 걸릴 수 있어요. 순위는 상위노출이나 방문·예약 증가를 보장하지 않습니다.</p><Link href="/history" className="inline-block text-sm font-semibold text-[#3B5CFF] mt-2">저장한 글과 순위 확인하기 →</Link>
                 </div>
               </div>
             ) : (
@@ -593,6 +626,16 @@ export default function StepGenerate({ onReset, formData, isRegulated = false }:
               </>
             )}
           </div>
+        )}
+
+        {formData.contentType === 'seo' && onNextTopic && (
+          <section className="card p-5">
+            <h4 className="font-semibold text-black">다음 글은 이 주제로 이어가세요</h4>
+            <p className="text-xs text-gray-500 mt-1 mb-3">업종·키워드·가게 정보는 유지하고 새 주제로 시작해요. {historyId ? '지금 글은 저장 이력에서 다시 볼 수 있어요.' : '지금 글은 저장되지 않았으니 먼저 복사해 보관해주세요.'}</p>
+            <div className="grid gap-2 sm:grid-cols-3">{getNextTopics(formData.businessCategory, formData.topic).map(next =>
+              <button key={next.id} type="button" onClick={() => onNextTopic(next.id)} className="rounded-xl bg-gray-50 p-3 text-left hover:bg-blue-50 border border-gray-200"><span className="block text-sm font-semibold text-black">{next.name}</span><span className="text-xs text-gray-500">{next.description}</span></button>
+            )}</div>
+          </section>
         )}
 
         {/* 버튼 */}
