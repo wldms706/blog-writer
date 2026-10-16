@@ -21,7 +21,7 @@ const PLANS: Plan[] = [
   {
     id: 'pro_permanent',
     name: '프로 (반영구)',
-    price: 12900,
+    price: 19900,
     originalPrice: 19900,
     description: '반영구 포함 외 타업종 글 가능',
     badge: '반영구 업종',
@@ -37,7 +37,7 @@ const PLANS: Plan[] = [
   {
     id: 'pro_general',
     name: '프로 (일반)',
-    price: 9900,
+    price: 15900,
     originalPrice: 15900,
     description: '반영구 제외 업종 가능',
     badge: '일반 업종',
@@ -83,7 +83,7 @@ export default function SubscribePage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [user, setUser] = useState<{ id: string; email: string } | null>(null);
-  const [promoData, setPromoData] = useState<{ remaining: number; isPromoOpen: boolean; prices: Record<string, number>; originalPrices: Record<string, number> } | null>(null);
+  const [promoData, setPromoData] = useState<{ remaining: number; isPromoOpen: boolean; hasPersonalPrice?: boolean; prices: Record<string, number>; originalPrices: Record<string, number> } | null>(null);
   const [couponCode, setCouponCode] = useState('');
   const [couponLoading, setCouponLoading] = useState(false);
   const [couponMsg, setCouponMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
@@ -100,9 +100,9 @@ export default function SubscribePage() {
 
     // 프로모션 카운트 가져오기
     fetch('/api/promo-count')
-      .then(res => res.json())
+      .then(res => { if (!res.ok) throw new Error('가격 정보를 불러오지 못했습니다.'); return res.json(); })
       .then(data => setPromoData(data))
-      .catch(() => {});
+      .catch(() => setError('가격 정보를 불러오지 못했습니다. 새로고침 후 다시 시도해주세요.'));
   }, []);
 
   // 프로모션 가격 적용된 플랜
@@ -144,6 +144,9 @@ export default function SubscribePage() {
   const handlePayment = async () => {
     if (!selectedPlan || !user || !clientKey) return;
 
+    if (!promoData) { setError('가격 정보를 확인한 후 다시 시도해주세요.'); return; }
+    const currentPrice = promoData.prices[selectedPlan.id];
+    if (selectedPlan.price !== currentPrice) { setSelectedPlan({...selectedPlan,price:currentPrice}); setError('적용 가격이 변경되었습니다. 표시된 금액을 확인하고 다시 결제해주세요.'); return; }
     setIsLoading(true);
     setError(null);
 
@@ -190,7 +193,8 @@ export default function SubscribePage() {
           </div>
         </div>
       )}
-      {promoData && !promoData.isPromoOpen && (
+      {promoData?.hasPersonalPrice && <div className="rounded-xl border border-blue-200 bg-blue-50 p-4 mb-6 text-sm text-blue-900">기존 고객 재구독 요금이 적용되었습니다. 선택한 플랜에 표시된 월 요금으로 새 카드 등록과 결제를 진행해주세요. 이후 자동결제도 이 구독 금액을 기준으로 진행됩니다.</div>}
+      {promoData && !promoData.isPromoOpen && !promoData.hasPersonalPrice && (
         <div className="bg-gray-100 border border-gray-300 rounded-xl py-3 mb-8 text-center">
           <p className="text-sm text-gray-600">한정 프로모션이 마감되었습니다 · 정상가로 표시됩니다</p>
         </div>

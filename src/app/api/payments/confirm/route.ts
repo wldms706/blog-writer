@@ -1,3 +1,4 @@
+import { getCheckoutPricing } from '@/lib/subscription-pricing';
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 
@@ -5,8 +6,8 @@ const TOSS_SECRET_KEY = process.env.TOSS_SECRET_KEY || '';
 
 // 플랜 정보
 const PLANS: Record<string, { name: string; price: number; type: string }> = {
-  pro_permanent: { name: '프로 (반영구)', price: 12900, type: 'permanent' },
-  pro_general: { name: '프로 (일반)', price: 9900, type: 'general' },
+  pro_permanent: { name: '프로 (반영구)', price: 19900, type: 'permanent' },
+  pro_general: { name: '프로 (일반)', price: 15900, type: 'general' },
   caption_only: { name: '인스타 캡션', price: 2900, type: 'caption' },
 };
 
@@ -42,18 +43,10 @@ export async function POST(request: NextRequest) {
     }
 
     // 플랜 검증
-    const plan = PLANS[planId];
+    const plan = PLANS[planId] ? { ...PLANS[planId] } : null;
     if (!plan) {
       return NextResponse.json(
         { success: false, message: '유효하지 않은 플랜입니다.' },
-        { status: 400 }
-      );
-    }
-
-    // 금액 검증
-    if (amount !== plan.price) {
-      return NextResponse.json(
-        { success: false, message: '결제 금액이 일치하지 않습니다.' },
         { status: 400 }
       );
     }
@@ -69,6 +62,10 @@ export async function POST(request: NextRequest) {
         { status: 401 }
       );
     }
+
+    const pricing = await getCheckoutPricing(user.id);
+    plan.price = pricing.prices[planId as keyof typeof pricing.prices];
+    if (amount !== plan.price) return NextResponse.json({success:false,message:'결제 금액이 일치하지 않습니다. 구독 화면에서 가격을 다시 확인해주세요.'},{status:400});
 
     // 중복 결제 방지: 같은 orderId로 이미 처리된 결제가 있는지 확인
     const { data: existingSubscription } = await supabase
@@ -123,6 +120,11 @@ export async function POST(request: NextRequest) {
       plan_type: plan.type,
       price: plan.price,
       status: 'active',
+      cancelled_at: null,
+      cancel_reason: null,
+      retry_count: 0,
+      coupon_code: null,
+      discount_percent: 0,
       payment_key: paymentKey,
       order_id: orderId,
       billing_key: paymentData.card?.billingKey || null,

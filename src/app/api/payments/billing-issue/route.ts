@@ -1,3 +1,4 @@
+import { getCheckoutPricing } from '@/lib/subscription-pricing';
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { nanoid } from 'nanoid';
@@ -5,8 +6,8 @@ import { nanoid } from 'nanoid';
 const TOSS_SECRET_KEY = process.env.TOSS_SECRET_KEY || '';
 
 const PLANS: Record<string, { name: string; price: number; type: string }> = {
-  pro_permanent: { name: '프로 (반영구)', price: 12900, type: 'permanent' },
-  pro_general: { name: '프로 (일반)', price: 9900, type: 'general' },
+  pro_permanent: { name: '프로 (반영구)', price: 19900, type: 'permanent' },
+  pro_general: { name: '프로 (일반)', price: 15900, type: 'general' },
 };
 
 const VALID_COUPONS: Record<string, { firstMonthFree: boolean; discountPercent: number }> = {
@@ -43,7 +44,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const plan = PLANS[planId];
+    const plan = PLANS[planId] ? { ...PLANS[planId] } : null;
     if (!plan) {
       return NextResponse.json(
         { success: false, message: '유효하지 않은 플랜입니다.' },
@@ -60,6 +61,9 @@ export async function POST(request: NextRequest) {
         { status: 401 },
       );
     }
+
+    const pricing = await getCheckoutPricing(user.id);
+    plan.price = pricing.prices[planId as keyof typeof pricing.prices];
 
     const authString = Buffer.from(`${TOSS_SECRET_KEY}:`).toString('base64');
 
@@ -133,6 +137,11 @@ export async function POST(request: NextRequest) {
       plan_type: plan.type,
       price: plan.price,
       status: 'active',
+      cancelled_at: null,
+      cancel_reason: null,
+      retry_count: 0,
+      coupon_code: null,
+      discount_percent: 0,
       payment_key: (chargeData.paymentKey as string) || null,
       order_id: orderId,
       billing_key: billingKey,
