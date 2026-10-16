@@ -3,6 +3,7 @@
 import { useState, useCallback, useMemo, useEffect } from 'react';
 import StepProgress from '@/components/StepProgress';
 import WritingStarter, { type WritingSeed } from '@/components/WritingStarter';
+import PricingNotice from '@/components/PricingNotice';
 import WeeklyStreak from '@/components/WeeklyStreak';
 import StepContentType from '@/components/steps/StepContentType';
 import StepBusiness from '@/components/steps/StepBusiness';
@@ -282,6 +283,7 @@ export default function Home() {
 
   return (
     <div>
+      {currentStep === 1 && <PricingNotice />}
       {/* Weekly Streak */}
       {currentStep === 1 && <WeeklyStreak />}
 
