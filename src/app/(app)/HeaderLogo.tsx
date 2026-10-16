@@ -9,7 +9,7 @@ export default function HeaderLogo() {
   return (
     <button
       onClick={handleClick}
-      className="flex items-center gap-2 hover:opacity-80 transition-opacity cursor-pointer"
+      className="flex shrink-0 items-center gap-2 hover:opacity-80 transition-opacity cursor-pointer"
     >
       <div className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-lg bg-[#3B5CFF]">
         <span className="text-sm font-black text-white">찐</span>

@@ -38,10 +38,10 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
 
       {/* Topbar */}
       <header className="sticky top-0 z-50 bg-black text-white">
-        <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4">
+        <div className="mx-auto flex w-full max-w-6xl flex-col items-stretch gap-2 px-3 py-3 sm:px-4 md:min-h-14 md:flex-row md:items-center md:justify-between md:py-2">
           <HeaderLogo />
 
-          <nav className="flex items-center gap-1 sm:gap-2">
+          <nav aria-label="주 메뉴" className="grid w-full min-w-0 grid-cols-3 items-stretch gap-1 md:w-auto md:flex md:flex-wrap md:items-center md:justify-end md:gap-2 [&>a]:min-w-0 [&>a]:whitespace-normal [&>a]:break-words [&>a]:text-center [&>button]:w-full md:[&>button]:w-auto">
             <Link href="/write" className="rounded-full px-3 sm:px-4 py-1.5 text-xs sm:text-sm text-white/70 hover:text-white hover:bg-white/10 transition-colors">
               블로그
             </Link>
@@ -59,7 +59,7 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
             </Link>
             <div className="hidden sm:block h-8 w-px bg-white/20" />
             {user && (
-              <span className="hidden text-xs text-white/40 md:block">{displayName}</span>
+              <span title={displayName} className="hidden max-w-28 truncate text-xs text-white/40 lg:block">{displayName}</span>
             )}
             <LogoutButton />
           </nav>
@@ -67,7 +67,7 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
       </header>
 
       {/* Body */}
-      <div className="mx-auto grid max-w-6xl grid-cols-12 gap-4 px-3 sm:px-4 py-4 sm:py-6">
+      <div className="mx-auto grid w-full min-w-0 max-w-6xl grid-cols-12 gap-4 px-3 sm:px-4 py-4 sm:py-6">
         {/* Sidebar - 모바일에서 숨김 */}
         <aside className="hidden md:block md:col-span-3">
           <div className="sticky top-20 space-y-3">
@@ -92,7 +92,7 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
         </aside>
 
         {/* Main */}
-        <main className="col-span-12 md:col-span-9">
+        <main className="col-span-12 min-w-0 [overflow-wrap:anywhere] md:col-span-9">
           <div className="rounded-2xl bg-white p-4 sm:p-6 shadow-lg">
             {children}
           </div>
